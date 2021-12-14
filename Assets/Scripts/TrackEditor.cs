@@ -1,33 +1,67 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class TrackEditor : MonoBehaviour
 {
-    private GameObject _camera;
+    // private List<GameObject> _parts = new();
+    // private List<Transform> _parts = new();
+    private Transform _parts;
 
     void Start()
     {
-        _camera = GameObject.Find("Camera0");
-        _camera.SetActive(false);
-        print(_camera);
-
-        var image = RTImage(_camera.GetComponent<Camera>());
-print(image);
-        GameObject.Find("RawImage").GetComponent<RawImage>().texture = image;
+        _parts = GameObject.Find("Parts").transform.Find("Category0").transform;
+        GenerateThumbnails();
     }
 
     void FixedUpdate()
     {
         
     }
-    
-    // Take a "screenshot" of a camera's Render Texture.
-    Texture2D RTImage(Camera cam)
+
+    void GenerateThumbnails()
     {
-        // The Render Texture in RenderTexture.active is the one
-        // that will be read by ReadPixels.
+        // Create a render texture for the camera
+        var renderTexture = new RenderTexture(128, 128, 16)
+        {
+            antiAliasing = 2
+        };
+
+        // Create a camera for shooting parts
+        var cameraThumbnail = new GameObject("cameraThumbnail");
+        cameraThumbnail.AddComponent<Camera>();
+        var cameraThumbnailCamera = cameraThumbnail.GetComponent<Camera>();
+        cameraThumbnailCamera.targetTexture = renderTexture;
+
+        var i = 0;
+        foreach (Transform part in _parts)
+        {
+            ++i;
+            // if (i > 1) continue;
+            // Set camera position & look at the part
+            cameraThumbnail.transform.position = part.position + new Vector3(-10, 10, -20);
+            cameraThumbnail.transform.LookAt(part.position);
+
+            // Create a UI thumbnail image for each part
+            var rawImageThumbnail = new GameObject("rawImageThumbnail");
+            rawImageThumbnail.AddComponent<RawImage>();
+            var rawImageThumbnailRawImage = rawImageThumbnail.GetComponent<RawImage>();
+            // rawImageThumbnailRawImage.
+
+            
+            var image = RenderTextureImage(cameraThumbnailCamera);
+            rawImageThumbnailRawImage.texture = image;
+            
+            //button.GetComponent<RectTransform>().transform.position = new Vector3(childI++ * 50 + 50, catI * 50 + 200, 0);
+        }
+    }
+    
+    /** Take a "screenshot" of a camera's Render Texture. */
+    Texture2D RenderTextureImage(Camera cam)  //  https://docs.unity3d.com/ScriptReference/Camera.Render.html
+    {
+        // The Render Texture in RenderTexture.active is the one that will be read by ReadPixels.
         var currentRT = RenderTexture.active;
         RenderTexture.active = cam.targetTexture;
 
