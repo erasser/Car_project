@@ -24,9 +24,10 @@ public class TrackEditor : MonoBehaviour
     void GenerateThumbnails()
     {
         // Create a render texture for the camera
-        var renderTexture = new RenderTexture(128, 128, 16)
+        var renderTexture = new RenderTexture(256, 256, 16)
         {
-            antiAliasing = 2
+            // antiAliasing = 2,
+            enableRandomWrite = true
         };
 
         // Create a camera for shooting parts
@@ -39,21 +40,23 @@ public class TrackEditor : MonoBehaviour
         foreach (Transform part in _parts)
         {
             ++i;
-            // if (i > 1) continue;
+            if (i > 1) continue;
             // Set camera position & look at the part
             cameraThumbnail.transform.position = part.position + new Vector3(-10, 10, -20);
             cameraThumbnail.transform.LookAt(part.position);
 
             // Create a UI thumbnail image for each part
             var rawImageThumbnail = new GameObject("rawImageThumbnail");
+            rawImageThumbnail.transform.SetParent(GameObject.Find("Canvas").transform);  // ok
             rawImageThumbnail.AddComponent<RawImage>();
             var rawImageThumbnailRawImage = rawImageThumbnail.GetComponent<RawImage>();
-            // rawImageThumbnailRawImage.
 
-            
             var image = RenderTextureImage(cameraThumbnailCamera);
             rawImageThumbnailRawImage.texture = image;
-            
+            // var img = GameObject.Find("RawImage").GetComponent<RawImage>();
+
+            // img.texture = image;
+
             //button.GetComponent<RectTransform>().transform.position = new Vector3(childI++ * 50 + 50, catI * 50 + 200, 0);
         }
     }
@@ -62,7 +65,8 @@ public class TrackEditor : MonoBehaviour
     Texture2D RenderTextureImage(Camera cam)  //  https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
         // The Render Texture in RenderTexture.active is the one that will be read by ReadPixels.
-        var currentRT = RenderTexture.active;
+        // var currentRenderTexture = RenderTexture.active;
+
         RenderTexture.active = cam.targetTexture;
 
         // Render the camera's view.
@@ -74,7 +78,7 @@ public class TrackEditor : MonoBehaviour
         image.Apply();
 
         // Replace the original active Render Texture.
-        RenderTexture.active = currentRT;
+        // RenderTexture.active = currentRenderTexture;
         return image;
     }
 }
