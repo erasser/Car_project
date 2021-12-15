@@ -39,23 +39,24 @@ public class TrackEditor : MonoBehaviour
         var i = 0;
         foreach (Transform part in _parts)
         {
-            ++i;
-            if (i > 1) continue;
             // Set camera position & look at the part
             cameraThumbnail.transform.position = part.position + new Vector3(-10, 10, -20);
             cameraThumbnail.transform.LookAt(part.position);
 
+            var texture = RenderTextureImage(cameraThumbnailCamera);
+
             // Create a UI thumbnail image for each part
-            var rawImageThumbnail = new GameObject("rawImageThumbnail");
-            rawImageThumbnail.transform.SetParent(GameObject.Find("Canvas").transform);  // ok
-            rawImageThumbnail.AddComponent<RawImage>();
-            var rawImageThumbnailRawImage = rawImageThumbnail.GetComponent<RawImage>();
+            var imageThumbnail = new GameObject("imageThumbnail");
+            imageThumbnail.transform.SetParent(GameObject.Find("Canvas").transform);
+            imageThumbnail.AddComponent<Image>();
+            var imageThumbnailImage = imageThumbnail.GetComponent<Image>();
+            var sprite = Sprite.Create(texture,
+                new Rect(0, 0, cameraThumbnailCamera.targetTexture.width, cameraThumbnailCamera.targetTexture.height), new Vector2());
+            imageThumbnailImage.sprite = sprite;
 
-            var image = RenderTextureImage(cameraThumbnailCamera);
-            rawImageThumbnailRawImage.texture = image;
-            // var img = GameObject.Find("RawImage").GetComponent<RawImage>();
+            imageThumbnail.transform.position = new Vector3(i * 110 + 60, 110);
 
-            // img.texture = image;
+            ++i;
 
             //button.GetComponent<RectTransform>().transform.position = new Vector3(childI++ * 50 + 50, catI * 50 + 200, 0);
         }
@@ -73,12 +74,12 @@ public class TrackEditor : MonoBehaviour
         cam.Render();
 
         // Make a new texture and read the active Render Texture into it.
-        Texture2D image = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
-        image.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
-        image.Apply();
+        Texture2D texture = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
+        texture.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
+        texture.Apply();
 
         // Replace the original active Render Texture.
         // RenderTexture.active = currentRenderTexture;
-        return image;
+        return texture;
     }
 }
