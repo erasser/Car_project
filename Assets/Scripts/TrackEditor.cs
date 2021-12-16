@@ -30,9 +30,9 @@ public class TrackEditor : MonoBehaviour
 
     void GenerateThumbnails()
     {
-        var thumbSize = 256;  // TODO: Should be relative to screen size
-        var thumbSpacing = 10;  // Total space between two thumbnails
-        var rectSize = new Vector2(thumbSize, thumbSize);
+        const int thumbSize = 256;  // TODO: Should be relative to screen size
+        const int thumbSpacing = 10;  // Total space between two thumbnails
+        var rectSize = new Vector2(thumbSize, thumbSize);  // How can I make it const?
 
         var partsInstance = Instantiate(parts);
         
@@ -91,24 +91,34 @@ public class TrackEditor : MonoBehaviour
     
     void GenerateGrid()
     {
-        int xCount = 16;
-        int yCount = 16;
-        int zCount = 16;
+        const int cubeSize = 10;
+        const int xCount = 16;
+        const int yCount = 8;
+        const int zCount = 10;
 
-        var xCubes = new List<Vector3>();
-        for (int x = 0; x < xCount; ++x)
-        {
-            xCubes.Add(new Vector3());
-        }
-
-        var yCubes = new List<List<Vector3>>();
-        for (int y = 0; y < yCount; ++y)
-        {
-            yCubes.Add(xCubes);
-        }
+        var gridParent = new GameObject("gridParent");
         
         for (int z = 0; z < yCount; ++z)
         {
+            var yCubes = new List<List<Vector3>>();
+            for (int y = 0; y < yCount; ++y)
+            {
+                var xCubes = new List<Vector3>();
+                for (int x = 0; x < xCount; ++x)
+                {
+                    var coordinates = new Vector3(
+                        x * cubeSize - xCount * cubeSize * .5f,
+                        y * cubeSize - yCount * cubeSize * .5f,
+                        z * cubeSize - zCount * cubeSize * .5f);
+
+                    xCubes.Add(coordinates);
+
+                    var cube = Instantiate(gridCube, gridParent.transform);
+                    cube.transform.position = coordinates;
+                    cube.transform.localScale = new Vector3(cubeSize, cubeSize, cubeSize);
+                }
+                yCubes.Add(xCubes);
+            }
             _grid.Add(yCubes);
         }
 
