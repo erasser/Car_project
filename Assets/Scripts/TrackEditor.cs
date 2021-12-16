@@ -11,14 +11,18 @@ using UnityEngine.UI;
 
 public class TrackEditor : MonoBehaviour
 {
-    [SerializeField]
+    [SerializeField]  // prefab
     private GameObject parts;
+    [SerializeField]  // prefab
+    private GameObject gridCube;
     private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
+    private List<List<List<Vector3>>> _grid = new List<List<List<Vector3>>>();  // 3D grid of coordinates
 
     void Start()
     {
         // parts = GameObject.Find("Parts").transform.Find("Category0").transform;  // Now it's a prefab
         GenerateThumbnails();
+        GenerateGrid();
     }
 
     // void FixedUpdate()
@@ -83,6 +87,36 @@ public class TrackEditor : MonoBehaviour
         }
 
         partsInstance.SetActive(false);
+    }
+    
+    void GenerateGrid()
+    {
+        int xCount = 16;
+        int yCount = 16;
+        int zCount = 16;
+
+        var xCubes = new List<Vector3>();
+        for (int x = 0; x < xCount; ++x)
+        {
+            xCubes.Add(new Vector3());
+        }
+
+        var yCubes = new List<List<Vector3>>();
+        for (int y = 0; y < yCount; ++y)
+        {
+            yCubes.Add(xCubes);
+        }
+        
+        for (int z = 0; z < yCount; ++z)
+        {
+            _grid.Add(yCubes);
+        }
+
+
+        // foreach (var tmp in _grid)
+        // {
+        //     print(tmp);
+        // }    
     }
 
     void PartSelect()
