@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
@@ -16,7 +14,8 @@ public class TrackEditor : MonoBehaviour
     [SerializeField]  // prefab
     private GameObject gridCube;
     private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
-    private List<List<List<Vector3>>> _grid = new List<List<List<Vector3>>>();  // 3D grid of coordinates
+    private List<List<List<Vector3>>> _grid = new();  // 3D grid of coordinates
+    private V3 _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
 
     void Start()
     {
@@ -96,8 +95,10 @@ public class TrackEditor : MonoBehaviour
         const int yCount = 8;
         const int zCount = 10;
 
+        _origin = new V3(xCount / 2, yCount / 2, zCount / 2);  // Assumes the counts are all even
+
         var gridParent = new GameObject("gridParent");
-        
+
         for (int z = 0; z < yCount; ++z)
         {
             var yCubes = new List<List<Vector3>>();
@@ -107,9 +108,9 @@ public class TrackEditor : MonoBehaviour
                 for (int x = 0; x < xCount; ++x)
                 {
                     var coordinates = new Vector3(
-                        x * cubeSize - xCount * cubeSize * .5f,
-                        y * cubeSize - yCount * cubeSize * .5f,
-                        z * cubeSize - zCount * cubeSize * .5f);
+                        x * cubeSize - xCount * cubeSize / 2,
+                        y * cubeSize - yCount * cubeSize / 2,
+                        z * cubeSize - zCount * cubeSize / 2);
 
                     xCubes.Add(coordinates);
 
@@ -121,18 +122,19 @@ public class TrackEditor : MonoBehaviour
             }
             _grid.Add(yCubes);
         }
+    }
 
-
-        // foreach (var tmp in _grid)
-        // {
-        //     print(tmp);
-        // }    
+    void PositionToGrid(GameObject obj, V3 position)
+    {
+        obj.transform.position = _grid[position.x][position.y][position.z];
     }
 
     void PartSelect()
     {
         var buttonNameParsed = EventSystem.current.currentSelectedGameObject.name.Split('_');
         int partNo = int.Parse(buttonNameParsed[1]);
-        var newPart = Instantiate(_partsCategory0.GetChild(partNo));
+        var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
+
+        PositionToGrid(newPart, _origin);
     }
 }
