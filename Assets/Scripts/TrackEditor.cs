@@ -4,8 +4,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-// Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
-
+// TODO: ► Svislý stín (vertikální světlo dolů)
+// TODO: ► Grid bounding box
 // TODO: Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 
 public class TrackEditor : MonoBehaviour
@@ -35,17 +35,15 @@ public class TrackEditor : MonoBehaviour
         
         _selectionCube = Instantiate(selectionCubePrefab);
         _camera = GameObject.Find("CameraEditor");
-        _camera.transform.LookAt(Vector3.zero);
+        // _camera.transform.LookAt(Vector3.zero);
         GenerateThumbnails();
         GenerateGrid();
-        _selectionCube.SetActive(true);
-        SetSelectionCoords(V3.zero);
     }
 
     // void FixedUpdate()
     // {}
 
-    void GenerateThumbnails()
+    void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
         const int thumbSize = 128;   // TODO: Should be relative to screen size
         const int thumbSpacing = 5;  // Total space between two thumbnails
@@ -97,20 +95,18 @@ public class TrackEditor : MonoBehaviour
             
             buttonThumb.GetComponent<Button>().onClick.AddListener(AddPart);
 
-            // imageThumb.AddComponent<EventTrigger>();
-            // var eventTrigger = imageThumb.GetComponent<EventTrigger>();
-
             ++i;
         }
 
         partsInstance.SetActive(false);
+        cameraThumb.SetActive(false);
     }
     
     void GenerateGrid()
     {
         const int cubeSize = 10;
 
-        _origin = new V3(V3.xCount / 2, V3.yCount / 2, V3.zCount / 2);  // Assumes the counts are all even
+        _origin = new V3(V3.xCount / 2, V3.yCount / 2, V3.zCount / 2);
 
         var gridParent = new GameObject("gridParent");
 
@@ -137,6 +133,9 @@ public class TrackEditor : MonoBehaviour
             }
             _grid.Add(yCubes);
         }
+
+        _selectionCube.SetActive(true);
+        SetSelectionCoords(V3.zero);
     }
 
     Vector3 PositionToGrid(GameObject obj, V3 position)
@@ -152,8 +151,7 @@ public class TrackEditor : MonoBehaviour
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
         newPart.SetActive(true);
 
-        // PositionToGrid(newPart, _origin);
-        PositionToGrid(newPart, new V3());
+        PositionToGrid(newPart, _selectionCubeCoords);
     }
 
     void MoveCameraTarget()
@@ -189,6 +187,8 @@ public class TrackEditor : MonoBehaviour
     void SetSelectionCoords(V3 coords)
     {
         _selectionCubeCoords = coords;
-        _camera.transform.LookAt(PositionToGrid(_selectionCube, coords));
+        var tmp = PositionToGrid(_selectionCube, coords);
+        print(tmp);
+        _camera.transform.LookAt(tmp);
     }
 }
