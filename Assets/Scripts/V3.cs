@@ -1,6 +1,8 @@
 ﻿/// <summary>
 ///     Used as grid indexes, hold integer values.
+/// <para>
 ///     Floats are rounded down.
+/// </para>
 /// </summary>
 internal struct V3
 {

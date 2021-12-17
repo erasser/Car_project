@@ -16,10 +16,12 @@ public class TrackEditor : MonoBehaviour
     private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
     private List<List<List<Vector3>>> _grid = new();  // 3D grid of coordinates
     private V3 _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
+    private GameObject _camera;
 
     void Start()
     {
-        // parts = GameObject.Find("Parts").transform.Find("Category0").transform;  // Now it's a prefab
+        _camera = GameObject.Find("CameraEditor");
+        _camera.transform.LookAt(Vector3.zero);
         GenerateThumbnails();
         GenerateGrid();
     }
@@ -29,8 +31,8 @@ public class TrackEditor : MonoBehaviour
 
     void GenerateThumbnails()
     {
-        const int thumbSize = 256;  // TODO: Should be relative to screen size
-        const int thumbSpacing = 10;  // Total space between two thumbnails
+        const int thumbSize = 128;   // TODO: Should be relative to screen size
+        const int thumbSpacing = 5;  // Total space between two thumbnails
         var rectSize = new Vector2(thumbSize, thumbSize);  // How can I make it const?
 
         var partsInstance = Instantiate(parts);
@@ -52,7 +54,7 @@ public class TrackEditor : MonoBehaviour
         foreach (Transform part in _partsCategory0)
         {
             // Set camera position & look at the part
-            cameraThumb.transform.position = part.position + new Vector3(-10, 10, -20);
+            cameraThumb.transform.position = part.position + new Vector3(-8, 8, -15);
             cameraThumb.transform.LookAt(part.position);
 
             part.gameObject.SetActive(true);  // Show the part for render shot
@@ -77,7 +79,7 @@ public class TrackEditor : MonoBehaviour
             rectTransform.transform.position = new Vector3(i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
             rectTransform.sizeDelta = rectSize;
             
-            buttonThumb.GetComponent<Button>().onClick.AddListener(PartSelect);
+            buttonThumb.GetComponent<Button>().onClick.AddListener(AddPart);
 
             // imageThumb.AddComponent<EventTrigger>();
             // var eventTrigger = imageThumb.GetComponent<EventTrigger>();
@@ -91,15 +93,15 @@ public class TrackEditor : MonoBehaviour
     void GenerateGrid()
     {
         const int cubeSize = 10;
-        const int xCount = 16;
-        const int yCount = 8;
-        const int zCount = 10;
+        const int xCount = 7;
+        const int yCount = 5;
+        const int zCount = 5;
 
         _origin = new V3(xCount / 2, yCount / 2, zCount / 2);  // Assumes the counts are all even
 
         var gridParent = new GameObject("gridParent");
-
-        for (int z = 0; z < yCount; ++z)
+        int i = 0;
+        for (int z = 0; z < zCount; ++z)
         {
             var yCubes = new List<List<Vector3>>();
             for (int y = 0; y < yCount; ++y)
@@ -129,12 +131,14 @@ public class TrackEditor : MonoBehaviour
         obj.transform.position = _grid[position.x][position.y][position.z];
     }
 
-    void PartSelect()
+    void AddPart()
     {
         var buttonNameParsed = EventSystem.current.currentSelectedGameObject.name.Split('_');
         int partNo = int.Parse(buttonNameParsed[1]);
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
+        newPart.SetActive(true);
 
-        PositionToGrid(newPart, _origin);
+        // PositionToGrid(newPart, _origin);
+        PositionToGrid(newPart, new V3());
     }
 }
