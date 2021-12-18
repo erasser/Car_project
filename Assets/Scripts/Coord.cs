@@ -7,26 +7,26 @@
 
 // TODO: x & z coords are swapped or what (see MoveLeft() v MoveCloser)
 
-internal struct V3
+internal struct Coord
 {
     public int x;
     public int y;
     public int z;
 
-    public static V3 zero = new(0, 0, 0);
-    
+    public static Coord zero = new(0, 0, 0);
+
     public static int xCount = 7;
     public static int yCount = 5;
     public static int zCount = 5;
 
-    public V3(int x, int y, int z)  // This automatically rounds a float down.
+    public Coord(int xCoord, int yCoord, int zCoord)  // This automatically rounds a float down.
     {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        x = xCoord;
+        y = yCoord;
+        z = zCoord;
     }
 
-    public V3 MoveUp()
+    public Coord MoveUp()
     {
         ++y;
         if (y == yCount)
@@ -34,7 +34,7 @@ internal struct V3
         return this;
     }
 
-    public V3 MoveDown()
+    public Coord MoveDown()
     {
         --y;
         if (y == -1)
@@ -42,7 +42,7 @@ internal struct V3
         return this;
     }
 
-    public V3 MoveLeft()
+    public Coord MoveLeft()
     {
         --z;
         if (z == -1)
@@ -50,7 +50,7 @@ internal struct V3
         return this;
     }
 
-    public V3 MoveRight()
+    public Coord MoveRight()
     {
         ++z;
         if (z == xCount)
@@ -58,7 +58,7 @@ internal struct V3
         return this;
     }
 
-    public V3 MoveCloser()
+    public Coord MoveCloser()
     {
         --x;
         if (x == -1)
@@ -66,12 +66,11 @@ internal struct V3
         return this;
     }
 
-    public V3 MoveFarther()
+    public Coord MoveFarther()
     {
         ++x;
         if (x == zCount)
             x = 0;
         return this;
     }
-
 }

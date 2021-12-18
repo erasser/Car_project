@@ -3,7 +3,27 @@ guid: 40d7488728a7e5e46b60f59c8b3d2bf9
 ModelImporter:
   serializedVersion: 21202
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material #11
+    second: {fileID: 2100000, guid: 05b9af318ea46a245b4d23754678bd9c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tt
+    second: {fileID: 2100000, guid: d04781b133309c14aad331c5fec2ffd4, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: estrada
+    second: {fileID: 2800000, guid: 76ae2f3a469c0334abbb9c16ed0774ca, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: metal-tiles-dirt
+    second: {fileID: 2800000, guid: 7b559a0dffe97a2429a09cc58921ccdb, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

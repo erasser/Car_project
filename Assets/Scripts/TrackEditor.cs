@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
+using Image = UnityEngine.UI.Image;
 
 // TODO: ► Svislý stín (vertikální světlo dolů)
 // TODO: ► Grid bounding box
@@ -17,11 +19,12 @@ public class TrackEditor : MonoBehaviour
     [SerializeField]
     private GameObject selectionCubePrefab;
     private GameObject _selectionCube;
-    private V3 _selectionCubeCoords;
+    private Coord _selectionCubeCoords;
     private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
-    private List<List<List<Vector3>>> _grid = new();  // 3D grid of coordinates
-    private V3 _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
+    private List<List<List<GridCube>>> _grid = new();  // 3D grid of coordinates
+    private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     private GameObject _camera;
+    private GameObject _ground;
 
     void Start()
     {
@@ -32,10 +35,12 @@ public class TrackEditor : MonoBehaviour
         ui.transform.Find("buttonRight").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
         ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
         ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
+        ui.transform.Find("buttonRotateRight").GetComponent<Button>().onClick.AddListener(RotatePart);
         
         _selectionCube = Instantiate(selectionCubePrefab);
         _camera = GameObject.Find("CameraEditor");
-        // _camera.transform.LookAt(Vector3.zero);
+        _ground = GameObject.Find("ground");
+        _ground.SetActive(false);
         GenerateThumbnails();
         GenerateGrid();
     }
@@ -68,7 +73,7 @@ public class TrackEditor : MonoBehaviour
         foreach (Transform part in _partsCategory0)
         {
             // Set camera position & look at the part
-            cameraThumb.transform.position = part.position + new Vector3(-8, 8, -15);
+            cameraThumb.transform.position = part.position + new Vector3(-4, 8, -15);
             cameraThumb.transform.LookAt(part.position);
 
             part.gameObject.SetActive(true);  // Show the part for render shot
@@ -100,33 +105,34 @@ public class TrackEditor : MonoBehaviour
 
         partsInstance.SetActive(false);
         cameraThumb.SetActive(false);
+        _ground.SetActive(true);
     }
     
     void GenerateGrid()
     {
         const int cubeSize = 10;
 
-        _origin = new V3(V3.xCount / 2, V3.yCount / 2, V3.zCount / 2);
+        _origin = new Coord(Coord.xCount / 2, Coord.yCount / 2, Coord.zCount / 2);
 
         var gridParent = new GameObject("gridParent");
 
-        for (int z = 0; z < V3.zCount; ++z)
+        for (int z = 0; z < Coord.zCount; ++z)
         {
-            var yCubes = new List<List<Vector3>>();
-            for (int y = 0; y < V3.yCount; ++y)
+            var yCubes = new List<List<GridCube>>();
+            for (int y = 0; y < Coord.yCount; ++y)
             {
-                var xCubes = new List<Vector3>();
-                for (int x = 0; x < V3.xCount; ++x)
+                var xCubes = new List<GridCube>();
+                for (int x = 0; x < Coord.xCount; ++x)
                 {
-                    var coordinates = new Vector3(
-                        x * cubeSize - V3.xCount * cubeSize / 2,
-                        y * cubeSize - V3.yCount * cubeSize / 2,
-                        z * cubeSize - V3.zCount * cubeSize / 2);
-
-                    xCubes.Add(coordinates);
+                    var gridCube = new GridCube(new Vector3(
+                        x * cubeSize - Coord.xCount * cubeSize / 2,
+                        y * cubeSize - Coord.yCount * cubeSize / 2,
+                        z * cubeSize - Coord.zCount * cubeSize / 2));
+                    
+                    xCubes.Add(gridCube);
 
                     var cube = Instantiate(gridCubePrefab, gridParent.transform);
-                    cube.transform.position = coordinates;
+                    cube.transform.position = gridCube.position;
                     cube.transform.localScale = new Vector3(cubeSize, cubeSize, cubeSize);
                 }
                 yCubes.Add(xCubes);
@@ -135,12 +141,12 @@ public class TrackEditor : MonoBehaviour
         }
 
         _selectionCube.SetActive(true);
-        SetSelectionCoords(V3.zero);
+        SetSelectionCoords(Coord.zero);
     }
 
-    Vector3 PositionToGrid(GameObject obj, V3 position)
+    Vector3 PositionToGrid(GameObject obj, Coord position)
     {
-        obj.transform.position = _grid[position.x][position.y][position.z];
+        obj.transform.position = _grid[position.x][position.y][position.z].position;
         return obj.transform.position;
     }
 
@@ -184,11 +190,20 @@ public class TrackEditor : MonoBehaviour
         }
     }
 
-    void SetSelectionCoords(V3 coords)
+    void RotatePart()
+    {
+        // if (direction == "right")
+            // GetPart().transform.eulerRotation -= 90;
+    }
+
+    GameObject GetPart()
+    {
+        return new GameObject();
+    }
+
+    void SetSelectionCoords(Coord coords)
     {
         _selectionCubeCoords = coords;
-        var tmp = PositionToGrid(_selectionCube, coords);
-        print(tmp);
-        _camera.transform.LookAt(tmp);
+        _camera.transform.LookAt(PositionToGrid(_selectionCube, coords));
     }
 }
