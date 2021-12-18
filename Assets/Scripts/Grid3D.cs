@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -57,6 +56,16 @@ public class Grid3D : MonoBehaviour
     }
 
     /// <summary>
+    ///     Gets GridCube at coordinates
+    /// </summary>
+    /// <param name="coordinates">GridCube coordinates</param>
+    /// <returns>GridCube</returns>
+    public GridCube GetGridCubeAt(Coord coordinates)
+    {
+        return _grid[coordinates.x][coordinates.y][coordinates.z];
+    }
+    
+    /// <summary>
     ///     Align object position to GridCube coordinates
     /// </summary>
     /// <para>
@@ -67,7 +76,7 @@ public class Grid3D : MonoBehaviour
     /// <returns>Target position</returns>
     public Vector3 PositionToGrid(GameObject obj, Coord coordinates)
     {
-        obj.transform.position = _grid[coordinates.x][coordinates.y][coordinates.z].position;
+        obj.transform.position = GetGridCubeAt(coordinates).position;
 
         return obj.transform.position;
     }
@@ -81,9 +90,10 @@ public class Grid3D : MonoBehaviour
     /// <param name="part">Part to move</param>
     /// <param name="coordinates">Target coordinates</param>
     /// <returns>Target position</returns>
-    public Vector3 MoveOnGrid(GameObject part, Coord coordinates)  // TODO: Remove part from old position
+    public Vector3 MoveOnGrid(GameObject part, Coord coordinates)
     {
-        _grid[coordinates.x][coordinates.y][coordinates.z].SetPart(part);
+        // TODO: ► Clear GridCube ar old position
+        GetGridCubeAt(coordinates).SetPart(part);
         PositionToGrid(part, coordinates);
 
         return part.transform.position;
@@ -91,7 +101,7 @@ public class Grid3D : MonoBehaviour
     
     public GameObject GetPartAtCoords(Coord coordinates)
     {
-        return _grid[coordinates.x][coordinates.y][coordinates.z].part;
+        return GetGridCubeAt(coordinates).part;
     }
 
 

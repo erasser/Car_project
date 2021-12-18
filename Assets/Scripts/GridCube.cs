@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 /// <summary>
 ///     Servers as objects holder
 /// </summary>
-public class GridCube
+public class GridCube  // Can't be a struct, because reference type is needed
 {
     /// <summary>
     ///     Coordinates of held object
@@ -33,7 +32,7 @@ public class GridCube
         part = trackPart;
         adjacentCoords = new List<Coord>();
     }
-
+    
     public void SetPart(GameObject partToSet)
     {
         part = partToSet;

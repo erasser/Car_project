@@ -162,11 +162,8 @@ public class TrackEditor : MonoBehaviour
 
         if (!part) return;
         
-        var buttonName = EventSystem.current.currentSelectedGameObject.name;
+        // var buttonName = EventSystem.current.currentSelectedGameObject.name;
 
-        if (buttonName == "buttonRotateRight")
-            part.transform.Rotate(Vector3.up, 90);
-        else
-            part.transform.Rotate(Vector3.up, -90);
+        part.GetComponent<Part>().Rotate();
     }
 }
