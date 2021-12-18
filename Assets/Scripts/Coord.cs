@@ -1,6 +1,9 @@
 ﻿/// <summary>
 ///     Used as grid indexes, hold integer values.
 /// <para>
+///     Used also as a relative count of cubes, which each part occupy
+/// </para>
+/// <para>
 ///     Floats are rounded down.
 /// </para>
 /// </summary>

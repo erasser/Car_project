@@ -22,9 +22,9 @@ public class GridCube  // Can't be a struct, because reference type is needed
     public GameObject part;
 
     /// <summary>
-    ///     List of coordinates of adjacent cubes, which the held object also takes up
+    ///     List of coordinates of adjacent cubes, which the held object also occupies
     /// </summary>
-    public List<Coord> adjacentCoords;
+    public List<Coord> adjacentCoords;  // If i use this, change the name accordingly to Parts.cs gridCubes var
 
     public GridCube(Vector3 coordinates = new(), GameObject trackPart = null)
     {
