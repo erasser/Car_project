@@ -6,8 +6,7 @@
 /// </summary>
 
 // TODO: x & z coords are swapped or what (see MoveLeft() v MoveCloser)
-
-internal struct Coord
+public struct Coord
 {
     public int x;
     public int y;

@@ -1,4 +1,5 @@
-﻿• Try slowmotion!
+﻿• Consider using lines to vizialize 3D grid (Handles.DrawLine or ten vector helper, co používám v UFO)
+• Try slowmotion!
 • Měnící se směr gravitace!
 • co vítr?
 • skleněný díly? Udržely by auto jen chvíli

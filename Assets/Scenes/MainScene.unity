@@ -1262,6 +1262,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1616280650}
   - component: {fileID: 1616280649}
+  - component: {fileID: 1616280651}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -1283,8 +1284,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partsPrefab: {fileID: 5539170237981068220, guid: a48b7587edf13664aa86cfe93157d31c,
     type: 3}
-  gridCubePrefab: {fileID: 5303459170938849431, guid: 6962e2ad54dd57c40bbde080bdddbb73,
-    type: 3}
   selectionCubePrefab: {fileID: 4468462130206352606, guid: 06b2275d4cb8615499f9328138fdd2bf,
     type: 3}
 --- !u!4 &1616280650
@@ -1302,6 +1301,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1616280651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616280648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 998a4015c73b4a7ca6889deaa46645df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridCubeHelperPrefab: {fileID: 5303459170938849431, guid: 6962e2ad54dd57c40bbde080bdddbb73,
+    type: 3}
 --- !u!1 &1661143549
 GameObject:
   m_ObjectHideFlags: 0
