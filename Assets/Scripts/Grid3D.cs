@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -54,11 +55,44 @@ public class Grid3D : MonoBehaviour
     {
         _gridParent.SetActive(!_gridParent.activeSelf);
     }
-    
-    public Vector3 PositionToGrid(GameObject obj, Coord position)
+
+    /// <summary>
+    ///     Align object position to GridCube coordinates
+    /// </summary>
+    /// <para>
+    ///     Just sets the position, doesn't update GridCubes
+    /// </para>
+    /// <param name="obj">Object to align</param>
+    /// <param name="coordinates">Target coordinates</param>
+    /// <returns>Target position</returns>
+    public Vector3 PositionToGrid(GameObject obj, Coord coordinates)
     {
-        obj.transform.position = _grid[position.x][position.y][position.z].position;
+        obj.transform.position = _grid[coordinates.x][coordinates.y][coordinates.z].position;
+
         return obj.transform.position;
     }
+    
+    /// <summary>
+    ///     Moves track part on grid to coordinates
+    /// </summary>
+    /// <para>
+    ///     Also handles updating of GridCubes
+    /// </para>
+    /// <param name="part">Part to move</param>
+    /// <param name="coordinates">Target coordinates</param>
+    /// <returns>Target position</returns>
+    public Vector3 MoveOnGrid(GameObject part, Coord coordinates)  // TODO: Remove part from old position
+    {
+        _grid[coordinates.x][coordinates.y][coordinates.z].SetPart(part);
+        PositionToGrid(part, coordinates);
+
+        return part.transform.position;
+    }
+    
+    public GameObject GetPartAtCoords(Coord coordinates)
+    {
+        return _grid[coordinates.x][coordinates.y][coordinates.z].part;
+    }
+
 
 }

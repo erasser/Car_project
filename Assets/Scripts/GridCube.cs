@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 /// <summary>
 ///     Servers as objects holder
 /// </summary>
-internal struct GridCube
+public class GridCube
 {
     /// <summary>
     ///     Coordinates of held object
@@ -31,5 +32,10 @@ internal struct GridCube
         position = coordinates;
         part = trackPart;
         adjacentCoords = new List<Coord>();
+    }
+
+    public void SetPart(GameObject partToSet)
+    {
+        part = partToSet;
     }
 }

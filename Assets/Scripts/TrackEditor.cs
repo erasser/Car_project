@@ -22,18 +22,18 @@ public class TrackEditor : MonoBehaviour
     private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     private GameObject _camera;
     private GameObject _ground;
-    private Grid3D _grid;
+    private Grid3D _grid3D;
 
     void Start()
     {
         var ui = GameObject.Find("Canvas");
-        _grid = gameObject.GetComponent<Grid3D>();
-        ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
-        ui.transform.Find("buttonDown").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
-        ui.transform.Find("buttonLeft").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
-        ui.transform.Find("buttonRight").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
-        ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
-        ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveCameraTarget);
+        _grid3D = gameObject.GetComponent<Grid3D>();
+        ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        ui.transform.Find("buttonDown").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        ui.transform.Find("buttonLeft").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        ui.transform.Find("buttonRight").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonRotateRight").GetComponent<Button>().onClick.AddListener(RotatePart);
         
         _selectionCube = Instantiate(selectionCubePrefab);
@@ -107,7 +107,7 @@ public class TrackEditor : MonoBehaviour
         partsInstance.SetActive(false);
         cameraThumb.SetActive(false);
         _ground.SetActive(true);
-        _grid.Toggle();  // Shows grid
+        _grid3D.Toggle();  // Shows grid
     }
 
     void AddPart()
@@ -117,10 +117,10 @@ public class TrackEditor : MonoBehaviour
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
         newPart.SetActive(true);
 
-        _grid.PositionToGrid(newPart, _selectionCubeCoords);
+        _grid3D.MoveOnGrid(newPart, _selectionCubeCoords);
     }
 
-    void MoveCameraTarget()
+    void MoveSelection()
     {
         var buttonName = EventSystem.current.currentSelectedGameObject.name;
 
@@ -150,22 +150,23 @@ public class TrackEditor : MonoBehaviour
         }
     }
 
-    void RotatePart()
-    {
-        // var part = 
-        
-        // if (direction == "right")
-            // GetPart().transform.eulerRotation -= 90;
-    }
-
-    GameObject GetPart()
-    {
-        return new GameObject();
-    }
-
     void SetSelectionCoords(Coord coords)
     {
         _selectionCubeCoords = coords;
-        _camera.transform.LookAt(_grid.PositionToGrid(_selectionCube, coords));
+        _camera.transform.LookAt(_grid3D.PositionToGrid(_selectionCube, coords));
+    }
+
+    void RotatePart()
+    {
+        var part = _grid3D.GetPartAtCoords(_selectionCubeCoords);
+
+        if (!part) return;
+        
+        var buttonName = EventSystem.current.currentSelectedGameObject.name;
+
+        if (buttonName == "buttonRotateRight")
+            part.transform.Rotate(Vector3.up, 90);
+        else
+            part.transform.Rotate(Vector3.up, -90);
     }
 }
