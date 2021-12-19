@@ -44,6 +44,11 @@ public class TrackEditor : MonoBehaviour
         _selectionCube.SetActive(true);
         SetSelectionCoords(Coord.zero);
 
+        var tmp = Grid3D.GetGridCubes(Coord.zero, "x", 3);
+        foreach (var t in tmp)
+        {
+            print(t.position);
+        }
     }
 
     // void FixedUpdate()
@@ -107,7 +112,7 @@ public class TrackEditor : MonoBehaviour
         partsInstance.SetActive(false);
         cameraThumb.SetActive(false);
         _ground.SetActive(true);
-        _grid3D.Toggle();  // Shows grid
+        Grid3D.Toggle();  // Shows grid
     }
 
     void AddPart()
@@ -117,7 +122,7 @@ public class TrackEditor : MonoBehaviour
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
         newPart.SetActive(true);
 
-        _grid3D.MoveOnGrid(newPart, _selectionCubeCoords);
+        Grid3D.MoveOnGrid(newPart, _selectionCubeCoords);
     }
 
     void MoveSelection()
@@ -153,12 +158,12 @@ public class TrackEditor : MonoBehaviour
     void SetSelectionCoords(Coord coords)
     {
         _selectionCubeCoords = coords;
-        _camera.transform.LookAt(_grid3D.PositionToGrid(_selectionCube, coords));
+        _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));
     }
 
     void RotatePart()
     {
-        var part = _grid3D.GetPartAtCoords(_selectionCubeCoords);
+        var part = Grid3D.GetPartAtCoords(_selectionCubeCoords);
 
         if (!part) return;
         

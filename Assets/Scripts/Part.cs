@@ -25,11 +25,9 @@ public class Part : MonoBehaviour
     /// </summary>
     private void CalculateGridCubes()
     {
-        var mesh = GetComponent<MeshFilter>().sharedMesh;
+        var meshSize = GetComponent<MeshFilter>().sharedMesh.bounds.size;
 
-        var gridCountX = GetCubesCount(mesh.bounds.size.x);
-        var gridCountY = GetCubesCount(mesh.bounds.size.y);
-        var gridCountZ = GetCubesCount(mesh.bounds.size.z);
+        _gridDimensions = new Coord(GetCubesCount(meshSize.x), GetCubesCount(meshSize.y), GetCubesCount(meshSize.z));
 
         int GetCubesCount(float meshDimension)
         {

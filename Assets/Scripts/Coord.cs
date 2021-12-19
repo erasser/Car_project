@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using System;
+
+/// <summary>
 ///     Used as grid indexes, hold integer values.
 /// <para>
 ///     Used also as a relative count of cubes, which each part occupy
@@ -8,7 +10,6 @@
 /// </para>
 /// </summary>
 
-// TODO: x & z coords are swapped or what (see MoveLeft() v MoveCloser)
 public struct Coord
 {
     public int x;
@@ -28,51 +29,74 @@ public struct Coord
         z = zCoord;
     }
 
-    public Coord MoveUp()
+    public override string ToString()
     {
-        ++y;
-        if (y == yCount)
-            y = 0;
-        return this;
+        return $"Coord = x: {x}, y: {y}, z: {z}";
     }
 
-    public Coord MoveDown()
+    public int Get(string axis)
     {
-        --y;
-        if (y == -1)
-            y = yCount - 1;
-        return this;
+        if (axis == "x")
+            return x;
+        if (axis == "y")
+            return y;
+        if (axis == "z")
+            return z;
+
+        throw new Exception($"You tried to set axis \"{axis}\", which is bullshit.");
+    }
+
+    public void Set(string axis, int value)
+    {
+        if (axis == "x")
+            x = value;
+        else if (axis == "y")
+            y = value;
+        else if (axis == "z")
+            z = value;
+        else
+            throw new Exception($"You tried to set axis \"{axis}\", which is bullshit.");
     }
 
     public Coord MoveLeft()
     {
-        --z;
-        if (z == -1)
-            z = xCount - 1;
+        if (x > 0)
+            --x;
         return this;
     }
 
     public Coord MoveRight()
     {
-        ++z;
-        if (z == xCount)
-            z = 0;
+        if (x < xCount - 1)
+            ++x;
+        return this;
+    }
+
+    public Coord MoveDown()
+    {
+        if (y > 0)
+            --y;
+        return this;
+    }
+    
+    public Coord MoveUp()
+    {
+        if (y < yCount - 1)
+            ++y;
         return this;
     }
 
     public Coord MoveCloser()
     {
-        --x;
-        if (x == -1)
-            x = zCount - 1;
+        if (z > 0)
+            --z;
         return this;
     }
 
     public Coord MoveFarther()
     {
-        ++x;
-        if (x == zCount)
-            x = 0;
+        if (z < zCount - 1)
+            ++z;
         return this;
     }
 }
