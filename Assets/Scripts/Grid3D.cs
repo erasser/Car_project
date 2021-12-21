@@ -8,7 +8,7 @@ public class Grid3D : MonoBehaviour
 {
     [SerializeField]
     private GameObject gridCubeHelperPrefab;
-    private static List<List<List<GridCube>>> _grid = new();  // 3D grid of coordinates
+    private static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
     private static GameObject _gridParent;
     
     void Awake()
@@ -18,7 +18,7 @@ public class Grid3D : MonoBehaviour
     
     private void Create()
     {
-        const int cubeSize = 10;
+        const int cubeSize = 20;
 
         // _origin = new Coord(Coord.xCount / 2, Coord.yCount / 2, Coord.zCount / 2);
 
@@ -32,20 +32,20 @@ public class Grid3D : MonoBehaviour
                 var xCubes = new List<GridCube>();
                 for (int z = 0; z < Coord.zCount; ++z)
                 {
-                    var gridCube = new GridCube(new Vector3(
+                    var gridCube = new GridCube(new (
                         x * cubeSize - Coord.xCount * cubeSize / 2,
                         y * cubeSize - Coord.yCount * cubeSize / 2,
-                        z * cubeSize - Coord.zCount * cubeSize / 2));
-                    
+                        z * cubeSize - Coord.zCount * cubeSize / 2), new Coord(x, y, z));
+
                     xCubes.Add(gridCube);
                     var cubeHelper = Instantiate(gridCubeHelperPrefab, _gridParent.transform);
                     cubeHelper.transform.SetParent(_gridParent.transform);
                     cubeHelper.transform.position = gridCube.position;
-                    cubeHelper.transform.localScale = new Vector3(cubeSize, cubeSize, cubeSize);
+                    cubeHelper.transform.localScale = new (cubeSize, cubeSize, cubeSize);
                 }
                 yCubes.Add(xCubes);
             }
-            _grid.Add(yCubes);
+            Grid.Add(yCubes);
         }
         Toggle();
     }
@@ -62,27 +62,53 @@ public class Grid3D : MonoBehaviour
     /// <returns>GridCube</returns>
     public static GridCube GetGridCubeAt(Coord coordinates)
     {
-        return _grid[coordinates.x][coordinates.y][coordinates.z];
+        return Grid[coordinates.x][coordinates.y][coordinates.z];
     }
-    
+
     /// <summary>
-    ///     Gets n GridCubes from coordinates
+    ///     Gets n GridCubes from coordinates, excluding the initial cube
     /// </summary>
     /// <param name="coordinates">Initial GridCube coordinates</param>
     /// <param name="axis">Initial GridCube coordinates, can be "x" or "z"</param>
-    /// <param name="count">Count of GridCubes to get, negative values are get in opposite direction. Count = 1 returns the initial cube only.</param>
+    /// <param name="count">Count of GridCubes to get, negative values are get in opposite direction</param>
+    /// <param name="excludeInitial">Exclude the initial cube? (i.e. get just the adjacent ones</param>
     /// <returns>List of GridCubes</returns>
-    public static List<GridCube> GetGridCubes(Coord coordinates, string axis, int count)
+    public static List<GridCube> GetGridCubesInLine(Coord coordinates, string axis, int count, bool excludeInitial = false)
     {
         var sign = (int)Mathf.Sign(count);
         var cubes = new List<GridCube>();
-        var newCoord = coordinates;
+        var coord = coordinates;
         count = Mathf.Abs(count);
 
-        for (int i = 0; i < count; ++i)
+        for (int i = excludeInitial ? 1 : 0; i < count; ++i)
         {
-            newCoord.Set(axis, newCoord.Get(axis) + sign * i);
-            cubes.Add(GetGridCubeAt(newCoord));
+            coord.Set(axis, coord.Get(axis) + sign * i);
+            cubes.Add(GetGridCubeAt(coord));
+        }
+
+        return cubes;
+    }
+
+    /// <summary>
+    ///     Gets GridCubes in countX × countZ area from coordinates 
+    /// </summary>
+    /// <param name="coordinates">Coordinates of initial cube (which is the closest and leftmost one)</param>
+    /// <param name="countX">Count of cubes on X axis</param>
+    /// <param name="countZ">Count of cubes on X axis</param>
+    /// <returns>List of GridCubes</returns>
+    public static List<GridCube> GetGridCubesInArea(Coord coordinates, int countX, int countZ)
+    {
+        var cubes = new List<GridCube>();
+        var relativeCoordinates = new Coord();
+
+        for (int x = 0; x < countX; ++x)
+        {
+            relativeCoordinates.x = x;
+            for (int z = 0; z < countZ; ++z)
+            {
+                relativeCoordinates.z = z;
+                cubes.Add(GetGridCubeAt(coordinates + relativeCoordinates));
+            }
         }
 
         return cubes;
@@ -99,11 +125,9 @@ public class Grid3D : MonoBehaviour
     /// <returns>Target position</returns>
     public static Vector3 PositionToGrid(GameObject obj, Coord coordinates)
     {
-        obj.transform.position = GetGridCubeAt(coordinates).position;
-
-        return obj.transform.position;
+        return obj.transform.position = GetGridCubeAt(coordinates).position;
     }
-    
+
     /// <summary>
     ///     Moves track part on grid to coordinates
     /// </summary>
@@ -113,15 +137,25 @@ public class Grid3D : MonoBehaviour
     /// <param name="part">Part to move</param>
     /// <param name="coordinates">Target coordinates</param>
     /// <returns>Target position</returns>
-    public static Vector3 MoveOnGrid(GameObject part, Coord coordinates)
+    public static Vector3 MovePartOnGrid(GameObject part, Coord coordinates)  // TODO: Move to Part.cs?
     {
-        // TODO: ► Clear GridCube ar old position
-        GetGridCubeAt(coordinates).SetPart(part);
+        // TODO: ► Clear GridCube at old position
 
-        return PositionToGrid(part, coordinates);
+        // var cubes = GetGridCubesInLine(coordinates, "x", part.GetComponent<Part>().gridWorldDimensions.x);  // adjacent cubes on x axis
+        // cubes.AddRange(GetGridCubesInLine(coordinates, "z", part.GetComponent<Part>().gridWorldDimensions.z));  // adjacent cubes on z axis
+        // cubes.Add(GetGridCubeAt(coordinates));  // initial cube
+
+        // Distribute the part over GridCubes
+        var cubes = GetGridCubesInArea(coordinates, part.GetComponent<Part>().gridWorldDimensions.x, part.GetComponent<Part>().gridWorldDimensions.z);
+        foreach (var cube in cubes)
+        {
+            cube.SetPart(part);
+        }
+
+        return part.GetComponent<Part>().PositionPart(cubes);
     }
     
-    public static GameObject GetPartAtCoords(Coord coordinates)
+    public static GameObject GetPartAtCoords(Coord coordinates)  // TODO: Move to Part.cs?
     {
         return GetGridCubeAt(coordinates).part;
     }

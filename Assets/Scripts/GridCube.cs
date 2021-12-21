@@ -15,6 +15,11 @@ public class GridCube  // Can't be a struct, because reference type is needed
     ///     Position of the cube in world space
     /// </summary>
     public Vector3 position;
+
+    /// <summary>
+    ///     Coordinates of the cube - just for debug at the moment
+    /// </summary>
+    public Coord coordinates;
     
     /// <summary>
     ///     Held part object
@@ -26,10 +31,11 @@ public class GridCube  // Can't be a struct, because reference type is needed
     /// </summary>
     public List<Coord> adjacentCoords;  // If i use this, change the name accordingly to Parts.cs gridCubes var
 
-    public GridCube(Vector3 coordinates = new(), GameObject trackPart = null)
+    public GridCube(Vector3 positionParam, Coord coordinatesParam)
     {
-        position = coordinates;
-        part = trackPart;
+        position = positionParam;
+        coordinates = coordinatesParam;
+        part = null;
         adjacentCoords = new List<Coord>();
     }
     

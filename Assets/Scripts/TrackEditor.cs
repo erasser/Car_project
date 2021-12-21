@@ -22,12 +22,11 @@ public class TrackEditor : MonoBehaviour
     private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     private GameObject _camera;
     private GameObject _ground;
-    private Grid3D _grid3D;
+    // private GameObject _track;
 
     void Start()
     {
         var ui = GameObject.Find("Canvas");
-        _grid3D = gameObject.GetComponent<Grid3D>();
         ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonDown").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonLeft").GetComponent<Button>().onClick.AddListener(MoveSelection);
@@ -43,16 +42,8 @@ public class TrackEditor : MonoBehaviour
         GenerateThumbnails();
         _selectionCube.SetActive(true);
         SetSelectionCoords(Coord.zero);
-
-        var tmp = Grid3D.GetGridCubes(Coord.zero, "x", 3);
-        foreach (var t in tmp)
-        {
-            print(t.position);
-        }
+        // _track = new GameObject("Track");
     }
-
-    // void FixedUpdate()
-    // {}
 
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
@@ -101,7 +92,7 @@ public class TrackEditor : MonoBehaviour
 
             // imageThumbImage.transform.position = new Vector3(i * thumbSize + 10, thumbSize + 10, 0);  // also works
             var rectTransform = buttonThumb.GetComponent<RectTransform>();
-            rectTransform.transform.position = new Vector3(i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
+            rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
             rectTransform.sizeDelta = rectSize;
             
             buttonThumb.GetComponent<Button>().onClick.AddListener(AddPart);
@@ -120,9 +111,10 @@ public class TrackEditor : MonoBehaviour
         var buttonNameParsed = EventSystem.current.currentSelectedGameObject.name.Split('_');
         int partNo = int.Parse(buttonNameParsed[1]);
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
+        newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
 
-        Grid3D.MoveOnGrid(newPart, _selectionCubeCoords);
+        Grid3D.MovePartOnGrid(newPart, _selectionCubeCoords); 
     }
 
     void MoveSelection()

@@ -18,9 +18,9 @@ public struct Coord
 
     public static Coord zero = new(0, 0, 0);
 
-    public static int xCount = 7;
-    public static int yCount = 5;
-    public static int zCount = 5;
+    public static int xCount = 8;
+    public static int yCount = 6;
+    public static int zCount = 6;
 
     public Coord(int xCoord, int yCoord, int zCoord)  // This automatically rounds a float down.
     {
@@ -32,6 +32,19 @@ public struct Coord
     public override string ToString()
     {
         return $"Coord = x: {x}, y: {y}, z: {z}";
+    }
+
+    public bool Equals(Coord coord)
+    {
+        return x == coord.x && y == coord.y && z == coord.z;
+    }
+    public static Coord operator +(Coord coord1, Coord coord2)
+    {
+        return new Coord(coord1.x + coord2.x, coord1.y + coord2.y, coord1.z + coord2.z);
+    }
+    public static Coord operator -(Coord coord1, Coord coord2)
+    {
+        return new Coord(coord1.x - coord2.x, coord1.y - coord2.y, coord1.z - coord2.z);
     }
 
     public int Get(string axis)
