@@ -127,38 +127,4 @@ public class Grid3D : MonoBehaviour
     {
         return obj.transform.position = GetGridCubeAt(coordinates).position;
     }
-
-    /// <summary>
-    ///     Moves track part on grid to coordinates
-    /// </summary>
-    /// <para>
-    ///     Also handles updating of GridCubes
-    /// </para>
-    /// <param name="part">Part to move</param>
-    /// <param name="coordinates">Target coordinates</param>
-    /// <returns>Target position</returns>
-    public static Vector3 MovePartOnGrid(GameObject part, Coord coordinates)  // TODO: Move to Part.cs?
-    {
-        // TODO: ► Clear GridCube at old position
-
-        // var cubes = GetGridCubesInLine(coordinates, "x", part.GetComponent<Part>().gridWorldDimensions.x);  // adjacent cubes on x axis
-        // cubes.AddRange(GetGridCubesInLine(coordinates, "z", part.GetComponent<Part>().gridWorldDimensions.z));  // adjacent cubes on z axis
-        // cubes.Add(GetGridCubeAt(coordinates));  // initial cube
-
-        // Distribute the part over GridCubes
-        var cubes = GetGridCubesInArea(coordinates, part.GetComponent<Part>().gridWorldDimensions.x, part.GetComponent<Part>().gridWorldDimensions.z);
-        foreach (var cube in cubes)
-        {
-            cube.SetPart(part);
-        }
-
-        return part.GetComponent<Part>().PositionPart(cubes);
-    }
-    
-    public static GameObject GetPartAtCoords(Coord coordinates)  // TODO: Move to Part.cs?
-    {
-        return GetGridCubeAt(coordinates).part;
-    }
-
-
 }

@@ -61,4 +61,35 @@ public class Part : MonoBehaviour
             gridCubes[0].position.y,
             (gridCubes[^1].position.z + gridCubes[0].position.z) / 2);
     }
+    
+    /// <summary>
+    ///     Moves track part on grid to coordinates
+    /// </summary>
+    /// <para>
+    ///     Also handles updating of GridCubes
+    /// </para>
+    /// <param name="coordinates">Target coordinates</param>
+    /// <returns>Target position</returns>
+    public Vector3 MovePartOnGrid(Coord coordinates)
+    {
+        // TODO: ► Clear GridCube at old position
+
+        // var cubes = GetGridCubesInLine(coordinates, "x", part.GetComponent<Part>().gridWorldDimensions.x);  // adjacent cubes on x axis
+        // cubes.AddRange(GetGridCubesInLine(coordinates, "z", part.GetComponent<Part>().gridWorldDimensions.z));  // adjacent cubes on z axis
+        // cubes.Add(GetGridCubeAt(coordinates));  // initial cube
+
+        // Distribute the part over GridCubes
+        var cubes = Grid3D.GetGridCubesInArea(coordinates, gridWorldDimensions.x, gridWorldDimensions.z);
+        foreach (var cube in cubes)
+        {
+            cube.SetPart(gameObject);
+        }
+
+        return PositionPart(cubes);
+    }
+    
+    public static GameObject GetPartAtCoords(Coord coordinates)
+    {
+        return Grid3D.GetGridCubeAt(coordinates).part;
+    }
 }

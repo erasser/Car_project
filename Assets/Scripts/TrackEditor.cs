@@ -114,7 +114,7 @@ public class TrackEditor : MonoBehaviour
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
 
-        Grid3D.MovePartOnGrid(newPart, _selectionCubeCoords); 
+        newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords); 
     }
 
     void MoveSelection()
@@ -155,7 +155,7 @@ public class TrackEditor : MonoBehaviour
 
     void RotatePart()
     {
-        var part = Grid3D.GetPartAtCoords(_selectionCubeCoords);
+        var part = Part.GetPartAtCoords(_selectionCubeCoords);
 
         if (!part) return;
         
