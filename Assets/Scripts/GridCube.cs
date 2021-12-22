@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 /// <summary>
@@ -22,9 +23,9 @@ public class GridCube  // Can't be a struct, because reference type is needed
     public Coord coordinates;
     
     /// <summary>
-    ///     Held part object
+    ///     List of part objects
     /// </summary>
-    public GameObject part;
+    public List<GameObject> parts;
 
     /// <summary>
     ///     List of coordinates of adjacent cubes, which the held object also occupies
@@ -35,12 +36,23 @@ public class GridCube  // Can't be a struct, because reference type is needed
     {
         position = positionParam;
         coordinates = coordinatesParam;
-        part = null;
+        parts = new();
         adjacentCoords = new List<Coord>();
     }
-    
-    public void SetPart(GameObject partToSet)
+
+    public GameObject GetPart()
     {
-        part = partToSet;
+        return parts.Count == 1 ? parts[0] : null;  // Only one part can occupy a cube (when not transforming)
+    }
+    
+    public void SetPart(GameObject partToSet = null)
+    {
+        parts.Add(partToSet);
+    }
+
+    public void UnsetPart(GameObject partToUnset)
+    {
+        Debug.Log("Removing part " + partToUnset.name);
+        Debug.Log(parts.Remove(partToUnset));
     }
 }

@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
@@ -16,12 +19,17 @@ public class TrackEditor : MonoBehaviour
     private GameObject partsPrefab;
     [SerializeField]
     private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
+    [SerializeField]
+    private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
     private GameObject _selectionCube;
+    private readonly List<Color> _selectionCubeColors = new();
+    private Material _selectionCubeMaterial;
     private Coord _selectionCubeCoords;
     private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
     private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     private GameObject _camera;
     private GameObject _ground;
+    public GameObject selectedPart;
     // private GameObject _track;
 
     void Start()
@@ -34,15 +42,27 @@ public class TrackEditor : MonoBehaviour
         ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonRotateRight").GetComponent<Button>().onClick.AddListener(RotatePart);
+        ui.transform.Find("buttonSelectOrApply").GetComponent<Button>().onClick.AddListener(SelectOrApply);
         
         _selectionCube = Instantiate(selectionCubePrefab);
+        _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
+        _selectionCubeColors.Add(_selectionCubeMaterial.color);            // default
+        _selectionCubeColors.Add(new Color(0, 1, 1, .1f));      // selected
+        _selectionCubeColors.Add(new Color(1, .5f, .5f, .1f));  // apply transform not allowed
         _camera = GameObject.Find("CameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
         GenerateThumbnails();
         _selectionCube.SetActive(true);
         SetSelectionCoords(Coord.zero);
+        _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
         // _track = new GameObject("Track");
+    }
+
+    private void Update()
+    {
+        // TODO: ► Process only if screen is touched
+        ProcessTouch();
     }
 
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
@@ -94,6 +114,7 @@ public class TrackEditor : MonoBehaviour
             var rectTransform = buttonThumb.GetComponent<RectTransform>();
             rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
             rectTransform.sizeDelta = rectSize;
+            rectTransform.AddComponent<Outline>();
             
             buttonThumb.GetComponent<Button>().onClick.AddListener(AddPart);
 
@@ -113,38 +134,44 @@ public class TrackEditor : MonoBehaviour
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
-
-        newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords); 
+        newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords);
+        SelectPart(newPart);
     }
 
     void MoveSelection()
     {
         var buttonName = EventSystem.current.currentSelectedGameObject.name;
+        var coords = new Coord();
 
         if (buttonName == "buttonUp")
         {
-            SetSelectionCoords(_selectionCubeCoords.MoveUp());
+            coords = _selectionCubeCoords.MoveUp();
         }
         else if (buttonName == "buttonDown")
         {
-            SetSelectionCoords(_selectionCubeCoords.MoveDown());
+            coords = _selectionCubeCoords.MoveDown();
         }
         else if (buttonName == "buttonLeft")
         {
-            SetSelectionCoords(_selectionCubeCoords.MoveLeft());
+            coords = _selectionCubeCoords.MoveLeft();
         }
         else if (buttonName == "buttonRight")
         {
-            SetSelectionCoords(_selectionCubeCoords.MoveRight());
+            coords = _selectionCubeCoords.MoveRight();
         }
         else if (buttonName == "buttonCloser")
         {
-            SetSelectionCoords(_selectionCubeCoords.MoveCloser());
+            coords = _selectionCubeCoords.MoveCloser();
         }
         else if (buttonName == "buttonFarther")
         {
-            SetSelectionCoords(_selectionCubeCoords.MoveFarther());
+            coords = _selectionCubeCoords.MoveFarther();
         }
+
+        if (selectedPart)  // Move selected part if any
+            selectedPart.GetComponent<Part>().MovePartOnGrid(coords);
+        else
+            SetSelectionCoords(coords);
     }
 
     void SetSelectionCoords(Coord coords)
@@ -153,6 +180,7 @@ public class TrackEditor : MonoBehaviour
         _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));
     }
 
+    // TODO: Merge with Part.Rotate()?
     void RotatePart()
     {
         var part = Part.GetPartAtCoords(_selectionCubeCoords);
@@ -162,5 +190,64 @@ public class TrackEditor : MonoBehaviour
         // var buttonName = EventSystem.current.currentSelectedGameObject.name;
 
         part.GetComponent<Part>().Rotate();
+    }
+
+    void SelectOrApply()
+    {
+        // if (selectedPart)  // Transform mode => apply
+        //     selectedPart.GetComponent<Part>().ApplyTransform();
+        // else     // Selection mode => Try to select
+        // {
+        //     var part = Part.GetPartAtCoords(_selectionCubeCoords);
+        //     if (part)
+        //         selectedPart = part;
+        // }
+    }
+
+    void ProcessTouch()
+    {
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())  // See UFO to implement touch
+        {
+            if (Physics.Raycast(_camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
+            {
+                if (!selectedPart)
+                    SelectPart(selectionHit.collider.gameObject);
+                else
+                {
+                    // TODO: Check, is transformation can be applied, apply transform & select the part
+                    if (selectionHit.collider.gameObject == selectedPart)
+                        selectedPart.GetComponent<Part>().Rotate();
+                    else
+                        SelectPart(selectionHit.collider.gameObject);
+                }
+            }
+            else  // Unselect
+            {
+                UnselectPart();
+            }
+        }
+    }
+
+    void SelectPart(GameObject part)
+    {
+        if (selectedPart == part) return;
+
+        var partDimensions = part.GetComponent<Part>().gridWorldDimensions;
+        
+        selectedPart = part;
+        _selectionCube.transform.SetParent(part.transform);
+        _selectionCube.transform.localPosition = Vector3.zero;
+        _selectionCube.transform.localScale = new Vector3(partDimensions.x * 10 + .1f, 10.1f, partDimensions.z * 10 + .1f);  // parts scale is 2
+        _selectionCubeMaterial.color = _selectionCubeColors[1];
+    }
+
+    void UnselectPart()
+    {
+        if (!selectedPart) return;
+
+        selectedPart = null;
+        _selectionCube.transform.parent = null;
+        _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
+        _selectionCubeMaterial.color = _selectionCubeColors[0];
     }
 }
