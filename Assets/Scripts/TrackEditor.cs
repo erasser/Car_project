@@ -22,7 +22,7 @@ public class TrackEditor : MonoBehaviour
     [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
     private GameObject _selectionCube;
-    private static readonly List<Color> SelectionCubeColors = new();
+    private static readonly Dictionary<String, Color> SelectionCubeColors = new();
     private float _selectionCubeAlphaHalf;
     private float _selectionCubeAlphaStartTime;
     private static Material _selectionCubeMaterial;
@@ -31,7 +31,8 @@ public class TrackEditor : MonoBehaviour
     private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     private GameObject _camera;
     private GameObject _ground;
-    public static GameObject selectedPart;
+    private static GameObject _selectedPart;
+    private static Part _selectedPartComponent;
     public static bool canTransformBeApplied;
     // private GameObject _track;
 
@@ -49,10 +50,10 @@ public class TrackEditor : MonoBehaviour
         
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
-        SelectionCubeColors.Add(_selectionCubeMaterial.color);            // unselected
-        SelectionCubeColors.Add(new Color(0, 1, 1, .18f));     // selected
-        SelectionCubeColors.Add(new Color(1, .5f, .5f, .4f));  // apply transform not allowed
-        _selectionCubeAlphaHalf = SelectionCubeColors[1].a / 2;
+        SelectionCubeColors.Add("unselected", _selectionCubeMaterial.color);
+        SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
+        SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
+        _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
         _camera = GameObject.Find("CameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
@@ -65,7 +66,7 @@ public class TrackEditor : MonoBehaviour
 
     private void Update()
     {
-        if (selectedPart)
+        if (_selectedPart)
             _selectionCubeMaterial.color = new Color(
                 _selectionCubeMaterial.color.r,
                 _selectionCubeMaterial.color.g,
@@ -146,7 +147,7 @@ public class TrackEditor : MonoBehaviour
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
-        SelectPart(newPart);  // Must be called before MovePartOnGrid()
+        SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
         newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords);
     }
 
@@ -155,6 +156,8 @@ public class TrackEditor : MonoBehaviour
         var buttonName = EventSystem.current.currentSelectedGameObject.name;
         var coords = new Coord();
 
+        // Zde jsem skončil. Jak to tady bude? Selection cube je připarentěná k part.
+        
         if (buttonName == "buttonUp")
         {
             coords = _selectionCubeCoords.MoveUp();
@@ -180,12 +183,15 @@ public class TrackEditor : MonoBehaviour
             coords = _selectionCubeCoords.MoveFarther();
         }
 
-        if (selectedPart)  // Move selected part if any
-            selectedPart.GetComponent<Part>().MovePartOnGrid(coords);
+        if (_selectedPart)  // Move selected part if any
+            _selectedPartComponent.MovePartOnGrid(coords);
 
         SetSelectionCoords(coords);
     }
 
+    /// <summary>
+    ///     Needed for the state when no part is selected 
+    /// </summary>
     void SetSelectionCoords(Coord coords)
     {
         _selectionCubeCoords = coords;
@@ -195,12 +201,12 @@ public class TrackEditor : MonoBehaviour
     // TODO: Merge with Part.Rotate()?
     void RotatePart()
     {
+        // old code...
         var part = Part.GetPartAtCoords(_selectionCubeCoords);
 
         if (!part) return;
         
-        // var buttonName = EventSystem.current.currentSelectedGameObject.name;
-
+        // old code...
         part.GetComponent<Part>().Rotate();
     }
 
@@ -222,13 +228,13 @@ public class TrackEditor : MonoBehaviour
         {
             if (Physics.Raycast(_camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
             {
-                if (!selectedPart)
+                if (!_selectedPart)
                     SelectPart(selectionHit.collider.gameObject);
                 else
                 {
                     // TODO: Check, is transformation can be applied, apply transform & select the part
-                    if (selectionHit.collider.gameObject == selectedPart)
-                        selectedPart.GetComponent<Part>().Rotate();
+                    if (selectionHit.collider.gameObject == _selectedPart)
+                        _selectedPartComponent.Rotate();
                     else
                         SelectPart(selectionHit.collider.gameObject);
                 }
@@ -240,46 +246,49 @@ public class TrackEditor : MonoBehaviour
         }
     }
 
-    void SelectPart(GameObject part)
+    void SelectPart(GameObject part, bool afterAddPart = false)
     {
-        if (selectedPart == part) return;
+        if (_selectedPart == part) return;
 
         // TODO: UnselectPart()  ??
 
-        selectedPart = part;
+        _selectedPart = part;
+        _selectedPartComponent = part.GetComponent<Part>();
 
-        var partComponent = selectedPart.GetComponent<Part>();
-        partComponent.outlineComponent.enabled = true;
-        var partDimensions = partComponent.gridWorldDimensions;
+        _selectedPartComponent.outlineComponent.enabled = true;
+        var partDimensions = _selectedPartComponent.gridWorldDimensions;
 
         _selectionCube.transform.SetParent(part.transform);
         _selectionCube.transform.localPosition = Vector3.zero;
         _selectionCube.transform.localScale = new Vector3(partDimensions.x * 10 + .1f, 10.1f, partDimensions.z * 10 + .1f);  // parts scale is 2
-        _selectionCubeMaterial.color = SelectionCubeColors[1];
+        _selectionCubeMaterial.color = SelectionCubeColors["selected"];
         _selectionCubeAlphaStartTime = Time.time;
+
+        if (!afterAddPart)  // Object was selected by touch => set new coordinates for selection cube.
+            SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
     }
 
     void UnselectPart()
     {
-        if (!selectedPart) return;
+        if (!_selectedPart) return;
 
-        var partComponent = selectedPart.GetComponent<Part>();
-        SetSelectionCoords(partComponent.occupiedGridCubes[0].coordinates);
-        partComponent.outlineComponent.enabled = false;
+        SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
+        _selectedPartComponent.outlineComponent.enabled = false;
 
-        selectedPart = null;
+        _selectedPart = null;
+        _selectedPartComponent = null;  // for sure
         _selectionCube.transform.parent = null;
         _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
-        _selectionCubeMaterial.color = SelectionCubeColors[0];
+        _selectionCubeMaterial.color = SelectionCubeColors["unselected"];
     }
 
     void TryUnselectPart()
     {
-        if (_selectionCubeMaterial.color != SelectionCubeColors[2])
+        if (_selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
             UnselectPart();
         else
         {
-            // TODO: Blink red cube
+            // TODO: ► Blink red cube
         }
     }
 
@@ -288,7 +297,7 @@ public class TrackEditor : MonoBehaviour
         canTransformBeApplied = true;
 
         // Collides with another part?
-        foreach (var cube in selectedPart.GetComponent<Part>().occupiedGridCubes)  // TODO: ► cache this!!!
+        foreach (var cube in _selectedPartComponent.occupiedGridCubes)
         {
             if (cube.GetPartsCount() > 1)
                 canTransformBeApplied = false;
@@ -303,9 +312,9 @@ public class TrackEditor : MonoBehaviour
     public static void UpdateSelectionCubeColor()  // Called only when part is moved
     {
         // print(canTransformBeApplied);
-        if (canTransformBeApplied /*&& _selectionCubeMaterial.color != SelectionCubeColors[1]*/)
-            _selectionCubeMaterial.color = SelectionCubeColors[1];
-        else if (!canTransformBeApplied /*&& _selectionCubeMaterial.color != SelectionCubeColors[2]*/)
-            _selectionCubeMaterial.color = SelectionCubeColors[2];
+        if (canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["selected"])
+            _selectionCubeMaterial.color = SelectionCubeColors["selected"];
+        else if (!canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
+            _selectionCubeMaterial.color = SelectionCubeColors["not allowed"];
     }
 }

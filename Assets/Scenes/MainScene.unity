@@ -1395,7 +1395,6 @@ MonoBehaviour:
   selectableObjectsLayer:
     serializedVersion: 2
     m_Bits: 64
-  selectedPart: {fileID: 0}
 --- !u!4 &1616280650
 Transform:
   m_ObjectHideFlags: 0
@@ -2247,7 +2246,7 @@ MonoBehaviour:
   lineIntensity: 1
   fillAmount: 0
   lineColor0: {r: 1, g: 1, b: 1, a: 1}
-  lineColor1: {r: 1, g: 0, b: 0.78841305, a: 1}
+  lineColor1: {r: 0, g: 1, b: 0, a: 1}
   lineColor2: {r: 0, g: 0, b: 0, a: 1}
   additiveRendering: 0
   backfaceCulling: 1
