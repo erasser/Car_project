@@ -40,6 +40,11 @@ public class GridCube  // Can't be a struct, because reference type is needed
         adjacentCoords = new List<Coord>();
     }
 
+    public int GetPartsCount()
+    {
+        return parts.Count;
+    }
+    
     public GameObject GetPart()
     {
         return parts.Count == 1 ? parts[0] : null;  // Only one part can occupy a cube (when not transforming)
@@ -52,7 +57,6 @@ public class GridCube  // Can't be a struct, because reference type is needed
 
     public void UnsetPart(GameObject partToUnset)
     {
-        Debug.Log("Removing part " + partToUnset.name);
-        Debug.Log(parts.Remove(partToUnset));
+        parts.Remove(partToUnset);
     }
 }

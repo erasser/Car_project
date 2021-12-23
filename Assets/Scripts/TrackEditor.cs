@@ -22,14 +22,17 @@ public class TrackEditor : MonoBehaviour
     [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
     private GameObject _selectionCube;
-    private readonly List<Color> _selectionCubeColors = new();
-    private Material _selectionCubeMaterial;
+    private static readonly List<Color> SelectionCubeColors = new();
+    private float _selectionCubeAlphaHalf;
+    private float _selectionCubeAlphaStartTime;
+    private static Material _selectionCubeMaterial;
     private Coord _selectionCubeCoords;
     private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
     private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     private GameObject _camera;
     private GameObject _ground;
-    public GameObject selectedPart;
+    public static GameObject selectedPart;
+    public static bool canTransformBeApplied;
     // private GameObject _track;
 
     void Start()
@@ -46,9 +49,10 @@ public class TrackEditor : MonoBehaviour
         
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
-        _selectionCubeColors.Add(_selectionCubeMaterial.color);            // default
-        _selectionCubeColors.Add(new Color(0, 1, 1, .1f));      // selected
-        _selectionCubeColors.Add(new Color(1, .5f, .5f, .1f));  // apply transform not allowed
+        SelectionCubeColors.Add(_selectionCubeMaterial.color);            // unselected
+        SelectionCubeColors.Add(new Color(0, 1, 1, .18f));     // selected
+        SelectionCubeColors.Add(new Color(1, .5f, .5f, .4f));  // apply transform not allowed
+        _selectionCubeAlphaHalf = SelectionCubeColors[1].a / 2;
         _camera = GameObject.Find("CameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
@@ -61,6 +65,14 @@ public class TrackEditor : MonoBehaviour
 
     private void Update()
     {
+        if (selectedPart)
+            _selectionCubeMaterial.color = new Color(
+                _selectionCubeMaterial.color.r,
+                _selectionCubeMaterial.color.g,
+                _selectionCubeMaterial.color.b,
+                Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf / 2 + _selectionCubeAlphaHalf / 2);
+                // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
+
         // TODO: ► Process only if screen is touched
         ProcessTouch();
     }
@@ -114,8 +126,8 @@ public class TrackEditor : MonoBehaviour
             var rectTransform = buttonThumb.GetComponent<RectTransform>();
             rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
             rectTransform.sizeDelta = rectSize;
-            rectTransform.AddComponent<Outline>();
-            
+            // rectTransform.AddComponent<Outline>();  // TODO: Collides with Outline asset
+
             buttonThumb.GetComponent<Button>().onClick.AddListener(AddPart);
 
             ++i;
@@ -134,8 +146,8 @@ public class TrackEditor : MonoBehaviour
         var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
+        SelectPart(newPart);  // Must be called before MovePartOnGrid()
         newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords);
-        SelectPart(newPart);
     }
 
     void MoveSelection()
@@ -170,8 +182,8 @@ public class TrackEditor : MonoBehaviour
 
         if (selectedPart)  // Move selected part if any
             selectedPart.GetComponent<Part>().MovePartOnGrid(coords);
-        else
-            SetSelectionCoords(coords);
+
+        SetSelectionCoords(coords);
     }
 
     void SetSelectionCoords(Coord coords)
@@ -223,7 +235,7 @@ public class TrackEditor : MonoBehaviour
             }
             else  // Unselect
             {
-                UnselectPart();
+                TryUnselectPart();
             }
         }
     }
@@ -232,22 +244,68 @@ public class TrackEditor : MonoBehaviour
     {
         if (selectedPart == part) return;
 
-        var partDimensions = part.GetComponent<Part>().gridWorldDimensions;
-        
+        // TODO: UnselectPart()  ??
+
         selectedPart = part;
+
+        var partComponent = selectedPart.GetComponent<Part>();
+        partComponent.outlineComponent.enabled = true;
+        var partDimensions = partComponent.gridWorldDimensions;
+
         _selectionCube.transform.SetParent(part.transform);
         _selectionCube.transform.localPosition = Vector3.zero;
         _selectionCube.transform.localScale = new Vector3(partDimensions.x * 10 + .1f, 10.1f, partDimensions.z * 10 + .1f);  // parts scale is 2
-        _selectionCubeMaterial.color = _selectionCubeColors[1];
+        _selectionCubeMaterial.color = SelectionCubeColors[1];
+        _selectionCubeAlphaStartTime = Time.time;
     }
 
     void UnselectPart()
     {
         if (!selectedPart) return;
 
+        var partComponent = selectedPart.GetComponent<Part>();
+        SetSelectionCoords(partComponent.occupiedGridCubes[0].coordinates);
+        partComponent.outlineComponent.enabled = false;
+
         selectedPart = null;
         _selectionCube.transform.parent = null;
         _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
-        _selectionCubeMaterial.color = _selectionCubeColors[0];
+        _selectionCubeMaterial.color = SelectionCubeColors[0];
+    }
+
+    void TryUnselectPart()
+    {
+        if (_selectionCubeMaterial.color != SelectionCubeColors[2])
+            UnselectPart();
+        else
+        {
+            // TODO: Blink red cube
+        }
+    }
+
+    public static void UpdateCanTransformBeApplied()
+    {
+        canTransformBeApplied = true;
+
+        // Collides with another part?
+        foreach (var cube in selectedPart.GetComponent<Part>().occupiedGridCubes)  // TODO: ► cache this!!!
+        {
+            if (cube.GetPartsCount() > 1)
+                canTransformBeApplied = false;
+        }
+        
+        // Is out of grid bounds?
+        // TODO
+        
+        UpdateSelectionCubeColor();
+    }
+
+    public static void UpdateSelectionCubeColor()  // Called only when part is moved
+    {
+        // print(canTransformBeApplied);
+        if (canTransformBeApplied /*&& _selectionCubeMaterial.color != SelectionCubeColors[1]*/)
+            _selectionCubeMaterial.color = SelectionCubeColors[1];
+        else if (!canTransformBeApplied /*&& _selectionCubeMaterial.color != SelectionCubeColors[2]*/)
+            _selectionCubeMaterial.color = SelectionCubeColors[2];
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+// using UnityEngine.UI;
 
 // Všechny GridCube, přes které part zabírá místo, budou referencovat ten part
 
@@ -10,14 +11,18 @@ public class Part : MonoBehaviour
     public Coord gridWorldDimensions;   // Count of GridCubes, that the part is going to occupy in world space (but with local position), updated on rotation
     public List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
     private byte _rotation;             // 0, 1, 2, 3
+    public Outline outlineComponent;
 
-    private void Awake()
+    void Awake()
     {
         CalculateLocalCubeDimensions();
+        outlineComponent = GetComponent<Outline>();
     }
 
     public void Rotate()
     {
+        // TODO: occupiedGridCubes.Clear();  // clear cubes.cs also  // See MovePartOnGrid()
+        
         print("rotate!");
         transform.eulerAngles = new (0, ++_rotation * 90, 0);  // Rotates right
         UpdateWorldCubeDimensions();
@@ -55,24 +60,6 @@ public class Part : MonoBehaviour
         UpdateWorldCubeDimensions();
     }
 
-    // List<GridCube> UpdateOccupiedGridCubes()
-    // {
-    //     var relativeCoordinates = new Coord();
-    //
-    //     for (int x = 0; x < countX; ++x)
-    //     {
-    //         relativeCoordinates.x = x;
-    //         for (int z = 0; z < countZ; ++z)
-    //         {
-    //             relativeCoordinates.z = z;
-    //             cubes.Add(GetGridCubeAt(coordinates + relativeCoordinates));
-    //         }
-    //     }
-    //
-    //
-    //     return occupiedGridCubes;
-    // }
-
     private void UpdateWorldCubeDimensions()
     {
         if (_rotation is 0 or 2) // :-o
@@ -86,7 +73,6 @@ public class Part : MonoBehaviour
 
     public Vector3 PositionPart(List<GridCube> gridCubes)
     {
-        occupiedGridCubes = gridCubes;
         return transform.position = new(
             (gridCubes[^1].position.x + gridCubes[0].position.x) / 2,
             gridCubes[0].position.y,
@@ -103,21 +89,24 @@ public class Part : MonoBehaviour
     /// <returns>Target position</returns>
     public Vector3 MovePartOnGrid(Coord coordinates)
     {
-        // TODO: ► Clear part's GridCubes at current position
-        // foreach (var cube in occupiedGridCubes)
-        // {
-        //     cube.SetPart();
-        // }
-        
+        // Clear cubes
+        foreach (var cube in occupiedGridCubes)
+        {
+            cube.UnsetPart(gameObject);
+        }
+
+        occupiedGridCubes.Clear();
+
         // Distribute the part over GridCubes
-        // occupiedGridCubes.Clear();
-        var cubes = Grid3D.GetGridCubesInArea(coordinates, gridWorldDimensions.x, gridWorldDimensions.z);
+        var cubes = Grid3D.GetGridCubesInArea(coordinates, gridWorldDimensions.x, gridWorldDimensions.z);  // cubes at new position
         foreach (var cube in cubes)
         {
             cube.SetPart(gameObject);
             occupiedGridCubes.Add(cube);
         }
 
+        TrackEditor.UpdateCanTransformBeApplied();
+        
         return PositionPart(cubes);
     }
     

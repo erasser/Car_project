@@ -1,4 +1,5 @@
-﻿• Consider using lines to vizialize 3D grid (Handles.DrawLine or ten vector helper, co používám v UFO)
+﻿• Udělat viditelnou řadu kostek od selectedCube do směrů všech os? 
+• Consider using lines to vizialize 3D grid (Handles.DrawLine or ten vector helper, co používám v UFO)
 • Try slowmotion!
 • Měnící se směr gravitace!
 • co vítr?
