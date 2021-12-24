@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public class TouchController : MonoBehaviour
 {
     private static Vector3 _touchPosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
-    private static Transform _dummyTransform;
+    private static Transform _cameraTargetTransform;
     private static TouchState _touchState = TouchState.NoTouch;
     private static ControllerState _controllerState = ControllerState.NoAction;
     private static Vector3 _touchDownPosition;
@@ -31,7 +31,7 @@ public class TouchController : MonoBehaviour
 
     void Start()
     {
-        _dummyTransform = GameObject.Find("dummy").transform;
+        _cameraTargetTransform = GameObject.Find("cameraTarget").transform;
     }
 
     void Update()
@@ -45,34 +45,36 @@ public class TouchController : MonoBehaviour
         MouseDown();
         MouseUp();
 
-        // Now touching
+        // Now touching => orbit camera
         if (_touchState == TouchState.TouchedDown)
         {
             var diff = Input.mousePosition - _touchPosition;
             // Now moving with touch
-            if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference
+            if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
                 _controllerState = ControllerState.Rotating;
 
-                var translationV3 = diff * Time.deltaTime * 4;
-                _dummyTransform.Translate(new Vector3(translationV3.x, translationV3.z, 0));
-                // _dummyTransform.Rotate(new Vector3(translationV3.y, translationV3.x, 0));
+                var translationV3 = diff * Time.deltaTime * 16;
+                _cameraTargetTransform.Rotate(new Vector3(- translationV3.y, translationV3.x, 0));  // TODO: Move to TrackEditor? & set target to selection cube at start
+                var rot = _cameraTargetTransform.localEulerAngles;
+                rot.z = 0;
+                rot.x = Mathf.Clamp(rot.x, 5, 85);
+                _cameraTargetTransform.localEulerAngles = rot;
             }
         }
-        // Now double (or more) touching
-        // else if (_touchState == TouchState.TouchedDown)
-        // {
-        //     var diff = Input.mousePosition - _touchPosition;
-        //     // Now moving with touch
-        //     if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference
-        //     {
-        //         _controllerState = ControllerState.Rotating;
-        //
-        //         var translationV3 = diff * Time.deltaTime * 4;
-        //         _dummyTransform.Translate(new Vector3(translationV3.x, translationV3.z, 0));
-        //         // _dummyTransform.Rotate(new Vector3(translationV3.y, translationV3.x, 0));
-        //     }
-        // }
+        // Now double (or more) touching => pan camera
+        else if (_touchState == TouchState.DoubleTouch)
+        {
+            var diff = Input.mousePosition - _touchPosition;
+            // Now moving with double touch
+            if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
+            {
+                _controllerState = ControllerState.Panning;
+            
+                var translationV3 = diff * Time.deltaTime * 24;
+                _cameraTargetTransform.Translate(new Vector3(- translationV3.x, - translationV3.y, 0), Space.Self);
+            }
+        }
 
         if (_touchState == TouchState.TouchedUp)
         {
@@ -99,10 +101,9 @@ public class TouchController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             _touchState = TouchState.TouchedDown;
-            
-            if (Input.GetMouseButtonDown(1))
-                _touchState = TouchState.DoubleTouch;
         }
+        if (Input.GetMouseButtonDown(1) && _touchState == TouchState.TouchedDown)
+            _touchState = TouchState.DoubleTouch;                                   // Need to press LMB, then RMB
     }
 
     // Is reset each frame

@@ -58,7 +58,7 @@ public class TrackEditor : MonoBehaviour
         SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
         SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
-        _camera = GameObject.Find("CameraEditor");
+        _camera = GameObject.Find("cameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
         GenerateThumbnails();
