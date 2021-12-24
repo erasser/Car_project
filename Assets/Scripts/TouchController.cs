@@ -19,7 +19,7 @@ public class TouchController : MonoBehaviour
         NoTouch,
         TouchedDown,
         TouchedUp,
-        TwoFingerTouch
+        DoubleTouch
     }
 
     enum ControllerState
@@ -41,8 +41,6 @@ public class TouchController : MonoBehaviour
     
     void ProcessTouch()
     {
-        _touchPosition = Input.mousePosition;
-        _touchState = TouchState.NoTouch;
 
         MouseDown();
         MouseUp();
@@ -58,37 +56,56 @@ public class TouchController : MonoBehaviour
 
                 var translationV3 = diff * Time.deltaTime * 4;
                 _dummyTransform.Translate(new Vector3(translationV3.x, translationV3.z, 0));
+                // _dummyTransform.Rotate(new Vector3(translationV3.y, translationV3.x, 0));
             }
         }
+        // Now double (or more) touching
+        // else if (_touchState == TouchState.TouchedDown)
+        // {
+        //     var diff = Input.mousePosition - _touchPosition;
+        //     // Now moving with touch
+        //     if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference
+        //     {
+        //         _controllerState = ControllerState.Rotating;
+        //
+        //         var translationV3 = diff * Time.deltaTime * 4;
+        //         _dummyTransform.Translate(new Vector3(translationV3.x, translationV3.z, 0));
+        //         // _dummyTransform.Rotate(new Vector3(translationV3.y, translationV3.x, 0));
+        //     }
+        // }
 
         if (_touchState == TouchState.TouchedUp)
         {
-            // if (_wasDownOnUI && _wasUpOnUI)
-            // {
-                // Finished touch without camera pan or rotation => raycast
-                if (_controllerState == ControllerState.NoAction && !_wasUpOnUI)
-                {print("raycasting");
-                    TrackEditor.Instance.ProcessSimpleTouch();
-                }
-                // }
-                else
+            // Finished touch without camera pan or rotation => raycast
+            if (_controllerState == ControllerState.NoAction && !_wasUpOnUI)
             {
-                _controllerState = ControllerState.NoAction;                
+                TrackEditor.Instance.ProcessSimpleTouch();
             }
-            
+            else
+            {
+                _controllerState = ControllerState.NoAction;
+            }
+            _touchState = TouchState.NoTouch;
         }
-        
+        _touchPosition = Input.mousePosition;
     }
-    
+
+    // Is reset each frame
     private void MouseDown()
     {
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        if (EventSystem.current.IsPointerOverGameObject())  // UI
+            return;
+
+        if (Input.GetMouseButtonDown(0))
         {
             _touchState = TouchState.TouchedDown;
-            // _wasDownOnUI = EventSystem.current.IsPointerOverGameObject();
+            
+            if (Input.GetMouseButtonDown(1))
+                _touchState = TouchState.DoubleTouch;
         }
     }
 
+    // Is reset each frame
     private void MouseUp()
     {
         if (Input.GetMouseButtonUp(0))
