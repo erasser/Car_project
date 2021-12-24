@@ -54,15 +54,18 @@ public class TouchController : MonoBehaviour
             {
                 _controllerState = ControllerState.Rotating;
 
-                var translationV3 = diff * Time.deltaTime * 16;
-                _cameraTargetTransform.Rotate(new Vector3(- translationV3.y, translationV3.x, 0));  // TODO: Move to TrackEditor? & set target to selection cube at start
+                var rotationV3 = diff * Time.deltaTime * 16;
+                var yRot = rotationV3.x * Mathf.Cos(_cameraTargetTransform.localEulerAngles.x * 0.0174533f);  // Slower orbit speed when nearer to orbit pole
+
+                _cameraTargetTransform.Rotate(new Vector3(- rotationV3.y, yRot, 0));  // TODO: Move to TrackEditor? & set target to selection cube at start
+                // _cameraTargetTransform.Rotate(new Vector3(- rotationV3.y, rotationV3.x, 0));
                 var rot = _cameraTargetTransform.localEulerAngles;
                 rot.z = 0;
                 rot.x = Mathf.Clamp(rot.x, 5, 85);
                 _cameraTargetTransform.localEulerAngles = rot;
             }
         }
-        // Now double (or more) touching => pan camera
+        // Now double (or more) touching => pan camera      // TODO: Limit camera target position to grid bounds
         else if (_touchState == TouchState.DoubleTouch)
         {
             var diff = Input.mousePosition - _touchPosition;
