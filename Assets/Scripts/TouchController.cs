@@ -1,17 +1,32 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+// See UFO to implement touch
+// TODO: ► Process only if screen is touched? Přece musí jít ty eventy pověsit nějak na celý okno hry
 
 public class TouchController : MonoBehaviour
 {
-    private Vector3 _touchPosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
-    private Transform _dummyTransform;
-    private State _state;
+    private static Vector3 _touchPosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
+    private static Transform _dummyTransform;
+    private static TouchState _touchState = TouchState.NoTouch;
+    private static ControllerState _controllerState = ControllerState.NoAction;
+    private static Vector3 _touchDownPosition;
+    private static Vector3 _touchUpPosition;
+    // private static bool _wasDownOnUI;
+    private static bool _wasUpOnUI;
 
-    enum State
+    enum TouchState
     {
         NoTouch,
-        OneFingerTouch,
+        TouchedDown,
+        TouchedUp,
         TwoFingerTouch
+    }
+
+    enum ControllerState
+    {
+        NoAction,
+        Panning,
+        Rotating
     }
 
     void Start()
@@ -21,44 +36,70 @@ public class TouchController : MonoBehaviour
 
     void Update()
     {
-        // TODO: ► Process only if screen is touched?
         ProcessTouch();
     }
     
     void ProcessTouch()
     {
-        if (_state == State.OneFingerTouch)
+        _touchPosition = Input.mousePosition;
+        _touchState = TouchState.NoTouch;
+
+        MouseDown();
+        MouseUp();
+
+        // Now touching
+        if (_touchState == TouchState.TouchedDown)
         {
-            var diff = (Input.mousePosition - _touchPosition) / 20;
-            var translationV3 = new Vector3(diff.x, diff.z, 0);
-            _dummyTransform.Translate(translationV3);
-            _touchPosition = Input.mousePosition;
-            print("translating " + Time.time);
+            var diff = Input.mousePosition - _touchPosition;
+            // Now moving with touch
+            if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference
+            {
+                _controllerState = ControllerState.Rotating;
+
+                var translationV3 = diff * Time.deltaTime * 4;
+                _dummyTransform.Translate(new Vector3(translationV3.x, translationV3.z, 0));
+            }
         }
 
-        if (MouseDown())
+        if (_touchState == TouchState.TouchedUp)
         {
-            _state = State.OneFingerTouch;
-            _touchPosition = Input.mousePosition;
+            // if (_wasDownOnUI && _wasUpOnUI)
+            // {
+                // Finished touch without camera pan or rotation => raycast
+                if (_controllerState == ControllerState.NoAction && !_wasUpOnUI)
+                {print("raycasting");
+                    TrackEditor.Instance.ProcessSimpleTouch();
+                }
+                // }
+                else
+            {
+                _controllerState = ControllerState.NoAction;                
+            }
+            
         }
         
-        if (MouseUp())  // See UFO to implement touch
-        {
-            _state = State.NoTouch;
-            
-            // Finished touch, raycast      // TODO: Add some value for small difference
-            if (_touchPosition == Input.mousePosition)
-                TrackEditor.Instance.ProcessSimpleTouch();
-        }
     }
     
-    private bool MouseDown()
-    {                                         // exclude UI from touch event ↓
-        return Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject();
+    private void MouseDown()
+    {
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            _touchState = TouchState.TouchedDown;
+            // _wasDownOnUI = EventSystem.current.IsPointerOverGameObject();
+        }
     }
 
-    private bool MouseUp()
+    private void MouseUp()
     {
-        return Input.GetMouseButtonUp(0);
+        if (Input.GetMouseButtonUp(0))
+        {
+            _touchState = TouchState.TouchedUp;
+            _wasUpOnUI = EventSystem.current.IsPointerOverGameObject();
+        }
     }
+
+    // private Vector3 ScreenToScenePosition(Vector3 screenPosition)
+    // {
+    //     return new Vector3(diff.x, diff.z, 0);
+    // }
 }
