@@ -21,23 +21,27 @@ public class TrackEditor : MonoBehaviour
     private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
     [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
-    private GameObject _selectionCube;
+    public static TrackEditor Instance;
+    private static GameObject _selectionCube;
     private static readonly Dictionary<String, Color> SelectionCubeColors = new();
     private float _selectionCubeAlphaHalf;
-    private float _selectionCubeAlphaStartTime;
+    private static float _selectionCubeAlphaStartTime;
     private static Material _selectionCubeMaterial;
-    private Coord _selectionCubeCoords;
+    private static Coord _selectionCubeCoords;
     private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
     private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
-    private GameObject _camera;
+    private static GameObject _camera;
     private GameObject _ground;
     private static GameObject _selectedPart;
     private static Part _selectedPartComponent;
-    public static bool canTransformBeApplied;
+    private static bool _canTransformBeApplied;
+
     // private GameObject _track;
 
     void Start()
     {
+        Instance = this;
+
         var ui = GameObject.Find("Canvas");
         ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonDown").GetComponent<Button>().onClick.AddListener(MoveSelection);
@@ -73,11 +77,29 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.b,
                 Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf / 2 + _selectionCubeAlphaHalf / 2);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
-
-        // TODO: ► Process only if screen is touched
-        ProcessTouch();
     }
 
+    public void ProcessSimpleTouch()
+    {
+        if (Physics.Raycast(_camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
+        {
+            if (!_selectedPart)
+                SelectPart(selectionHit.collider.gameObject);
+            else
+            {
+                // TODO: Check, is transformation can be applied, apply transform & select the part
+                if (selectionHit.collider.gameObject == _selectedPart)
+                    _selectedPartComponent.Rotate();
+                else
+                    SelectPart(selectionHit.collider.gameObject);
+            }
+        }
+        else  // Unselect
+        {
+            TryUnselectPart();
+        }
+    }
+    
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
         const int thumbSize = 128;   // TODO: Should be relative to screen size
@@ -156,8 +178,6 @@ public class TrackEditor : MonoBehaviour
         var buttonName = EventSystem.current.currentSelectedGameObject.name;
         var coords = new Coord();
 
-        // Zde jsem skončil. Jak to tady bude? Selection cube je připarentěná k part.
-        
         if (buttonName == "buttonUp")
         {
             coords = _selectionCubeCoords.MoveUp();
@@ -192,10 +212,15 @@ public class TrackEditor : MonoBehaviour
     /// <summary>
     ///     Needed for the state when no part is selected 
     /// </summary>
-    void SetSelectionCoords(Coord coords)
+    static void SetSelectionCoords(Coord coords)
     {
         _selectionCubeCoords = coords;
-        _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));
+
+        // Position selection cube only if it's not attached to a part
+        if (!_selectionCube.transform.parent)
+            Grid3D.PositionToGrid(_selectionCube, coords);
+
+        // _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));  // Will be replaced by free camera
     }
 
     // TODO: Merge with Part.Rotate()?
@@ -222,31 +247,7 @@ public class TrackEditor : MonoBehaviour
         // }
     }
 
-    void ProcessTouch()
-    {
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())  // See UFO to implement touch
-        {
-            if (Physics.Raycast(_camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
-            {
-                if (!_selectedPart)
-                    SelectPart(selectionHit.collider.gameObject);
-                else
-                {
-                    // TODO: Check, is transformation can be applied, apply transform & select the part
-                    if (selectionHit.collider.gameObject == _selectedPart)
-                        _selectedPartComponent.Rotate();
-                    else
-                        SelectPart(selectionHit.collider.gameObject);
-                }
-            }
-            else  // Unselect
-            {
-                TryUnselectPart();
-            }
-        }
-    }
-
-    void SelectPart(GameObject part, bool afterAddPart = false)
+    static void SelectPart(GameObject part, bool afterAddPart = false)
     {
         if (_selectedPart == part) return;
 
@@ -268,7 +269,7 @@ public class TrackEditor : MonoBehaviour
             SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
     }
 
-    void UnselectPart()
+    static void UnselectPart()
     {
         if (!_selectedPart) return;
 
@@ -282,7 +283,7 @@ public class TrackEditor : MonoBehaviour
         _selectionCubeMaterial.color = SelectionCubeColors["unselected"];
     }
 
-    void TryUnselectPart()
+    static void TryUnselectPart()
     {
         if (_selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
             UnselectPart();
@@ -294,13 +295,13 @@ public class TrackEditor : MonoBehaviour
 
     public static void UpdateCanTransformBeApplied()
     {
-        canTransformBeApplied = true;
+        _canTransformBeApplied = true;
 
         // Collides with another part?
         foreach (var cube in _selectedPartComponent.occupiedGridCubes)
         {
             if (cube.GetPartsCount() > 1)
-                canTransformBeApplied = false;
+                _canTransformBeApplied = false;
         }
         
         // Is out of grid bounds?
@@ -312,9 +313,9 @@ public class TrackEditor : MonoBehaviour
     public static void UpdateSelectionCubeColor()  // Called only when part is moved
     {
         // print(canTransformBeApplied);
-        if (canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["selected"])
+        if (_canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["selected"])
             _selectionCubeMaterial.color = SelectionCubeColors["selected"];
-        else if (!canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
+        else if (!_canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
             _selectionCubeMaterial.color = SelectionCubeColors["not allowed"];
     }
 }

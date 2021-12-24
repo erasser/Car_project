@@ -1,4 +1,6 @@
-﻿• Udělat viditelnou řadu kostek od selectedCube do směrů všech os? 
+﻿Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
+
+• Udělat viditelnou řadu kostek od selectedCube do směrů všech os? 
 • Consider using lines to vizialize 3D grid (Handles.DrawLine or ten vector helper, co používám v UFO)
 • Try slowmotion!
 • Měnící se směr gravitace!
