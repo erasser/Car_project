@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+
 // See UFO to implement touch
 // TODO: ► Process only if screen is touched? Přece musí jít ty eventy pověsit nějak na celý okno hry
 
@@ -8,6 +9,7 @@ public class TouchController : MonoBehaviour
     private static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
     private static TouchState _touchState = TouchState.NoTouch;
     private static ControllerState _controllerState = ControllerState.NoAction;
+    private static int _scrollValue;
     private static Vector3 _touchDownPosition;
     private static Vector3 _touchUpPosition;
     // private static bool _wasDownOnUI;
@@ -36,8 +38,9 @@ public class TouchController : MonoBehaviour
     void ProcessTouch()
     {
 
-        MouseDown();
-        MouseUp();
+        CheckMouseDown();
+        CheckMouseUp();
+        CheckScroll();
 
         // Now touching => orbit camera
         if (_touchState == TouchState.TouchedDown)
@@ -62,6 +65,11 @@ public class TouchController : MonoBehaviour
             }
         }
 
+        if (_scrollValue != 0)
+        {
+            OrbitCamera.Zoom(_scrollValue);
+        }
+
         if (_touchState == TouchState.TouchedUp)
         {
             // Finished touch without camera pan or rotation => raycast
@@ -79,10 +87,9 @@ public class TouchController : MonoBehaviour
     }
 
     // Is reset each frame
-    private void MouseDown()
+    private void CheckMouseDown()
     {
-        if (EventSystem.current.IsPointerOverGameObject())  // UI
-            return;
+        if (EventSystem.current.IsPointerOverGameObject()) return; // UI
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -93,7 +100,7 @@ public class TouchController : MonoBehaviour
     }
 
     // Is reset each frame
-    private void MouseUp()
+    private void CheckMouseUp()
     {
         if (Input.GetMouseButtonUp(0))
         {
@@ -102,8 +109,9 @@ public class TouchController : MonoBehaviour
         }
     }
 
-    // private Vector3 ScreenToScenePosition(Vector3 screenPosition)
-    // {
-    //     return new Vector3(diff.x, diff.z, 0);
-    // }
+    // TODO: Implement touchscreen control (like e.g. picture zoom works?)
+    private void CheckScroll()
+    {
+        _scrollValue = (int)Input.mouseScrollDelta.y;
+    }
 }

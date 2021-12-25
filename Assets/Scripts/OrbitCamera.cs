@@ -1,8 +1,5 @@
-using System;
-using System.IO.Enumeration;
-using System.Numerics;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations;
 using Vector3 = UnityEngine.Vector3;
 
 /// <summary>
@@ -12,14 +9,17 @@ using Vector3 = UnityEngine.Vector3;
 public class OrbitCamera : MonoBehaviour
 {
     public static OrbitCamera instance;
+    [SerializeField][Tooltip("Minimal pitch in degrees")]
+    private int minPitch = 5;  // Beware: Euler angles are clamped to [0, 360]
+    [SerializeField][Tooltip("Maximal pitch in degrees")]
+    private int maxPitch = 85;
     [SerializeField]
-    private int minPitch = 5;   // degrees  // TODO: Add comment for Unity editor
+    private int minZoom = 5;
     [SerializeField]
-    private int maxPitch = 85;  // degrees
+    private int maxZoom = 200;
     public static Camera cameraComponent;
     private static Transform _cameraTargetTransform;
     private static GameObject _watchedObject;
-    // TODO: Přidat automaticky <outline>
 
     void Start()
     {
@@ -29,6 +29,7 @@ public class OrbitCamera : MonoBehaviour
         transform.SetParent(_cameraTargetTransform, true);
         Orbit(Vector3.zero);  // To set initial pitch
         cameraComponent = GetComponent<Camera>();
+        gameObject.AddComponent<LookAtConstraint>().constraintActive = true;  // It works without source object, strange...
     }
 
     private void Update()
@@ -55,6 +56,14 @@ public class OrbitCamera : MonoBehaviour
         rot.z = 0;
         rot.x = Mathf.Clamp(rot.x, instance.minPitch, instance.maxPitch);
         _cameraTargetTransform.localEulerAngles = rot;
+    }
+
+    public static void Zoom(int zoomValue)  // -1 | 1 comes in
+    {
+        // var coefficient = - cameraComponent.transform.localPosition.z / instance.maxZoom;  // Could be used for faster zoom on higher distance
+
+        cameraComponent.transform.localPosition = new Vector3(0, 0,                 // z must be inverted, because it's supposed to be negative
+            Mathf.Clamp(cameraComponent.transform.localPosition.z + zoomValue * 5 /* * coefficient*/, - instance.maxZoom, - instance.minZoom));
     }
 
     /// <summary>
