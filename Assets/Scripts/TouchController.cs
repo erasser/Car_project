@@ -5,8 +5,7 @@ using UnityEngine.EventSystems;
 
 public class TouchController : MonoBehaviour
 {
-    private static Vector3 _touchPosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
-    private static Transform _cameraTargetTransform;
+    private static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
     private static TouchState _touchState = TouchState.NoTouch;
     private static ControllerState _controllerState = ControllerState.NoAction;
     private static Vector3 _touchDownPosition;
@@ -29,11 +28,6 @@ public class TouchController : MonoBehaviour
         Rotating
     }
 
-    void Start()
-    {
-        _cameraTargetTransform = GameObject.Find("cameraTarget").transform;
-    }
-
     void Update()
     {
         ProcessTouch();
@@ -48,34 +42,23 @@ public class TouchController : MonoBehaviour
         // Now touching => orbit camera
         if (_touchState == TouchState.TouchedDown)
         {
-            var diff = Input.mousePosition - _touchPosition;
+            var touchPositionDiff = Input.mousePosition - _lastMousePosition;
             // Now moving with touch
-            if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
+            if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
                 _controllerState = ControllerState.Rotating;
-
-                var rotationV3 = diff * Time.deltaTime * 16;
-                var yRot = rotationV3.x * Mathf.Cos(_cameraTargetTransform.localEulerAngles.x * 0.0174533f);  // Slower orbit speed when nearer to orbit pole
-
-                _cameraTargetTransform.Rotate(new Vector3(- rotationV3.y, yRot, 0));  // TODO: Move to TrackEditor? & set target to selection cube at start
-                // _cameraTargetTransform.Rotate(new Vector3(- rotationV3.y, rotationV3.x, 0));
-                var rot = _cameraTargetTransform.localEulerAngles;
-                rot.z = 0;
-                rot.x = Mathf.Clamp(rot.x, 5, 85);
-                _cameraTargetTransform.localEulerAngles = rot;
+                OrbitCamera.Orbit(touchPositionDiff);
             }
         }
         // Now double (or more) touching => pan camera      // TODO: Limit camera target position to grid bounds
         else if (_touchState == TouchState.DoubleTouch)
         {
-            var diff = Input.mousePosition - _touchPosition;
+            var touchPositionDiff = Input.mousePosition - _lastMousePosition;
             // Now moving with double touch
-            if (diff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
+            if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
                 _controllerState = ControllerState.Panning;
-            
-                var translationV3 = diff * Time.deltaTime * 24;
-                _cameraTargetTransform.Translate(new Vector3(- translationV3.x, - translationV3.y, 0), Space.Self);
+                OrbitCamera.Pan(touchPositionDiff);
             }
         }
 
@@ -84,7 +67,7 @@ public class TouchController : MonoBehaviour
             // Finished touch without camera pan or rotation => raycast
             if (_controllerState == ControllerState.NoAction && !_wasUpOnUI)
             {
-                TrackEditor.Instance.ProcessSimpleTouch();
+                TrackEditor.instance.ProcessSimpleTouch();
             }
             else
             {
@@ -92,7 +75,7 @@ public class TouchController : MonoBehaviour
             }
             _touchState = TouchState.NoTouch;
         }
-        _touchPosition = Input.mousePosition;
+        _lastMousePosition = Input.mousePosition;
     }
 
     // Is reset each frame

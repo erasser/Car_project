@@ -8,11 +8,6 @@ using UnityEngine;
 public class GridCube  // Can't be a struct, because reference type is needed
 {
     /// <summary>
-    ///     Coordinates of held object
-    /// </summary>
-    // public Coord coord;
-
-    /// <summary>
     ///     Position of the cube in world space
     /// </summary>
     public Vector3 position;

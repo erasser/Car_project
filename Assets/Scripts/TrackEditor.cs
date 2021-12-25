@@ -21,7 +21,7 @@ public class TrackEditor : MonoBehaviour
     private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
     [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
-    public static TrackEditor Instance;
+    public static TrackEditor instance;
     private static GameObject _selectionCube;
     private static readonly Dictionary<String, Color> SelectionCubeColors = new();
     private float _selectionCubeAlphaHalf;
@@ -40,7 +40,7 @@ public class TrackEditor : MonoBehaviour
 
     void Start()
     {
-        Instance = this;
+        instance = this;
 
         var ui = GameObject.Find("Canvas");
         ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveSelection);
@@ -81,7 +81,7 @@ public class TrackEditor : MonoBehaviour
 
     public void ProcessSimpleTouch()
     {
-        if (Physics.Raycast(_camera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
+        if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
         {
             if (!_selectedPart)
                 SelectPart(selectionHit.collider.gameObject);

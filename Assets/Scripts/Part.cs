@@ -19,6 +19,11 @@ public class Part : MonoBehaviour
         outlineComponent = GetComponent<Outline>();
     }
 
+    void OnDestroy()
+    {
+        OrbitCamera.CheckIfWatched(gameObject);
+    }
+
     public void Rotate()
     {
         // TODO: occupiedGridCubes.Clear();  // clear cubes.cs also  // See MovePartOnGrid()
@@ -114,7 +119,7 @@ public class Part : MonoBehaviour
     {
         return Grid3D.GetGridCubeAt(coordinates).GetPart();
     }
-
+    
     public void ApplyTransform()
     {
         // Check, if position & rotation can be applied
