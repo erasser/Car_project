@@ -20,6 +20,8 @@ public class TrackEditor : MonoBehaviour
     [SerializeField]
     private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
     [SerializeField]
+    private GameObject boundingBoxPrefab;    // Helper to show grid bounds
+    [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
     public static TrackEditor instance;
     private static GameObject _selectionCube;
@@ -76,7 +78,7 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.r,
                 _selectionCubeMaterial.color.g,
                 _selectionCubeMaterial.color.b,
-                Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf / 2 + _selectionCubeAlphaHalf / 2);
+                Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
     }
 
@@ -248,11 +250,11 @@ public class TrackEditor : MonoBehaviour
         // }
     }
 
-    static void SelectPart(GameObject part, bool afterAddPart = false)
+    static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
     {
         if (_selectedPart == part) return;
 
-        // TODO: UnselectPart()  ??
+        UnselectPart();
 
         _selectedPart = part;
         _selectedPartComponent = part.GetComponent<Part>();
@@ -270,7 +272,7 @@ public class TrackEditor : MonoBehaviour
             SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
     }
 
-    static void UnselectPart()
+    static void UnselectPart()  // Must reflect SelectPart()
     {
         if (!_selectedPart) return;
 
@@ -286,14 +288,18 @@ public class TrackEditor : MonoBehaviour
 
     static void TryUnselectPart()
     {
-        if (_selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
+        if (_canTransformBeApplied)
             UnselectPart();
         else
         {
+            
             // TODO: ► Blink red cube
         }
     }
 
+    /// <summary>
+    ///     Must be called after part position or rotation is changed.
+    /// </summary>
     public static void UpdateCanTransformBeApplied()
     {
         _canTransformBeApplied = true;

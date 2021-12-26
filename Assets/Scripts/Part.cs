@@ -9,7 +9,7 @@ public class Part : MonoBehaviour
     // public GridCube gridCube;           // The main GridCube, at which the part is held
     private Coord _gridLocalDimensions; // Count of GridCubes, that the part is going to occupy in local space, calculated just once
     public Coord gridWorldDimensions;   // Count of GridCubes, that the part is going to occupy in world space (but with local position), updated on rotation
-    public List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
+    public readonly List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
     private byte _rotation;             // 0, 1, 2, 3
     public Outline outlineComponent;
 

@@ -18,10 +18,6 @@ public struct Coord
 
     public static Coord zero = new(0, 0, 0);
 
-    public static int xCount = 8;
-    public static int yCount = 6;
-    public static int zCount = 6;
-
     public Coord(int xCoord, int yCoord, int zCoord)  // This automatically rounds a float down.
     {
         x = xCoord;
@@ -80,7 +76,7 @@ public struct Coord
 
     public Coord MoveRight()
     {
-        if (x < xCount - 1)
+        if (x < Grid3D.XCount - 1)
             ++x;
         return this;
     }
@@ -94,7 +90,7 @@ public struct Coord
     
     public Coord MoveUp()
     {
-        if (y < yCount - 1)
+        if (y < Grid3D.YCount - 1)
             ++y;
         return this;
     }
@@ -108,7 +104,7 @@ public struct Coord
 
     public Coord MoveFarther()
     {
-        if (z < zCount - 1)
+        if (z < Grid3D.ZCount - 1)
             ++z;
         return this;
     }

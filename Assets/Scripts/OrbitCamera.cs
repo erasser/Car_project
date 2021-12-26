@@ -9,6 +9,9 @@ using Vector3 = UnityEngine.Vector3;
 /// <para>
 ///     Usage: Add this script to a camera. Camera position z component is supposed to be negative.
 /// </para>
+/// <para>
+///     Does not allow camera roll.
+/// </para>
 /// </summary>
 
 public class OrbitCamera : MonoBehaviour

@@ -10,7 +10,12 @@ public class Grid3D : MonoBehaviour
     private GameObject gridCubeHelperPrefab;
     private static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
     private static GameObject _gridParent;
-    
+    public Dictionary<string, Vector3> bounds = new();
+    const int CubeSize = 20;
+    public const int XCount = 8;
+    public const int YCount = 6;
+    public const int ZCount = 6;
+
     void Awake()
     {
         Create();
@@ -18,35 +23,39 @@ public class Grid3D : MonoBehaviour
     
     private void Create()
     {
-        const int cubeSize = 20;
-
         // _origin = new Coord(Coord.xCount / 2, Coord.yCount / 2, Coord.zCount / 2);
 
         _gridParent = new GameObject("gridParent");
 
-        for (int x = 0; x < Coord.xCount; ++x)
+        for (int x = 0; x < XCount; ++x)
         {
             var yCubes = new List<List<GridCube>>();
-            for (int y = 0; y < Coord.yCount; ++y)
+            for (int y = 0; y < YCount; ++y)
             {
                 var xCubes = new List<GridCube>();
-                for (int z = 0; z < Coord.zCount; ++z)
+                for (int z = 0; z < ZCount; ++z)
                 {
                     var gridCube = new GridCube(new (
-                        x * cubeSize - Coord.xCount * cubeSize / 2,
-                        y * cubeSize - Coord.yCount * cubeSize / 2,
-                        z * cubeSize - Coord.zCount * cubeSize / 2), new Coord(x, y, z));
+                        x * CubeSize - XCount * CubeSize / 2f,
+                        y * CubeSize - YCount * CubeSize / 2f,
+                        z * CubeSize - ZCount * CubeSize / 2f),
+                        new Coord(x, y, z));
 
                     xCubes.Add(gridCube);
                     var cubeHelper = Instantiate(gridCubeHelperPrefab, _gridParent.transform);
                     cubeHelper.transform.SetParent(_gridParent.transform);
                     cubeHelper.transform.position = gridCube.position;
-                    cubeHelper.transform.localScale = new (cubeSize, cubeSize, cubeSize);
+                    cubeHelper.transform.localScale = new (CubeSize, CubeSize, CubeSize);
                 }
                 yCubes.Add(xCubes);
             }
             Grid.Add(yCubes);
         }
+
+        var bound = new Vector3(-CubeSize * XCount / 2f, -CubeSize * YCount / 2f, -CubeSize * ZCount / 2f);
+        bounds.Add("min", - bound);
+        bounds.Add("max", bound);
+
         Toggle();
     }
 
@@ -94,7 +103,7 @@ public class Grid3D : MonoBehaviour
     /// </summary>
     /// <param name="coordinates">Coordinates of initial cube (which is the closest and leftmost one)</param>
     /// <param name="countX">Count of cubes on X axis</param>
-    /// <param name="countZ">Count of cubes on X axis</param>
+    /// <param name="countZ">Count of cubes on Z axis</param>
     /// <returns>List of GridCubes</returns>
     public static List<GridCube> GetGridCubesInArea(Coord coordinates, int countX, int countZ)
     {
