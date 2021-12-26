@@ -20,9 +20,12 @@ public class TrackEditor : MonoBehaviour
     [SerializeField]
     private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
     [SerializeField]
+    private GameObject startArrowPrefab;
+    [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
     public static TrackEditor instance;
     private static GameObject _selectionCube;
+    private static GameObject _startArrow;
     private static readonly Dictionary<String, Color> SelectionCubeColors = new();
     private float _selectionCubeAlphaHalf;
     private static float _selectionCubeAlphaStartTime;
@@ -58,12 +61,14 @@ public class TrackEditor : MonoBehaviour
         SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
         SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
+        _startArrow = Instantiate(startArrowPrefab);
         _camera = GameObject.Find("cameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
         GenerateThumbnails();
         _selectionCube.SetActive(true);
         SetSelectionCoords(Coord.zero);
+        Grid3D.SetBoundingBox();
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
         OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 100);
         // _track = new GameObject("Track");
@@ -103,8 +108,8 @@ public class TrackEditor : MonoBehaviour
     
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
-        const int thumbSize = 128;   // TODO: Should be relative to screen size
-        const int thumbSpacing = 5;  // Total space between two thumbnails
+        const byte thumbSize = 120;   // TODO: Should be relative to screen size
+        const float thumbSpacing = 3.5f;  // Total space between two thumbnails
         var rectSize = new Vector2(thumbSize, thumbSize);  // How can I make it const?
 
         var partsInstance = Instantiate(partsPrefab);

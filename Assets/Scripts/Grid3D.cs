@@ -20,7 +20,7 @@ public class Grid3D : MonoBehaviour
 
     public static Grid3D instance;
     private static GameObject _boundingBox;
-    private static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
+    public static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
     private static GameObject _gridParent;
     // public Dictionary<string, Vector3> bounds = new();
 
@@ -28,7 +28,6 @@ public class Grid3D : MonoBehaviour
     {
         instance = this;
         Create();
-        SetBoundingBox();
     }
     
     private void Create()
@@ -147,11 +146,10 @@ public class Grid3D : MonoBehaviour
         return obj.transform.position = GetGridCubeAt(coordinates).position;
     }
 
-    private void SetBoundingBox()
+    public static void SetBoundingBox()
     {
-        _boundingBox = Instantiate(boundingBoxPrefab);
-        _boundingBox.transform.localScale = new Vector3((xCount - 2) * CubeSize, (yCount - 2) * CubeSize, (zCount - 2) * CubeSize);
+        _boundingBox = Instantiate(instance.boundingBoxPrefab);
+        _boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
         _boundingBox.SetActive(true);
-
     }
 }
