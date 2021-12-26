@@ -65,6 +65,7 @@ public class TrackEditor : MonoBehaviour
         _selectionCube.SetActive(true);
         SetSelectionCoords(Coord.zero);
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
+        OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 100);
         // _track = new GameObject("Track");
     }
 
