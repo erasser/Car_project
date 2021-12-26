@@ -8,17 +8,27 @@ public class Grid3D : MonoBehaviour
 {
     [SerializeField]
     private GameObject gridCubeHelperPrefab;
+    [SerializeField]
+    private GameObject boundingBoxPrefab;    // Helper to show grid bounds
+    [SerializeField][Tooltip("Width cube count, must be in [3, 255]")]  // TODO: Make better serialized field (spinner?)
+    public byte xCount = 10;
+    [SerializeField][Tooltip("Height cube count, must be in [3, 255]")]
+    public byte yCount = 7;
+    [SerializeField][Tooltip("Depth cube count, must be in [3, 255]")]
+    public byte zCount = 8;
+    const byte CubeSize = 20;
+
+    public static Grid3D instance;
+    private static GameObject _boundingBox;
     private static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
     private static GameObject _gridParent;
-    public Dictionary<string, Vector3> bounds = new();
-    const int CubeSize = 20;
-    public const int XCount = 8;
-    public const int YCount = 6;
-    public const int ZCount = 6;
+    // public Dictionary<string, Vector3> bounds = new();
 
     void Awake()
     {
+        instance = this;
         Create();
+        SetBoundingBox();
     }
     
     private void Create()
@@ -27,18 +37,18 @@ public class Grid3D : MonoBehaviour
 
         _gridParent = new GameObject("gridParent");
 
-        for (int x = 0; x < XCount; ++x)
+        for (int x = 0; x < xCount; ++x)
         {
             var yCubes = new List<List<GridCube>>();
-            for (int y = 0; y < YCount; ++y)
+            for (int y = 0; y < yCount; ++y)
             {
                 var xCubes = new List<GridCube>();
-                for (int z = 0; z < ZCount; ++z)
+                for (int z = 0; z < zCount; ++z)
                 {
                     var gridCube = new GridCube(new (
-                        x * CubeSize - XCount * CubeSize / 2f,
-                        y * CubeSize - YCount * CubeSize / 2f,
-                        z * CubeSize - ZCount * CubeSize / 2f),
+                        CubeSize * (x  + .5f * (1 - xCount)),
+                        CubeSize * (y - yCount * .5f + .5f),
+                        CubeSize * (z - zCount * .5f + .5f)),
                         new Coord(x, y, z));
 
                     xCubes.Add(gridCube);
@@ -52,9 +62,9 @@ public class Grid3D : MonoBehaviour
             Grid.Add(yCubes);
         }
 
-        var bound = new Vector3(-CubeSize * XCount / 2f, -CubeSize * YCount / 2f, -CubeSize * ZCount / 2f);
-        bounds.Add("min", - bound);
-        bounds.Add("max", bound);
+        // var bound = new Vector3(-CubeSize * XCount / 2f, -CubeSize * YCount / 2f, -CubeSize * ZCount / 2f);
+        // bounds.Add("min", - bound);
+        // bounds.Add("max", bound);
 
         Toggle();
     }
@@ -135,5 +145,13 @@ public class Grid3D : MonoBehaviour
     public static Vector3 PositionToGrid(GameObject obj, Coord coordinates)
     {
         return obj.transform.position = GetGridCubeAt(coordinates).position;
+    }
+
+    private void SetBoundingBox()
+    {
+        _boundingBox = Instantiate(boundingBoxPrefab);
+        _boundingBox.transform.localScale = new Vector3((xCount - 2) * CubeSize, (yCount - 2) * CubeSize, (zCount - 2) * CubeSize);
+        _boundingBox.SetActive(true);
+
     }
 }

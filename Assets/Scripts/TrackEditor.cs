@@ -20,8 +20,6 @@ public class TrackEditor : MonoBehaviour
     [SerializeField]
     private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
     [SerializeField]
-    private GameObject boundingBoxPrefab;    // Helper to show grid bounds
-    [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
     public static TrackEditor instance;
     private static GameObject _selectionCube;

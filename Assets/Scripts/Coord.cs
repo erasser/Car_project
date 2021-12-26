@@ -76,7 +76,7 @@ public struct Coord
 
     public Coord MoveRight()
     {
-        if (x < Grid3D.XCount - 1)
+        if (x < Grid3D.instance.xCount - 1)
             ++x;
         return this;
     }
@@ -90,7 +90,7 @@ public struct Coord
     
     public Coord MoveUp()
     {
-        if (y < Grid3D.YCount - 1)
+        if (y < Grid3D.instance.yCount - 1)
             ++y;
         return this;
     }
@@ -104,7 +104,7 @@ public struct Coord
 
     public Coord MoveFarther()
     {
-        if (z < Grid3D.ZCount - 1)
+        if (z < Grid3D.instance.zCount - 1)
             ++z;
         return this;
     }
