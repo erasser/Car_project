@@ -11,6 +11,7 @@ public class Part : MonoBehaviour
     public Coord gridWorldDimensions;   // Count of GridCubes, that the part is going to occupy in world space (but with local position), updated on rotation
     public readonly List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
     private byte _rotation;             // 0, 1, 2, 3
+    [HideInInspector]
     public Outline outlineComponent;
 
     void Awake()
@@ -19,10 +20,10 @@ public class Part : MonoBehaviour
         outlineComponent = GetComponent<Outline>();
     }
 
-    void OnDestroy()
-    {
-        OrbitCamera.CheckIfWatched(gameObject);
-    }
+    // void OnDestroy()
+    // {
+    //     OrbitCamera.CheckIfWatched(gameObject);  // I don't use attaching camera target to parts
+    // }
 
     public void Rotate()
     {
@@ -94,13 +95,7 @@ public class Part : MonoBehaviour
     /// <returns>Target position</returns>
     public Vector3 MovePartOnGrid(Coord coordinates)
     {
-        // Clear cubes
-        foreach (var cube in occupiedGridCubes)
-        {
-            cube.UnsetPart(gameObject);
-        }
-
-        occupiedGridCubes.Clear();
+        ClearCubes();
 
         // Distribute the part over GridCubes
         var cubes = Grid3D.GetGridCubesInArea(coordinates, gridWorldDimensions.x, gridWorldDimensions.z);  // cubes at new position
@@ -120,10 +115,23 @@ public class Part : MonoBehaviour
         return Grid3D.GetGridCubeAt(coordinates).GetPart();
     }
     
-    public void ApplyTransform()
+    public void Delete()
     {
-        // Check, if position & rotation can be applied
-        // Then apply
-        // Or just return bool?
+        if (TrackEditor.selectedPart == gameObject)
+            TrackEditor.UnselectPart();
+
+        ClearCubes();
+        
+        Destroy(gameObject);
+    }
+
+    void ClearCubes()
+    {
+        foreach (var cube in occupiedGridCubes)
+        {
+            cube.UnsetPart(gameObject);
+        }
+
+        occupiedGridCubes.Clear();
     }
 }

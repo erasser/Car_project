@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -19,13 +20,13 @@ public class TrackEditor : MonoBehaviour
     private GameObject partsPrefab;
     [SerializeField]
     private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
-    [SerializeField]
-    private GameObject startArrowPrefab;
+    // [SerializeField]
+    // private GameObject vehicleControllerPrefab;
     [SerializeField]
     private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
     public static TrackEditor instance;
     private static GameObject _selectionCube;
-    private static GameObject _startArrow;
+    // private static GameObject _vehicleController;
     private static readonly Dictionary<String, Color> SelectionCubeColors = new();
     private float _selectionCubeAlphaHalf;
     private static float _selectionCubeAlphaStartTime;
@@ -35,7 +36,7 @@ public class TrackEditor : MonoBehaviour
     private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     private static GameObject _camera;
     private GameObject _ground;
-    private static GameObject _selectedPart;
+    public static GameObject selectedPart;
     private static Part _selectedPartComponent;
     private static bool _canTransformBeApplied;
 
@@ -52,8 +53,8 @@ public class TrackEditor : MonoBehaviour
         ui.transform.Find("buttonRight").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveSelection);
         ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        ui.transform.Find("buttonRotateRight").GetComponent<Button>().onClick.AddListener(RotatePart);
-        ui.transform.Find("buttonSelectOrApply").GetComponent<Button>().onClick.AddListener(SelectOrApply);
+        // ui.transform.Find("buttonRotateRight").GetComponent<Button>().onClick.AddListener(RotatePart);
+        ui.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
         
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
@@ -61,7 +62,7 @@ public class TrackEditor : MonoBehaviour
         SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
         SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
-        _startArrow = Instantiate(startArrowPrefab);
+        // _vehicleController = Instantiate(vehicleControllerPrefab);
         _camera = GameObject.Find("cameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
@@ -76,7 +77,7 @@ public class TrackEditor : MonoBehaviour
 
     private void Update()
     {
-        if (_selectedPart)
+        if (selectedPart)
             _selectionCubeMaterial.color = new Color(
                 _selectionCubeMaterial.color.r,
                 _selectionCubeMaterial.color.g,
@@ -89,12 +90,12 @@ public class TrackEditor : MonoBehaviour
     {
         if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
         {
-            if (!_selectedPart)
+            if (!selectedPart)
                 SelectPart(selectionHit.collider.gameObject);
             else
             {
                 // TODO: Check, is transformation can be applied, apply transform & select the part
-                if (selectionHit.collider.gameObject == _selectedPart)
+                if (selectionHit.collider.gameObject == selectedPart)
                     _selectedPartComponent.Rotate();
                 else
                     SelectPart(selectionHit.collider.gameObject);
@@ -172,7 +173,15 @@ public class TrackEditor : MonoBehaviour
     {
         var buttonNameParsed = EventSystem.current.currentSelectedGameObject.name.Split('_');
         int partNo = int.Parse(buttonNameParsed[1]);
-        var newPart = Instantiate(_partsCategory0.GetChild(partNo)).gameObject;
+        var partFromChildren = _partsCategory0.GetChild(partNo);
+
+        if (selectedPart)
+        {
+            if (partFromChildren.CompareTag(selectedPart.tag)) return;  // Don't do anything if selected and new part are the same one
+            selectedPart.GetComponent<Part>().Delete();                 // Selected part is going to be replaced by the new one
+        }
+
+        var newPart = Instantiate(partFromChildren).gameObject;
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
         SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
@@ -209,7 +218,7 @@ public class TrackEditor : MonoBehaviour
             coords = _selectionCubeCoords.MoveFarther();
         }
 
-        if (_selectedPart)  // Move selected part if any
+        if (selectedPart)  // Move selected part if any
             _selectedPartComponent.MovePartOnGrid(coords);
 
         SetSelectionCoords(coords);
@@ -241,25 +250,33 @@ public class TrackEditor : MonoBehaviour
         part.GetComponent<Part>().Rotate();
     }
 
-    void SelectOrApply()
+    void Play()
     {
-        // if (selectedPart)  // Transform mode => apply
-        //     selectedPart.GetComponent<Part>().ApplyTransform();
-        // else     // Selection mode => Try to select
-        // {
-        //     var part = Part.GetPartAtCoords(_selectionCubeCoords);
-        //     if (part)
-        //         selectedPart = part;
-        // }
+        var start = GameObject.FindWithTag("partStart");
+
+        if (!start)
+        {
+            Debug.LogWarning("There is no start!");
+            return;
+        }
+
+        // GameObject.Find("Vehicle5(drift)").SetActive(true);
+        // _vehicleController.SetActive(true);
+        // GameObject.Find("Control").GetComponent<MSSceneControllerFree>().enabled = true;
+        
+        // var vehicle = GameObject.Find("Vehicle3");
+        // vehicle.transform.rotation = start.transform.rotation;
+        // vehicle.transform.position = new Vector3(start.transform.position.x, start.transform.position.y + 4, start.transform.position.z);
+
     }
 
     static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
     {
-        if (_selectedPart == part) return;
+        if (selectedPart == part) return;
 
         UnselectPart();
 
-        _selectedPart = part;
+        selectedPart = part;
         _selectedPartComponent = part.GetComponent<Part>();
 
         _selectedPartComponent.outlineComponent.enabled = true;
@@ -275,14 +292,14 @@ public class TrackEditor : MonoBehaviour
             SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
     }
 
-    static void UnselectPart()  // Must reflect SelectPart()
+    public static void UnselectPart()  // Must reflect SelectPart()
     {
-        if (!_selectedPart) return;
+        if (!selectedPart) return;
 
         SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
         _selectedPartComponent.outlineComponent.enabled = false;
 
-        _selectedPart = null;
+        selectedPart = null;
         _selectedPartComponent = null;  // for sure
         _selectionCube.transform.parent = null;
         _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);

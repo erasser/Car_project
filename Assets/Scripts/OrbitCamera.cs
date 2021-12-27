@@ -49,7 +49,8 @@ public class OrbitCamera : MonoBehaviour
     public static void Pan(Vector3 touchPositionDiff)
     {
         var translationV3 = touchPositionDiff * Time.deltaTime * 24;
-        var newPosition = _cameraTargetTransform.position - translationV3;
+        // var newPosition = _cameraTargetTransform.position - translationV3;
+        var newPosition = _cameraTargetTransform.position - _cameraTargetTransform.TransformDirection(translationV3);
 
         newPosition.x = Mathf.Clamp(newPosition.x, Grid3D.Grid[0][0][0].position.x, Grid3D.Grid[Grid3D.instance.xCount - 1][Grid3D.instance.yCount - 1][Grid3D.instance.zCount - 1].position.x);
         newPosition.y = Mathf.Clamp(newPosition.y, Grid3D.Grid[0][0][0].position.y, Grid3D.Grid[Grid3D.instance.xCount - 1][Grid3D.instance.yCount - 1][Grid3D.instance.zCount - 1].position.y);

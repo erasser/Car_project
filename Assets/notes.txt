@@ -1,5 +1,6 @@
 ﻿Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
 
+• Pokročilé možnosti editace - hromadné selectování a úpravy
 • Udělat viditelnou řadu kostek od selectedCube do směrů všech os? 
 • Consider using lines to vizialize 3D grid (Handles.DrawLine or ten vector helper, co používám v UFO)
 • Try slowmotion!
@@ -10,3 +11,19 @@
 • voda? Při vyšší rychlosti by auto mohlo dělat žabky, při nožší se potopit
 • Multiplayer (online + local), online žebříčky a sdílení tratí
 • počasí \m/
+
+
+info: nejdřív enable vehicle, potom control
+
+wrong placement blinking
+
+limit camera target position (use grid bounds)
+
+implement start & finish
+
+add part delete
+
+hold part to delete? hold part to force to replace?
+
+ROTATE ARROWS WITH CAMERA!
+new 3D UI
