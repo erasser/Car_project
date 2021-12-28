@@ -16,27 +16,33 @@ using Vector3 = UnityEngine.Vector3;
 
 public class OrbitCamera : MonoBehaviour
 {
-    public static OrbitCamera instance;
-    [SerializeField][Tooltip("Minimal pitch in degrees")]
+    private static OrbitCamera _instance;
+    [SerializeField]    [Range(0, 90)]      [Tooltip("Minimal pitch in degrees")]
     private int minPitch = 5;  // Beware: Euler angles are clamped to [0, 360]
-    [SerializeField][Tooltip("Maximal pitch in degrees")]
+    [SerializeField]    [Range(0, 90)]      [Tooltip("Maximal pitch in degrees")]
     private int maxPitch = 85;
-    [SerializeField]
+    [SerializeField]    [Range(0, 10000)]   [Tooltip("Minimal camera distance in scene units")]
     private int minZoom = 5;
-    [SerializeField]
+    [SerializeField]    [Range(0, 10000)]   [Tooltip("Maximal camera distance in scene units")]
     private int maxZoom = 200;
+    [SerializeField]    [Range(1, 255)]
+    private byte orbitSpeed = 10;
+    [SerializeField]    [Range(1, 255)]
+    private byte panSpeed = 16;
+    [SerializeField]                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
+    private GameObject uiRotateHorizontalUiElement;
     public static Camera cameraComponent;
-    private static Transform _cameraTargetTransform;
+    private static Transform _cameraTargetTransform;  // Should not be child of anything
     private static GameObject _watchedObject;
 
     void Awake()
     {
-        instance = this;
+        _instance = this;
         _cameraTargetTransform = new GameObject("cameraTarget").transform;
         _cameraTargetTransform.Translate(0, transform.position.y, 0);
         transform.SetParent(_cameraTargetTransform, true);
         gameObject.AddComponent<LookAtConstraint>().constraintActive = true;  // It works without source object, strange...
-        SetPitch(instance.minPitch);
+        SetPitch(_instance.minPitch);
         cameraComponent = GetComponent<Camera>();
     }
 
@@ -48,13 +54,14 @@ public class OrbitCamera : MonoBehaviour
 
     public static void Pan(Vector3 touchPositionDiff)
     {
-        var translationV3 = touchPositionDiff * Time.deltaTime * 24;
-        // var newPosition = _cameraTargetTransform.position - translationV3;
+        var translationV3 = touchPositionDiff * Time.deltaTime * _instance.panSpeed;
         var newPosition = _cameraTargetTransform.position - _cameraTargetTransform.TransformDirection(translationV3);
-
-        newPosition.x = Mathf.Clamp(newPosition.x, Grid3D.Grid[0][0][0].position.x, Grid3D.Grid[Grid3D.instance.xCount - 1][Grid3D.instance.yCount - 1][Grid3D.instance.zCount - 1].position.x);
-        newPosition.y = Mathf.Clamp(newPosition.y, Grid3D.Grid[0][0][0].position.y, Grid3D.Grid[Grid3D.instance.xCount - 1][Grid3D.instance.yCount - 1][Grid3D.instance.zCount - 1].position.y);
-        newPosition.z = Mathf.Clamp(newPosition.z, Grid3D.Grid[0][0][0].position.z, Grid3D.Grid[Grid3D.instance.xCount - 1][Grid3D.instance.yCount - 1][Grid3D.instance.zCount - 1].position.z);
+        var minPosition = Grid3D.Grid[0][0][0].position;
+        var maxPosition = Grid3D.Grid[Grid3D.instance.xCount - 1][Grid3D.instance.yCount - 1][Grid3D.instance.zCount - 1].position;
+        
+        newPosition.x = Mathf.Clamp(newPosition.x, minPosition.x, maxPosition.x);
+        newPosition.y = Mathf.Clamp(newPosition.y, minPosition.y, maxPosition.y);
+        newPosition.z = Mathf.Clamp(newPosition.z, minPosition.z, maxPosition.z);
 
         _cameraTargetTransform.position = newPosition;
     }
@@ -65,16 +72,11 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="touchPositionDiff">Should be <c>Input.mousePosition - lastMousePosition</c>.</param>
     public static void Orbit(Vector3 touchPositionDiff)
     {
-        var rotationV3 = touchPositionDiff * Time.deltaTime * 16;
+        var rotationV3 = touchPositionDiff * Time.deltaTime * _instance.orbitSpeed;
         // Slower orbit speed when nearer to orbit pole
-        var yRot = rotationV3.x * Mathf.Cos(_cameraTargetTransform.localEulerAngles.x * .0174533f);
+        var rotY = rotationV3.x * Mathf.Cos(_cameraTargetTransform.localEulerAngles.x * .0174533f);
 
-        _cameraTargetTransform.Rotate(new Vector3(- rotationV3.y, yRot, 0));
-        // _cameraTargetTransform.Rotate(new Vector3(- rotationV3.y, rotationV3.x, 0));
-        var rot = _cameraTargetTransform.localEulerAngles;
-        rot.z = 0;
-        rot.x = Mathf.Clamp(rot.x, instance.minPitch, instance.maxPitch);
-        _cameraTargetTransform.localEulerAngles = rot;
+        SetRotation(_cameraTargetTransform.localEulerAngles.x - rotationV3.y, _cameraTargetTransform.localEulerAngles.y + rotY);
     }
 
     /// <summary>
@@ -86,7 +88,7 @@ public class OrbitCamera : MonoBehaviour
         // var coefficient = - cameraComponent.transform.localPosition.z / instance.maxZoom;  // Could be used for faster zoom on higher distance
 
         cameraComponent.transform.localPosition = new Vector3(0, 0,                 // z must be inverted, because it's supposed to be negative
-            Mathf.Clamp(cameraComponent.transform.localPosition.z + zoomValue * 5 /* * coefficient*/, - instance.maxZoom, - instance.minZoom));
+            Mathf.Clamp(cameraComponent.transform.localPosition.z + zoomValue * 5 /* * coefficient*/, - _instance.maxZoom, - _instance.minZoom));
     }
 
     /// <summary>
@@ -132,17 +134,14 @@ public class OrbitCamera : MonoBehaviour
     /// <para>
     ///     y = yaw (horizontal position of camera)
     /// </para>
-    /// <param name="rotation">Rotation vector. Vector z component is ignored.</param>
-    public static void SetRotation(Vector3 rotation)
+    /// <param name="pitch">Pitch angle in degrees</param>
+    /// <param name="yaw">Yaw angle in degrees</param>
+    public static void SetRotation(float pitch, float yaw)
     {
-        if (rotation.x < instance.minPitch || rotation.x > instance.maxPitch)
-        {
-            var oldRotX = rotation.x;
-            rotation.x = Mathf.Clamp(oldRotX, instance.minPitch, instance.maxPitch);
-            Debug.LogWarning($"Rotation x = {oldRotX} is out of pitch limits [{instance.minPitch}, {instance.maxPitch}]. Value was clamped to x = {rotation.x}");
-        }
+        pitch = Mathf.Clamp(pitch, _instance.minPitch, _instance.maxPitch);
+        _cameraTargetTransform.eulerAngles = new Vector3(pitch, yaw, 0);
 
-        _cameraTargetTransform.eulerAngles = new Vector3(rotation.x, rotation.y, 0);
+        UpdateRotateHorizontalUiElement();
     }
 
     /// <summary>
@@ -151,14 +150,7 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="pitch">Pitch value in degrees, will be clamped between minPitch and maxPitch value.</param>
     public static void SetPitch(float pitch)
     {
-        if (pitch < instance.minPitch || pitch > instance.maxPitch)
-        {
-            var oldRotX = pitch;
-            pitch = Mathf.Clamp(oldRotX, instance.minPitch, instance.maxPitch);
-            Debug.LogWarning($"Rotation pitch = {oldRotX} is out of pitch limits [{instance.minPitch}, {instance.maxPitch}]. Value was clamped to x = {pitch}");
-        }
-
-        _cameraTargetTransform.eulerAngles = new Vector3(pitch, _cameraTargetTransform.eulerAngles.y, 0);
+        SetRotation(pitch, _cameraTargetTransform.eulerAngles.y);
     }
 
     /// <summary>
@@ -167,7 +159,7 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="yaw">Yaw value in degrees.</param>
     public static void SetYaw(float yaw)
     {
-        _cameraTargetTransform.eulerAngles = new Vector3(_cameraTargetTransform.eulerAngles.x, yaw, 0);
+        SetRotation(_cameraTargetTransform.eulerAngles.x, yaw);
     }
 
     /// <summary>
@@ -182,11 +174,11 @@ public class OrbitCamera : MonoBehaviour
             return;
         }
 
-        if (distance < instance.minZoom || distance > instance.maxZoom)
+        if (distance < _instance.minZoom || distance > _instance.maxZoom)
         {
             var oldDistance = distance;
-            distance = Mathf.Clamp(oldDistance, instance.minZoom, instance.maxZoom);
-            Debug.LogWarning($"Distance = {oldDistance} is out of zoom limits [{instance.minZoom}, {instance.maxZoom}]. Value was clamped to distance = {distance}");
+            distance = Mathf.Clamp(oldDistance, _instance.minZoom, _instance.maxZoom);
+            Debug.LogWarning($"Distance = {oldDistance} is out of zoom limits [{_instance.minZoom}, {_instance.maxZoom}]. Value was clamped to distance = {distance}");
         }
 
         cameraComponent.transform.localPosition = new Vector3(0, 0, - distance);
@@ -195,13 +187,23 @@ public class OrbitCamera : MonoBehaviour
     public static void Set(Vector3 targetPosition, float pitch, float yaw)
     {
         LookAtV3(targetPosition);
-        SetPitch(pitch);
-        SetYaw(yaw);
+        SetRotation(pitch, yaw);
     }
 
     public static void Set(Vector3 targetPosition, float pitch, float yaw, float distance)
     {
         Set(targetPosition, pitch, yaw);
         SetDistance(distance);
+    }
+
+    /// <summary>
+    ///     Aligns Y rotation with camera Y rotation
+    /// </summary>
+    /// <param name="rotY">Camera Y rotation component</param>
+    static void UpdateRotateHorizontalUiElement()
+    {
+        if (_instance.uiRotateHorizontalUiElement)
+            _instance.uiRotateHorizontalUiElement.transform.localEulerAngles = new Vector3(0, - _cameraTargetTransform.localEulerAngles.y, 0);
+        // _instance.uiRotateHorizontalUiElement.transform.Rotate(Vector3.up, oldRotY - rotY);  // rotate relatively
     }
 }

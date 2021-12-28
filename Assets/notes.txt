@@ -1,4 +1,6 @@
-﻿Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
+﻿► Render object on top: https://answers.unity.com/questions/17841/always-render-a-object-on-top-of-another.html
+
+Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
 
 • Pokročilé možnosti editace - hromadné selectování a úpravy
 • Udělat viditelnou řadu kostek od selectedCube do směrů všech os? 

@@ -1,11 +1,22 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+/// <summary>
+///     To be attached to anything (e.g. GameController)
+/// </summary>
+
 // See UFO to implement touch
 // TODO: ► Process only if screen is touched? Přece musí jít ty eventy pověsit nějak na celý okno hry
 
 public class TouchController : MonoBehaviour
 {
+    [SerializeField]
+    private bool use3DUiToo = true;
+    [SerializeField]
+    private GameObject cameraUi;
+    public static Camera cameraUiComponent;
+    [SerializeField]
+    private LayerMask selectableUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
     private static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
     private static TouchState _touchState = TouchState.NoTouch;
     private static ControllerState _controllerState = ControllerState.NoAction;
@@ -32,6 +43,11 @@ public class TouchController : MonoBehaviour
         Rotating
     }
 
+    void Start()
+    {
+        cameraUiComponent = cameraUi.GetComponent<Camera>();
+    }
+
     void Update()
     {
         ProcessTouch();
@@ -39,19 +55,26 @@ public class TouchController : MonoBehaviour
     
     void ProcessTouch()
     {
-
         CheckMouseDown();
         CheckMouseUp();
         CheckScroll();
+
+        var was3DUiIntersected = false;
+
+        if (use3DUiToo && _touchState == TouchState.TouchedDown) 
+        {
+            if (TrackEditor.instance.ProcessUiTouch(selectableUiObjectsLayer))
+                _touchState = TouchState.NoTouch;
+        }
 
         // Now touching => orbit camera
         if (_touchState == TouchState.TouchedDown)
         {
             _touchDuration += Time.deltaTime;  // Used to detect held touch
 
-            if (_touchDuration > 2)
+            if (_touchDuration > 2 && _controllerState == ControllerState.NoAction)
             {
-                _touchState = TouchState.HeldTouch;
+                _touchState = TouchState.HeldTouch;  // TODO: This may be redundant
                 if (TrackEditor.selectedPart)
                     TrackEditor.selectedPart.GetComponent<Part>().Delete();
             }
@@ -97,10 +120,12 @@ public class TouchController : MonoBehaviour
         _lastMousePosition = Input.mousePosition;
     }
 
-    // Is reset each frame
+    // Is reset each frame in ProcessTouch() when processed
     private void CheckMouseDown()
     {
-        if (EventSystem.current.IsPointerOverGameObject()) return; // UI - Při přechodu na nové 3D UI udělat na to metodu. Toto použít v metodě tady, komplexnější logiku v UI.cs
+        // UI - Při přechodu na nové 3D UI udělat na to metodu. Toto použít v metodě tady, komplexnější logiku v UI.cs
+        // UI elementům se dá vypnout Raycast target...
+        if (EventSystem.current.IsPointerOverGameObject()) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -113,7 +138,7 @@ public class TouchController : MonoBehaviour
         }
     }
 
-    // Is reset each frame
+    // Is reset each frame in ProcessTouch() when processed
     private void CheckMouseUp()
     {
         if (Input.GetMouseButtonUp(0))

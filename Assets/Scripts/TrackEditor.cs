@@ -39,7 +39,6 @@ public class TrackEditor : MonoBehaviour
     public static GameObject selectedPart;
     private static Part _selectedPartComponent;
     private static bool _canTransformBeApplied;
-
     // private GameObject _track;
 
     void Start()
@@ -47,12 +46,12 @@ public class TrackEditor : MonoBehaviour
         instance = this;
 
         var ui = GameObject.Find("Canvas");
-        ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        ui.transform.Find("buttonDown").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        ui.transform.Find("buttonLeft").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        ui.transform.Find("buttonRight").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        // ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        // ui.transform.Find("buttonDown").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        // ui.transform.Find("buttonLeft").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        // ui.transform.Find("buttonRight").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        // ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveSelection);
+        // ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveSelection);
         // ui.transform.Find("buttonRotateRight").GetComponent<Button>().onClick.AddListener(RotatePart);
         ui.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
         
@@ -66,10 +65,7 @@ public class TrackEditor : MonoBehaviour
         _camera = GameObject.Find("cameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
-        GenerateThumbnails();
-        _selectionCube.SetActive(true);
-        SetSelectionCoords(Coord.zero);
-        _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
+        GenerateThumbnails();  // Initialization process continues here
         // _track = new GameObject("Track");
     }
 
@@ -103,6 +99,16 @@ public class TrackEditor : MonoBehaviour
         {
             TryUnselectPart();
         }
+    }
+
+    public bool ProcessUiTouch(LayerMask selectableUiObjectsLayer)
+    {
+        if (Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))
+        {
+            MoveSelection(selectionHit.collider.name);
+            return true;
+        }
+        return false;
     }
     
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
@@ -167,7 +173,10 @@ public class TrackEditor : MonoBehaviour
         Grid3D.Toggle();  // Shows grid
         Grid3D.SetBoundingBox();
         GameObject.Find("ground").transform.position = new Vector3(0, Grid3D.Bounds["min"].y - .05f, 0);
-        OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
+        _selectionCube.SetActive(true);
+        SetSelectionCoords(Coord.zero);
+        // OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
+        _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
     }
 
     void AddPart()
@@ -189,32 +198,32 @@ public class TrackEditor : MonoBehaviour
         newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords);
     }
 
-    void MoveSelection()
+    void MoveSelection(string arrowName)
     {
-        var buttonName = EventSystem.current.currentSelectedGameObject.name;
+        // var buttonName = EventSystem.current.currentSelectedGameObject.name;
         var coords = new Coord();
 
-        if (buttonName == "buttonUp")
+        if (arrowName == "arrowUp")
         {
             coords = _selectionCubeCoords.MoveUp();
         }
-        else if (buttonName == "buttonDown")
+        else if (arrowName == "arrowDown")
         {
             coords = _selectionCubeCoords.MoveDown();
         }
-        else if (buttonName == "buttonLeft")
+        else if (arrowName == "arrowLeft")
         {
             coords = _selectionCubeCoords.MoveLeft();
         }
-        else if (buttonName == "buttonRight")
+        else if (arrowName == "arrowRight")
         {
             coords = _selectionCubeCoords.MoveRight();
         }
-        else if (buttonName == "buttonCloser")
+        else if (arrowName == "arrowFront")
         {
             coords = _selectionCubeCoords.MoveCloser();
         }
-        else if (buttonName == "buttonFarther")
+        else if (arrowName == "arrowBack")
         {
             coords = _selectionCubeCoords.MoveFarther();
         }
