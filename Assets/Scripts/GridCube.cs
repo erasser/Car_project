@@ -3,27 +3,27 @@ using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 /// <summary>
-///     Servers as objects holder
+///     Servers as objects holder.
 /// </summary>
 public class GridCube  // Can't be a struct, because reference type is needed
 {
     /// <summary>
-    ///     Position of the cube in world space
+    ///     Position of the cube in world space.
     /// </summary>
     public Vector3 position;
 
     /// <summary>
-    ///     Coordinates of the cube - just for debug at the moment
+    ///     Coordinates of the cube - just for debug at the moment.
     /// </summary>
     public Coord coordinates;
     
     /// <summary>
-    ///     List of part objects
+    ///     List of part objects.
     /// </summary>
     public List<GameObject> parts;
 
     /// <summary>
-    ///     List of coordinates of adjacent cubes, which the held object also occupies
+    ///     List of coordinates of adjacent cubes, which the held object also occupies.
     /// </summary>
     public List<Coord> adjacentCoords;  // If i use this, change the name accordingly to Parts.cs gridCubes var
 

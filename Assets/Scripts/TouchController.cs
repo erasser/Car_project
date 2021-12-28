@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 /// <summary>
-///     To be attached to anything (e.g. GameController)
+///     Can be attached to anything (e.g. GameController).
 /// </summary>
 
 // See UFO to implement touch
@@ -13,8 +13,8 @@ public class TouchController : MonoBehaviour
     [SerializeField]
     private bool use3DUiToo = true;
     [SerializeField]
-    private GameObject cameraUi;
-    public static Camera cameraUiComponent;
+    private GameObject cameraUi;                // TODO: Show only if use3DUiToo = true
+    public static Camera cameraUiComponent;     // TODO: Show only if use3DUiToo = true
     [SerializeField]
     private LayerMask selectableUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
     private static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
@@ -59,9 +59,7 @@ public class TouchController : MonoBehaviour
         CheckMouseUp();
         CheckScroll();
 
-        var was3DUiIntersected = false;
-
-        if (use3DUiToo && _touchState == TouchState.TouchedDown) 
+        if (use3DUiToo && _touchState == TouchState.TouchedDown && _controllerState == ControllerState.NoAction) 
         {
             if (TrackEditor.instance.ProcessUiTouch(selectableUiObjectsLayer))
                 _touchState = TouchState.NoTouch;
@@ -107,7 +105,7 @@ public class TouchController : MonoBehaviour
         if (_touchState == TouchState.TouchedUp)
         {
             // Finished touch without camera pan or rotation => raycast
-            if (_controllerState == ControllerState.NoAction && !_wasUpOnUI)
+            if (_controllerState == ControllerState.NoAction && !_wasUpOnUI)  // TODO: Nedalo by se to spojit s předešlou podmínkou?
             {
                 TrackEditor.instance.ProcessSimpleTouch();
             }

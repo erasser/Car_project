@@ -175,7 +175,7 @@ public class TrackEditor : MonoBehaviour
         GameObject.Find("ground").transform.position = new Vector3(0, Grid3D.Bounds["min"].y - .05f, 0);
         _selectionCube.SetActive(true);
         SetSelectionCoords(Coord.zero);
-        // OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
+        OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
     }
 
@@ -234,9 +234,6 @@ public class TrackEditor : MonoBehaviour
         SetSelectionCoords(coords);
     }
 
-    /// <summary>
-    ///     Needed for the state when no part is selected 
-    /// </summary>
     static void SetSelectionCoords(Coord coords)
     {
         _selectionCubeCoords = coords;

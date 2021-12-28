@@ -5,12 +5,14 @@ using Vector3 = UnityEngine.Vector3;
 // TODO: Limit serialized fields values (pitch [-90, 90], distance: positive values), allow to disable pitch limiting) 
 
 /// <summary>
-///     Creates the camera target, positions it to the same height as the camera has, attaches the camera to the target, sets the min pitch value
+/// <para>
+///     Creates the camera target, positions it to the same height as the camera has, attaches the camera to the target, sets the min pitch value. Does not allow camera roll.
+/// </para>
 /// <para>
 ///     Usage: Add this script to a camera. Camera position z component is supposed to be negative.
 /// </para>
 /// <para>
-///     Does not allow camera roll.
+///     Can be initialized with Set().
 /// </para>
 /// </summary>
 
@@ -42,7 +44,7 @@ public class OrbitCamera : MonoBehaviour
         _cameraTargetTransform.Translate(0, transform.position.y, 0);
         transform.SetParent(_cameraTargetTransform, true);
         gameObject.AddComponent<LookAtConstraint>().constraintActive = true;  // It works without source object, strange...
-        SetPitch(_instance.minPitch);
+        SetPitch(_instance.minPitch);  // So the pitch limit is satisfied
         cameraComponent = GetComponent<Camera>();
     }
 
@@ -126,14 +128,16 @@ public class OrbitCamera : MonoBehaviour
     }
 
     /// <summary>
+    /// <para>
     ///     Sets rotation of camera target to absolute value.
-    /// </summary>
+    /// </para>
     /// <para>
     ///     x = pitch (vertical position of camera)
     /// </para>
     /// <para>
     ///     y = yaw (horizontal position of camera)
     /// </para>
+    /// </summary>
     /// <param name="pitch">Pitch angle in degrees</param>
     /// <param name="yaw">Yaw angle in degrees</param>
     public static void SetRotation(float pitch, float yaw)
