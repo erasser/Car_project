@@ -14,13 +14,15 @@ public class TouchController : MonoBehaviour
     private static Vector3 _touchUpPosition;
     // private static bool _wasDownOnUI;
     private static bool _wasUpOnUI;
+    private float _touchDuration;
 
     enum TouchState
     {
         NoTouch,
         TouchedDown,
         TouchedUp,
-        DoubleTouch
+        DoubleTouch,  // two fingers
+        HeldTouch
     }
 
     enum ControllerState
@@ -45,6 +47,15 @@ public class TouchController : MonoBehaviour
         // Now touching => orbit camera
         if (_touchState == TouchState.TouchedDown)
         {
+            _touchDuration += Time.deltaTime;  // Used to detect held touch
+
+            if (_touchDuration > 2)
+            {
+                _touchState = TouchState.HeldTouch;
+                if (TrackEditor.selectedPart)
+                    TrackEditor.selectedPart.GetComponent<Part>().Delete();
+            }
+
             var touchPositionDiff = Input.mousePosition - _lastMousePosition;
             // Now moving with touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
@@ -89,14 +100,17 @@ public class TouchController : MonoBehaviour
     // Is reset each frame
     private void CheckMouseDown()
     {
-        if (EventSystem.current.IsPointerOverGameObject()) return; // UI
+        if (EventSystem.current.IsPointerOverGameObject()) return; // UI - Při přechodu na nové 3D UI udělat na to metodu. Toto použít v metodě tady, komplexnější logiku v UI.cs
 
         if (Input.GetMouseButtonDown(0))
         {
             _touchState = TouchState.TouchedDown;
         }
+
         if (Input.GetMouseButtonDown(1) && _touchState == TouchState.TouchedDown)
-            _touchState = TouchState.DoubleTouch;                                   // Need to press LMB, then RMB
+        {
+            _touchState = TouchState.DoubleTouch; // Need to press LMB, then RMB
+        }
     }
 
     // Is reset each frame
@@ -106,6 +120,7 @@ public class TouchController : MonoBehaviour
         {
             _touchState = TouchState.TouchedUp;
             _wasUpOnUI = EventSystem.current.IsPointerOverGameObject();
+            _touchDuration = 0;
         }
     }
 

@@ -320,7 +320,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &3388661785778192019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -487,7 +486,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!1001 &459352624739372235
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -640,7 +638,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!1001 &532874227279700427
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -764,7 +761,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &7680014367748695671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -925,7 +921,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!4 &1040847244958843050 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7e469a29f70277944827b7e7b6875f62,
@@ -1069,7 +1064,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &5737599526641624697
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1166,6 +1160,11 @@ PrefabInstance:
       propertyPath: m_TagString
       value: partStart
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 0084d0a922e159b4d9c91f1f6b746846,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0084d0a922e159b4d9c91f1f6b746846, type: 3}
 --- !u!4 &1274137246068070341 stripped
@@ -1207,7 +1206,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &8356986998704071785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1368,7 +1366,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!4 &1998200530063145286 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 839d45fec1153ac4088fff78419b1d5e,
@@ -1521,7 +1518,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!4 &4524359482673494237 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b419dc11ded52c2479ab35c31c97b3cb,
@@ -1645,7 +1641,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &3392566225141370631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1811,7 +1806,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!4 &4114937320458792077 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 915f6402c8225864fb96afe518eaeffc,
@@ -1940,7 +1934,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &3034152484243863558
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2106,7 +2099,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!1001 &4876176858649542175
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2245,7 +2237,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &2703971480393574161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2392,7 +2383,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &5132636810537968785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2545,7 +2535,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &2105330710903461013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2698,7 +2687,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &5934295842006865532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2851,7 +2839,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &4319806618045254068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3004,7 +2991,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!114 &5800231693239629307
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3170,7 +3156,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineComponent: {fileID: 0}
-  prefabId: 0
 --- !u!4 &9149393688838414498 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0449bebc8fcd79c4da803e6ba25dc715,

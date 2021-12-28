@@ -69,9 +69,7 @@ public class TrackEditor : MonoBehaviour
         GenerateThumbnails();
         _selectionCube.SetActive(true);
         SetSelectionCoords(Coord.zero);
-        Grid3D.SetBoundingBox();
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
-        OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 100);
         // _track = new GameObject("Track");
     }
 
@@ -167,6 +165,9 @@ public class TrackEditor : MonoBehaviour
         cameraThumb.SetActive(false);
         _ground.SetActive(true);
         Grid3D.Toggle();  // Shows grid
+        Grid3D.SetBoundingBox();
+        GameObject.Find("ground").transform.position = new Vector3(0, Grid3D.Bounds["min"].y - .05f, 0);
+        OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
     }
 
     void AddPart()

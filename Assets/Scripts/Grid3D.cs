@@ -22,7 +22,7 @@ public class Grid3D : MonoBehaviour
     private static GameObject _boundingBox;
     public static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
     private static GameObject _gridParent;
-    // public Dictionary<string, Vector3> bounds = new();
+    public static readonly Dictionary<string, Vector3> Bounds = new();
 
     void Awake()
     {
@@ -61,9 +61,9 @@ public class Grid3D : MonoBehaviour
             Grid.Add(yCubes);
         }
 
-        // var bound = new Vector3(-CubeSize * XCount / 2f, -CubeSize * YCount / 2f, -CubeSize * ZCount / 2f);
-        // bounds.Add("min", - bound);
-        // bounds.Add("max", bound);
+        var bound = new Vector3(CubeSize * instance.xCount / 2f, CubeSize * instance.yCount / 2f, CubeSize * instance.zCount / 2f);
+        Bounds.Add("min", - bound);
+        Bounds.Add("max", bound);
 
         Toggle();
     }
