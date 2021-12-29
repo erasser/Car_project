@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -26,10 +27,24 @@ public class TouchController : MonoBehaviour
     // private static bool _wasDownOnUI;
     private static bool _wasUpOnUI;
     private float _touchDuration;
+
+#if UNITY_EDITOR    // for debug
     public string debugTouchState;
     public string debugControllerState;
+    private readonly Dictionary<TouchState, string> _touchStates = new() {
+        { TouchState.NoTouch, "no touch" },
+        { TouchState.TouchedDown, "touched down" },
+        { TouchState.TouchedUp, "touched up" },
+        { TouchState.DoubleTouch, "double touch" },
+        { TouchState.HeldTouch, "held touch" }};
+    private readonly Dictionary<ControllerState, string> _controllerStates = new() {
+        { ControllerState.NoAction, "no action" },
+        { ControllerState.Panning, "panning" },
+        { ControllerState.Orbiting, "orbiting" },
+        { ControllerState.Ui3DUsed, "UI 3D used" }};
+#endif
 
-    enum TouchState
+    enum TouchState         // All must be contained in _touchStates
     {
         NoTouch,
         TouchedDown,
@@ -38,11 +53,11 @@ public class TouchController : MonoBehaviour
         HeldTouch
     }
 
-    enum ControllerState
+    enum ControllerState    // All must be contained in _controllerStates
     {
         NoAction,
         Panning,
-        Rotating,
+        Orbiting,
         Ui3DUsed
     }
 
@@ -62,11 +77,17 @@ public class TouchController : MonoBehaviour
         CheckMouseUp();
         CheckScroll();
 
-        /*  PO ORBIT A PAN NEFUNGUJE 3D UI  */
-        
+#if UNITY_EDITOR
         DebugShowStates();
+#endif
 
-        // 3D UI touch
+        /*  Zoom  */
+        if (_scrollValue != 0)
+        {
+            OrbitCamera.Zoom(_scrollValue);
+        }
+
+        /*  3D UI touch  */
         if (use3DUiToo && _touchState == TouchState.TouchedDown && _controllerState == ControllerState.NoAction) 
         {
             if (TrackEditor.instance.ProcessUiTouch(selectableUiObjectsLayer))
@@ -76,18 +97,12 @@ public class TouchController : MonoBehaviour
             }
         }
 
-        // Reset states after using 3D UI (related to above condition)
-        if (use3DUiToo && _touchState == TouchState.TouchedUp && _controllerState == ControllerState.Ui3DUsed)
-        {
-            _controllerState = ControllerState.NoAction;
-            _touchState = TouchState.NoTouch;
-        }
-
-        // Now touching => orbit camera
+        /*  orbit camera */  // Now touching
         if (_touchState == TouchState.TouchedDown)
         {
             _touchDuration += Time.deltaTime;  // Used to detect held touch
 
+            /*  delete a part  */  // Now holding touch
             if (_touchDuration > 2 && _controllerState == ControllerState.NoAction)
             {
                 _touchState = TouchState.HeldTouch;  // TODO: This may be redundant
@@ -99,12 +114,12 @@ public class TouchController : MonoBehaviour
             // Now moving with touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
-                _controllerState = ControllerState.Rotating;
+                _controllerState = ControllerState.Orbiting;
                 OrbitCamera.Orbit(touchPositionDiff);
             }
         }
 
-        // Now double (or more) touching => pan camera      // TODO: Limit camera target position to grid bounds
+        /*  pan camera  */  // Now double (or more) touching
         if (_touchState == TouchState.DoubleTouch)
         {
             var touchPositionDiff = Input.mousePosition - _lastMousePosition;
@@ -116,31 +131,21 @@ public class TouchController : MonoBehaviour
             }
         }
 
-        // Reset states after orbit and pan  // TODO: Can be merged with "reset states after using 3D UI" (use3DUiToo is redundant there)
-        if (_touchState == TouchState.TouchedUp && (_controllerState == ControllerState.Rotating || _controllerState == ControllerState.Panning))
+        /*  Raycast to select part  */  // Finished touch without camera pan or rotation or use of UI (common or 3D)
+        if (_touchState == TouchState.TouchedUp /*&& _controllerState == ControllerState.NoAction*/)
         {
-            _controllerState = ControllerState.NoAction;
-            _touchState = TouchState.NoTouch;
-        }
-        
-        if (_scrollValue != 0)  // TODO: Put this at the end of this block
-        {
-            OrbitCamera.Zoom(_scrollValue);
-        }
-
-        if (_touchState == TouchState.TouchedUp && _controllerState == ControllerState.NoAction)
-        {
-            // Finished touch without camera pan or rotation => raycast
-            if (_controllerState == ControllerState.NoAction && !_wasUpOnUI)  // TODO: Nedalo by se to spojit s předešlou podmínkou?
+            if (!_wasUpOnUI && _controllerState == ControllerState.NoAction)
             {
                 TrackEditor.instance.ProcessSimpleTouch();
             }
             else
             {
+                /*  Reset states after orbit, pan or use of 3D UI  */
                 _controllerState = ControllerState.NoAction;
             }
             _touchState = TouchState.NoTouch;
         }
+
         _lastMousePosition = Input.mousePosition;
     }
 
@@ -179,28 +184,11 @@ public class TouchController : MonoBehaviour
         _scrollValue = (int)Input.mouseScrollDelta.y;
     }
 
+#if UNITY_EDITOR
     void DebugShowStates()
     {
-        if (_controllerState == ControllerState.NoAction)
-            debugControllerState = "no action";
-        else if (_controllerState == ControllerState.Panning)
-            debugControllerState = "panning";
-        else if (_controllerState == ControllerState.Rotating)
-            debugControllerState = "rotating";
-        else if (_controllerState == ControllerState.Ui3DUsed)
-            debugControllerState = "UI 3D used";
-        else debugControllerState = "";
-
-        if (_touchState == TouchState.NoTouch)
-            debugTouchState = "no touch";
-        else if (_touchState == TouchState.TouchedDown)
-            debugTouchState = "touch down";
-        else if (_touchState == TouchState.TouchedUp)
-            debugTouchState = "touch up";
-        else if (_touchState == TouchState.HeldTouch)
-            debugTouchState = "held touch";
-        else if (_touchState == TouchState.DoubleTouch)
-            debugTouchState = "double touch";
-        else debugTouchState = "";
+        debugTouchState = _touchStates[_touchState];
+        debugControllerState = _controllerStates[_controllerState];
     }
+#endif
 }

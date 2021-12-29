@@ -26,9 +26,9 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField]    [Range(0, 10000)]   [Tooltip("Minimal camera distance in scene units")]
     private int minZoom = 5;
     [SerializeField]    [Range(0, 10000)]   [Tooltip("Maximal camera distance in scene units")]
-    private int maxZoom = 200;
+    private int maxZoom = 300;
     [SerializeField]    [Range(1, 255)]
-    private byte orbitSpeed = 10;
+    private byte orbitSpeed = 16;
     [SerializeField]    [Range(1, 255)]
     private byte panSpeed = 16;
     [SerializeField]                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
