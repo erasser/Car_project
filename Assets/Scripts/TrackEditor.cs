@@ -80,6 +80,9 @@ public class TrackEditor : MonoBehaviour
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
     }
 
+    /// <summary>
+    ///     Processes selecting / unselecting of track parts.
+    /// </summary>
     public void ProcessSimpleTouch()
     {
         if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
@@ -101,6 +104,25 @@ public class TrackEditor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    ///     Processes long touch. 
+    /// </summary>
+    /// <returns>Was something deleted?</returns>
+    public bool ProcessHeldTouch()
+    {
+        if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
+        {
+            selectionHit.collider.gameObject.GetComponent<Part>().Delete();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    ///     Processes 3D UI touch.
+    /// </summary>
+    /// <param name="selectableUiObjectsLayer">LayerMask, which 3D UI elements have.</param>
+    /// <returns>Was something moved?</returns>
     public bool ProcessUiTouch(LayerMask selectableUiObjectsLayer)
     {
         if (Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))

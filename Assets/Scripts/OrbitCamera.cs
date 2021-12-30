@@ -26,9 +26,9 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField]    [Range(0, 10000)]   [Tooltip("Minimal camera distance in scene units")]
     private int minZoom = 5;
     [SerializeField]    [Range(0, 10000)]   [Tooltip("Maximal camera distance in scene units")]
-    private int maxZoom = 300;
+    private int maxZoom = 400;
     [SerializeField]    [Range(1, 255)]
-    private byte orbitSpeed = 16;
+    private byte orbitSpeed = 20;
     [SerializeField]    [Range(1, 255)]
     private byte panSpeed = 16;
     [SerializeField]                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
@@ -75,10 +75,11 @@ public class OrbitCamera : MonoBehaviour
     public static void Orbit(Vector3 touchPositionDiff)
     {
         var rotationV3 = touchPositionDiff * Time.deltaTime * _instance.orbitSpeed;
-        // Slower orbit speed when nearer to orbit pole
-        var rotY = rotationV3.x * Mathf.Cos(_cameraTargetTransform.localEulerAngles.x * .0174533f);
+        var localEulerAngles = _cameraTargetTransform.localEulerAngles;
+                                    // ↓ Slower orbit speed when nearer to orbit pole
+        var rotY = rotationV3.x /* * Mathf.Cos(localEulerAngles.x * .0174533f)*/;
 
-        SetRotation(_cameraTargetTransform.localEulerAngles.x - rotationV3.y, _cameraTargetTransform.localEulerAngles.y + rotY);
+        SetRotation(localEulerAngles.x - rotationV3.y, localEulerAngles.y + rotY);
     }
 
     /// <summary>

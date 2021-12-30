@@ -11,6 +11,8 @@ using UnityEngine.EventSystems;
 
 public class TouchController : MonoBehaviour
 {
+    [SerializeField]    [Range(.01f, 5)]      [Tooltip("Interval in seconds, in which long touch event is fired (without touch dragging).")]
+    private float longTouchDuration = 2;
     [SerializeField]
     private bool use3DUiToo = true;
     [SerializeField]
@@ -41,7 +43,8 @@ public class TouchController : MonoBehaviour
         { ControllerState.NoAction, "no action" },
         { ControllerState.Panning, "panning" },
         { ControllerState.Orbiting, "orbiting" },
-        { ControllerState.Ui3DUsed, "UI 3D used" }};
+        { ControllerState.Ui3DUsed, "UI 3D used" },
+        { ControllerState.PartDeleted, "part deleted" }};
 #endif
 
     enum TouchState         // All must be contained in _touchStates
@@ -56,9 +59,10 @@ public class TouchController : MonoBehaviour
     enum ControllerState    // All must be contained in _controllerStates
     {
         NoAction,
-        Panning,
-        Orbiting,
-        Ui3DUsed
+        Panning,     // dragging with double touch
+        Orbiting,    // dragging with single touch
+        Ui3DUsed,
+        PartDeleted
     }
 
     void Start()
@@ -81,10 +85,11 @@ public class TouchController : MonoBehaviour
         DebugShowStates();
 #endif
 
-        /*  Zoom  */
+        /*  Zoom  */  // TODO: Implement for mobile
         if (_scrollValue != 0)
         {
             OrbitCamera.Zoom(_scrollValue);
+            return;
         }
 
         /*  3D UI touch  */
@@ -97,21 +102,25 @@ public class TouchController : MonoBehaviour
             }
         }
 
-        /*  orbit camera */  // Now touching
         if (_touchState == TouchState.TouchedDown)
         {
             _touchDuration += Time.deltaTime;  // Used to detect held touch
 
             /*  delete a part  */  // Now holding touch
-            if (_touchDuration > 2 && _controllerState == ControllerState.NoAction)
+            if (_touchDuration > longTouchDuration && _controllerState == ControllerState.NoAction)
             {
-                _touchState = TouchState.HeldTouch;  // TODO: This may be redundant
-                if (TrackEditor.selectedPart)
-                    TrackEditor.selectedPart.GetComponent<Part>().Delete();
+                _touchState = TouchState.HeldTouch;
+
+                if (TrackEditor.instance.ProcessHeldTouch())  // This approach deletes also unselected parts
+                    _controllerState = ControllerState.PartDeleted;
+                
+                // if (TrackEditor.selectedPart)  // This approach needs a part to be selected
+                //     TrackEditor.selectedPart.GetComponent<Part>().Delete();
             }
 
             var touchPositionDiff = Input.mousePosition - _lastMousePosition;
-            // Now moving with touch
+
+            /*  orbit camera */  // Now dragging with touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
                 _controllerState = ControllerState.Orbiting;
