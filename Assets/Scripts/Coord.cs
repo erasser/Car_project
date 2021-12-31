@@ -12,6 +12,7 @@
 /// </para>
 /// </summary>
 
+[Serializable]
 public struct Coord
 {
     public int x;

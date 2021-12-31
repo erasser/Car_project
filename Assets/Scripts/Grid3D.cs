@@ -152,4 +152,41 @@ public class Grid3D : MonoBehaviour
         _boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
         _boundingBox.SetActive(true);
     }
+    
+    /// <summary>
+    ///     Checks if cubes are valid
+    /// </summary>
+    // public static bool IsValid()
+    // {
+    //     foreach (var rowX in Grid)
+    //     {
+    //         foreach (var rowY in rowX)
+    //         {
+    //             foreach (var cube in rowY)
+    //             {
+    //                 if (!cube.IsValid())
+    //                     return false;
+    //             }
+    //         }
+    //     }
+    //     return true;
+    // }
+    
+    // public static List<GridCubeSaveData> GetOccupiedCubesSaveData()
+    // {
+    //     var cubesSaveData = new List<GridCubeSaveData>();
+    //
+    //     foreach (var rowX in Grid)
+    //     {
+    //         foreach (var rowY in rowX)
+    //         {
+    //             foreach (var cube in rowY)
+    //             {
+    //                 if (cube.ShouldBeSaved())
+    //                     cubesSaveData.Add(cube.GetGridCubeSaveData());
+    //             }
+    //         }
+    //     }
+    //     return cubesSaveData;
+    // }
 }

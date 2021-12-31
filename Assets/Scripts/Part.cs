@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 // using UnityEngine.UI;
@@ -146,7 +147,41 @@ public class Part : MonoBehaviour
         {
             cube.UnsetPart(gameObject);
         }
-
         occupiedGridCubes.Clear();
+    }
+
+    public static List<PartSaveData> GetPartsSaveData()
+    {
+        List<PartSaveData> partsSaveData = new();
+
+        foreach (Transform partTransform in TrackEditor.track.transform)
+        {
+            partsSaveData.Add(partTransform.GetComponent<Part>().GetPartSaveData());
+        }
+        return partsSaveData;
+    }
+
+    private PartSaveData GetPartSaveData()
+    {
+        return new PartSaveData(tag, _rotation, occupiedGridCubes);
+    }
+}
+
+[Serializable]
+public struct PartSaveData
+{
+    public string tag;
+    public byte rotation;
+    public List<Coord> occupiedGridCubesCoords;
+
+    public PartSaveData(string tag, byte rotation, List<GridCube> occupiedGridCubes)
+    {
+        this.tag = tag;
+        this.rotation = rotation;
+        occupiedGridCubesCoords = new();
+        foreach (GridCube cube in occupiedGridCubes)
+        {
+            occupiedGridCubesCoords.Add(cube.coordinates);
+        }
     }
 }

@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
 
@@ -38,22 +33,17 @@ public class TrackEditor : MonoBehaviour
     private GameObject _ground;
     public static GameObject selectedPart;
     private static Part _selectedPartComponent;
-    private static bool _canTransformBeApplied;
-    // private GameObject _track;
+    public static bool canTransformBeApplied;
+    public static GameObject track;
 
     void Start()
     {
         instance = this;
 
         var ui = GameObject.Find("Canvas");
-        // ui.transform.Find("buttonUp").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        // ui.transform.Find("buttonDown").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        // ui.transform.Find("buttonLeft").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        // ui.transform.Find("buttonRight").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        // ui.transform.Find("buttonCloser").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        // ui.transform.Find("buttonFarther").GetComponent<Button>().onClick.AddListener(MoveSelection);
-        // ui.transform.Find("buttonRotateRight").GetComponent<Button>().onClick.AddListener(RotatePart);
         ui.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
+        ui.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
+        ui.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
         
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
@@ -66,7 +56,7 @@ public class TrackEditor : MonoBehaviour
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
         GenerateThumbnails();  // Initialization process continues here
-        // _track = new GameObject("Track");
+        track = new GameObject("Track");
     }
 
     private void Update()
@@ -196,7 +186,7 @@ public class TrackEditor : MonoBehaviour
         Grid3D.SetBoundingBox();
         GameObject.Find("ground").transform.position = new Vector3(0, Grid3D.Bounds["min"].y - .05f, 0);
         _selectionCube.SetActive(true);
-        SetSelectionCoords(Coord.zero);
+        SetSelectionCoords(new Coord(1, 1, 1));
         OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
     }
@@ -213,7 +203,7 @@ public class TrackEditor : MonoBehaviour
             selectedPart.GetComponent<Part>().Delete();                 // Selected part is going to be replaced by the new one
         }
 
-        var newPart = Instantiate(partFromChildren).gameObject;
+        var newPart = Instantiate(partFromChildren, track.transform).gameObject;
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
         SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
@@ -337,7 +327,7 @@ public class TrackEditor : MonoBehaviour
 
     static void TryUnselectPart()
     {
-        if (_canTransformBeApplied)
+        if (canTransformBeApplied)
             UnselectPart();
         else
         {
@@ -351,13 +341,13 @@ public class TrackEditor : MonoBehaviour
     /// </summary>
     public static void UpdateCanTransformBeApplied()
     {
-        _canTransformBeApplied = true;
+        canTransformBeApplied = true;
 
         // Collides with another part?
         foreach (var cube in _selectedPartComponent.occupiedGridCubes)
         {
             if (cube.GetPartsCount() > 1)
-                _canTransformBeApplied = false;
+                canTransformBeApplied = false;
         }
         
         // Is out of grid bounds?
@@ -369,9 +359,15 @@ public class TrackEditor : MonoBehaviour
     public static void UpdateSelectionCubeColor()  // Called only when part is moved
     {
         // print(canTransformBeApplied);
-        if (_canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["selected"])
+        if (canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["selected"])
             _selectionCubeMaterial.color = SelectionCubeColors["selected"];
-        else if (!_canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
+        else if (!canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
             _selectionCubeMaterial.color = SelectionCubeColors["not allowed"];
+    }
+
+    static bool IsValidForPublish()
+    {
+        // TODO: Check if user finishes the track
+        return true;
     }
 }
