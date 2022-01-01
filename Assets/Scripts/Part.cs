@@ -138,8 +138,8 @@ public class Part : MonoBehaviour
             TrackEditor.UnselectPart();
 
         ClearCubes();
-        
         Destroy(gameObject);
+        TrackEditor.isStartPresent = false;
     }
 
     void ClearCubes()

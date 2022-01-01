@@ -18,23 +18,30 @@ public class TrackEditor : MonoBehaviour
     // private GameObject vehicleControllerPrefab;
     [SerializeField]
     LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
-    private static GameObject _partsInstance;
     public static TrackEditor instance;
-    static GameObject _selectionCube;
     // private static GameObject _vehicleController;
+    Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
+
+    /*  Editor objects  */
+    private static GameObject _partsInstance;
+    static Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
+    static GameObject _camera;
+    GameObject _ground;
+    public static GameObject track;
+
+    /*  Editor states  */      // Must be reset in ResetTrack()
+    public static bool canTransformBeApplied;
+    public static bool isStartPresent;
+
+    /*  Selection related  */
+    static GameObject _selectionCube;
     static readonly Dictionary<String, Color> SelectionCubeColors = new();
     float _selectionCubeAlphaHalf;
     static float _selectionCubeAlphaStartTime;
     static Material _selectionCubeMaterial;
     static Coord _selectionCubeCoords;
-    static Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
-    Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
-    static GameObject _camera;
-    GameObject _ground;
     public static GameObject selectedPart;
     static Part _selectedPartComponent;
-    public static bool canTransformBeApplied;
-    public static GameObject track;
 
     void Start()
     {
@@ -201,6 +208,18 @@ public class TrackEditor : MonoBehaviour
         }
 
         var newPart = Instantiate(partFromChildren, track.transform).gameObject;
+
+        if (newPart.CompareTag("partStart"))
+        {
+            if (isStartPresent)
+            {
+                // TODO: Show message to user
+                Debug.Log("Start already present!");
+                return;
+            }
+            isStartPresent = true;
+        }
+
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
         var partComponent = newPart.GetComponent<Part>();
@@ -359,13 +378,13 @@ public class TrackEditor : MonoBehaviour
     /// </summary>
     public static void GenerateLoadedTrack(List<PartSaveData> partsSaveData)
     {
-        ClearTrack();
+        ResetTrack();
 
         foreach (var partSaveData in partsSaveData)
             AddPart(partSaveData.partIndex, partSaveData.initialOccupiedGridCubeCoord);
     }
 
-    static void ClearTrack()
+    static void ResetTrack()
     {
         foreach (Transform partTransform in track.transform)
         {
@@ -383,6 +402,8 @@ public class TrackEditor : MonoBehaviour
 
         UpdateCanTransformBeApplied();
         UpdateSelectionCubeColor();
+
+        isStartPresent = false;
     }
     
     static bool IsValidForPublish()
