@@ -2,10 +2,7 @@
 
 /// <summary>
 /// <para>
-///     Used as grid indexes, hold integer values.
-/// </para>
-/// <para>
-///     Used also as a relative count of cubes, which each part occupy.
+///     Used as grid indexes (absolute or relative), hold integer values.
 /// </para>
 /// <para>
 ///     Floats are rounded down.
@@ -20,6 +17,7 @@ public struct Coord
     public int z;
 
     public static Coord zero = new(0, 0, 0);
+    public static Coord Null = new(2147483647, 2147483647, 2147483647);  // My dirty hack for null value
 
     public Coord(int xCoord, int yCoord, int zCoord)  // This automatically rounds a float down.
     {
@@ -44,6 +42,11 @@ public struct Coord
     public static Coord operator -(Coord coord1, Coord coord2)
     {
         return new Coord(coord1.x - coord2.x, coord1.y - coord2.y, coord1.z - coord2.z);
+    }
+
+    public bool IsNull()
+    {
+        return Equals(Null);
     }
 
     public int Get(string axis)

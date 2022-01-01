@@ -172,8 +172,8 @@ public class TrackEditor : MonoBehaviour
             rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
             rectTransform.sizeDelta = rectSize;
             // rectTransform.AddComponent<Outline>();  // TODO: Collides with Outline asset
-
-            buttonThumb.GetComponent<Button>().onClick.AddListener(AddPart);
+            int index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
+            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(index, Coord.Null);});
 
             ++i;
         }
@@ -190,13 +190,11 @@ public class TrackEditor : MonoBehaviour
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
     }
 
-    static void AddPart()
+    static void AddPart(int partIndex, Coord coords)
     {
-        var buttonNameParsed = EventSystem.current.currentSelectedGameObject.name.Split('_');
-        int partIndex = int.Parse(buttonNameParsed[1]);
         var partFromChildren = _partsCategory0.GetChild(partIndex);
 
-        if (selectedPart)
+        if (selectedPart)     // Doesn't apply when a track is loaded
         {
             if (partFromChildren.CompareTag(selectedPart.tag)) return;  // Don't do anything if selected and new part are the same one
             selectedPart.GetComponent<Part>().Delete();                 // Selected part is going to be replaced by the new one
@@ -205,51 +203,34 @@ public class TrackEditor : MonoBehaviour
         var newPart = Instantiate(partFromChildren, track.transform).gameObject;
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
-        SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
         var partComponent = newPart.GetComponent<Part>();
         partComponent.partIndex = partIndex;
-        partComponent.MovePartOnGrid(_selectionCubeCoords);
-    }
 
-    static void AddPartOfLoadedTrack(int partIndex, Coord coords)
-    {
-        var newPart = Instantiate(_partsCategory0.GetChild(partIndex).transform, track.transform).gameObject;
-        newPart.transform.localScale = new(2, 2, 2);
-        newPart.SetActive(true);
-        var partComponent = newPart.GetComponent<Part>();
-        partComponent.partIndex = partIndex;
+        if (coords.IsNull())  // The part is chosen by user
+        {
+            SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
+            coords = _selectionCubeCoords;
+        }
+
         partComponent.MovePartOnGrid(coords);
     }
 
     void MoveSelection(string arrowName)
     {
-        // var buttonName = EventSystem.current.currentSelectedGameObject.name;
         var coords = new Coord();
 
         if (arrowName == "arrowUp")
-        {
             coords = _selectionCubeCoords.MoveUp();
-        }
         else if (arrowName == "arrowDown")
-        {
             coords = _selectionCubeCoords.MoveDown();
-        }
         else if (arrowName == "arrowLeft")
-        {
             coords = _selectionCubeCoords.MoveLeft();
-        }
         else if (arrowName == "arrowRight")
-        {
             coords = _selectionCubeCoords.MoveRight();
-        }
         else if (arrowName == "arrowFront")
-        {
             coords = _selectionCubeCoords.MoveCloser();
-        }
         else if (arrowName == "arrowBack")
-        {
             coords = _selectionCubeCoords.MoveFarther();
-        }
 
         if (selectedPart)  // Move selected part if any
             _selectedPartComponent.MovePartOnGrid(coords);
@@ -381,7 +362,7 @@ public class TrackEditor : MonoBehaviour
         ClearTrack();
 
         foreach (var partSaveData in partsSaveData)
-            AddPartOfLoadedTrack(partSaveData.partIndex, partSaveData.initialOccupiedGridCubeCoord);
+            AddPart(partSaveData.partIndex, partSaveData.initialOccupiedGridCubeCoord);
     }
 
     static void ClearTrack()
