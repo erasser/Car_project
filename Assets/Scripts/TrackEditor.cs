@@ -6,33 +6,33 @@ using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
 
 // TODO: ► Svislý stín (vertikální světlo dolů)
-// TODO: ► Grid bounding box
 // TODO: Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 
 public class TrackEditor : MonoBehaviour
 {
     [SerializeField]
-    private GameObject partsPrefab;
+    GameObject partsPrefab;
     [SerializeField]
-    private GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
+    GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
     // [SerializeField]
     // private GameObject vehicleControllerPrefab;
     [SerializeField]
-    private LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
+    LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
+    private static GameObject _partsInstance;
     public static TrackEditor instance;
-    private static GameObject _selectionCube;
+    static GameObject _selectionCube;
     // private static GameObject _vehicleController;
-    private static readonly Dictionary<String, Color> SelectionCubeColors = new();
-    private float _selectionCubeAlphaHalf;
-    private static float _selectionCubeAlphaStartTime;
-    private static Material _selectionCubeMaterial;
-    private static Coord _selectionCubeCoords;
-    private Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
-    private Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
-    private static GameObject _camera;
-    private GameObject _ground;
+    static readonly Dictionary<String, Color> SelectionCubeColors = new();
+    float _selectionCubeAlphaHalf;
+    static float _selectionCubeAlphaStartTime;
+    static Material _selectionCubeMaterial;
+    static Coord _selectionCubeCoords;
+    static Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
+    Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
+    static GameObject _camera;
+    GameObject _ground;
     public static GameObject selectedPart;
-    private static Part _selectedPartComponent;
+    static Part _selectedPartComponent;
     public static bool canTransformBeApplied;
     public static GameObject track;
 
@@ -59,7 +59,7 @@ public class TrackEditor : MonoBehaviour
         track = new GameObject("Track");
     }
 
-    private void Update()
+    void Update()
     {
         if (selectedPart)
             _selectionCubeMaterial.color = new Color(
@@ -129,9 +129,8 @@ public class TrackEditor : MonoBehaviour
         const float thumbSpacing = 3.5f;  // Total space between two thumbnails
         var rectSize = new Vector2(thumbSize, thumbSize);  // How can I make it const?
 
-        var partsInstance = Instantiate(partsPrefab);
-        
-        _partsCategory0 = partsInstance.transform.Find("Category0").transform;
+        _partsInstance = Instantiate(partsPrefab);
+        _partsCategory0 = _partsInstance.transform.Find("Category0").transform;
         
         // Create a render texture for the camera
         var renderTexture = new RenderTexture(thumbSize, thumbSize, 16)
@@ -179,7 +178,7 @@ public class TrackEditor : MonoBehaviour
             ++i;
         }
 
-        partsInstance.SetActive(false);
+        _partsInstance.SetActive(false);
         cameraThumb.SetActive(false);
         _ground.SetActive(true);
         Grid3D.Toggle();  // Shows grid
@@ -191,7 +190,7 @@ public class TrackEditor : MonoBehaviour
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
     }
 
-    void AddPart()
+    static void AddPart()
     {
         var buttonNameParsed = EventSystem.current.currentSelectedGameObject.name.Split('_');
         int partNo = int.Parse(buttonNameParsed[1]);
@@ -208,6 +207,17 @@ public class TrackEditor : MonoBehaviour
         newPart.SetActive(true);
         SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
         newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords);
+    }
+
+    static Part AddPartOfLoadedTrack(string tagName, Coord coords)
+    {
+        var newPart = Instantiate(GameObject.FindGameObjectsWithTag(tagName)[0].transform, track.transform).gameObject;
+        newPart.transform.localScale = new(2, 2, 2);
+        newPart.SetActive(true);
+        var partComponent = newPart.GetComponent<Part>();
+        partComponent.MovePartOnGrid(coords);
+
+        return partComponent;
     }
 
     void MoveSelection(string arrowName)
@@ -266,7 +276,7 @@ public class TrackEditor : MonoBehaviour
         if (!part) return;
         
         // old code...
-        part.GetComponent<Part>().Rotate();
+        part.Rotate();
     }
 
     void Play()
@@ -313,6 +323,8 @@ public class TrackEditor : MonoBehaviour
 
     public static void UnselectPart()  // Must reflect SelectPart()
     {
+        _selectionCubeMaterial.color = SelectionCubeColors["unselected"];
+
         if (!selectedPart) return;
 
         SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
@@ -322,7 +334,6 @@ public class TrackEditor : MonoBehaviour
         _selectedPartComponent = null;  // for sure
         _selectionCube.transform.parent = null;
         _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
-        _selectionCubeMaterial.color = SelectionCubeColors["unselected"];
     }
 
     static void TryUnselectPart()
@@ -341,30 +352,63 @@ public class TrackEditor : MonoBehaviour
     /// </summary>
     public static void UpdateCanTransformBeApplied()
     {
-        canTransformBeApplied = true;
+        if (!selectedPart) return;  // The state when parts are being added to the scene, after a track is loaded
 
-        // Collides with another part?
-        foreach (var cube in _selectedPartComponent.occupiedGridCubes)
-        {
-            if (cube.GetPartsCount() > 1)
-                canTransformBeApplied = false;
-        }
-        
-        // Is out of grid bounds?
-        // TODO
-        
+        canTransformBeApplied = GridCube.AreCubesValid(_selectedPartComponent.occupiedGridCubes);
+
         UpdateSelectionCubeColor();
     }
 
-    public static void UpdateSelectionCubeColor()  // Called only when part is moved
+    static void UpdateSelectionCubeColor()  // Called when a part is moved or a track is loaded // TODO: Should be called also when part is rotated
     {
-        // print(canTransformBeApplied);
-        if (canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["selected"])
+        if (!selectedPart) {
+            _selectionCubeMaterial.color = SelectionCubeColors["unselected"];}
+        else if (canTransformBeApplied)
+        {
             _selectionCubeMaterial.color = SelectionCubeColors["selected"];
-        else if (!canTransformBeApplied && _selectionCubeMaterial.color != SelectionCubeColors["not allowed"])
+        }
+        else if (!canTransformBeApplied)
             _selectionCubeMaterial.color = SelectionCubeColors["not allowed"];
     }
 
+    /// <summary>
+    ///     Generates a track from loaded track data. 
+    /// </summary>
+    public static void GenerateLoadedTrack(List<PartSaveData> partsSaveData)
+    {
+        ClearTrack();
+
+        foreach (Transform trackPart in _partsCategory0.transform)
+            trackPart.gameObject.SetActive(true);
+
+        _partsInstance.SetActive(true);
+        foreach (var partSaveData in partsSaveData)
+        {
+            AddPartOfLoadedTrack(partSaveData.tag, partSaveData.initialOccupiedGridCubeCoord);
+        }
+        _partsInstance.SetActive(false);
+    }
+
+    static void ClearTrack()
+    {
+        foreach (Transform partTransform in track.transform)
+        {
+            Destroy(partTransform.gameObject);
+        }
+
+        Grid3D.Clear();
+
+        if (selectedPart)
+        {
+            var toDestroy = selectedPart;
+            UnselectPart();
+            Destroy(toDestroy);
+        }
+
+        UpdateCanTransformBeApplied();
+        UpdateSelectionCubeColor();
+    }
+    
     static bool IsValidForPublish()
     {
         // TODO: Check if user finishes the track

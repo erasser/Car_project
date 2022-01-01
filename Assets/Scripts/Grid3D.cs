@@ -7,9 +7,9 @@ using UnityEngine;
 public class Grid3D : MonoBehaviour
 {
     [SerializeField]
-    private GameObject gridCubeHelperPrefab;
+    GameObject gridCubeHelperPrefab;
     [SerializeField]
-    private GameObject boundingBoxPrefab;    // Helper to show grid bounds
+    GameObject boundingBoxPrefab;    // Helper to show grid bounds
     [SerializeField][Tooltip("Width cube count, must be in [3, 255]")]  // TODO: Make better serialized field (spinner?)
     public byte xCount = 10;
     [SerializeField][Tooltip("Height cube count, must be in [3, 255]")]
@@ -19,9 +19,9 @@ public class Grid3D : MonoBehaviour
     const byte CubeSize = 20;
 
     public static Grid3D instance;
-    private static GameObject _boundingBox;
+    static GameObject _boundingBox;
     public static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
-    private static GameObject _gridParent;
+    static GameObject _gridParent;
     public static readonly Dictionary<string, Vector3> Bounds = new();
 
     void Awake()
@@ -30,7 +30,7 @@ public class Grid3D : MonoBehaviour
         Create();
     }
     
-    private void Create()
+    void Create()
     {
         // _origin = new Coord(Coord.xCount / 2, Coord.yCount / 2, Coord.zCount / 2);
 
@@ -152,8 +152,16 @@ public class Grid3D : MonoBehaviour
         _boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
         _boundingBox.SetActive(true);
     }
+
+    public static void Clear()
+    {
+        foreach (var rowX in Grid)
+            foreach (var rowY in rowX)
+                foreach (var cube in rowY)
+                    cube.Clear();
+    }
     
-    /// <summary>
+    /// <summary>  // If this is used, try to use recursion \m/
     ///     Checks if cubes are valid
     /// </summary>
     // public static bool IsValid()

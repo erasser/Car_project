@@ -8,10 +8,10 @@ using UnityEngine;
 public class Part : MonoBehaviour
 {
     // public GridCube gridCube;           // The main GridCube, at which the part is held
-    private Coord _gridLocalDimensions; // Count of GridCubes, that the part is going to occupy in local space, calculated just once
+    Coord _gridLocalDimensions; // Count of GridCubes, that the part is going to occupy in local space, calculated just once
     public Coord gridWorldDimensions;   // Count of GridCubes, that the part is going to occupy in world space (but with local position), updated on rotation
     public readonly List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
-    private byte _rotation;             // 0, 1, 2, 3
+    byte _rotation;             // 0, 1, 2, 3
     [HideInInspector]
     public Outline outlineComponent;
 
@@ -49,6 +49,7 @@ public class Part : MonoBehaviour
     public void Rotate()
     {
         // TODO: occupiedGridCubes.Clear();  // clear cubes.cs also  // See MovePartOnGrid()
+        // TODO: update UpdateCanTransformBeApplied() when it's done
 
         print("rotate!");
         transform.eulerAngles = new (0, ++_rotation * 90, 0);  // Rotates right
@@ -65,8 +66,8 @@ public class Part : MonoBehaviour
         // For ■■ shape
         if (gridWorldDimensions.x == 1 && gridWorldDimensions.z == 2) // from _ to |
         {
-            Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1)).SetPart(gameObject);
-            occupiedGridCubes[1].UnsetPart(gameObject);
+            Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1)).SetPart(this);
+            occupiedGridCubes[1].UnsetPart(this);
         }
         else if (gridWorldDimensions.x == 2 && gridWorldDimensions.z == 1) // from | to _
         {
@@ -94,7 +95,7 @@ public class Part : MonoBehaviour
         var cubes = Grid3D.GetGridCubesInArea(coordinates, gridWorldDimensions.x, gridWorldDimensions.z);  // cubes at new position
         foreach (var cube in cubes)
         {
-            cube.SetPart(gameObject);
+            cube.SetPart(this);
             occupiedGridCubes.Add(cube);
         }
 
@@ -103,7 +104,7 @@ public class Part : MonoBehaviour
         return cubes;
     }
 
-    public Vector3 PositionPart(List<GridCube> gridCubes)
+    Vector3 PositionPart(List<GridCube> gridCubes)
     {
         return transform.position = new(
             (gridCubes[^1].position.x + gridCubes[0].position.x) / 2,
@@ -126,7 +127,7 @@ public class Part : MonoBehaviour
         return PositionPart(cubes);
     }
 
-    public static GameObject GetPartAtCoords(Coord coordinates)
+    public static Part GetPartAtCoords(Coord coordinates)
     {
         return Grid3D.GetGridCubeAt(coordinates).GetPart();
     }
@@ -145,7 +146,7 @@ public class Part : MonoBehaviour
     {
         foreach (var cube in occupiedGridCubes)
         {
-            cube.UnsetPart(gameObject);
+            cube.UnsetPart(this);
         }
         occupiedGridCubes.Clear();
     }
@@ -161,9 +162,9 @@ public class Part : MonoBehaviour
         return partsSaveData;
     }
 
-    private PartSaveData GetPartSaveData()
+    PartSaveData GetPartSaveData()
     {
-        return new PartSaveData(tag, _rotation, occupiedGridCubes);
+        return new PartSaveData(tag, _rotation, occupiedGridCubes[0].coordinates);
     }
 }
 
@@ -172,16 +173,12 @@ public struct PartSaveData
 {
     public string tag;
     public byte rotation;
-    public List<Coord> occupiedGridCubesCoords;
+    public Coord initialOccupiedGridCubeCoord;
 
-    public PartSaveData(string tag, byte rotation, List<GridCube> occupiedGridCubes)
+    public PartSaveData(string tag, byte rotation, Coord initialOccupiedGridCubeCoord)
     {
         this.tag = tag;
         this.rotation = rotation;
-        occupiedGridCubesCoords = new();
-        foreach (GridCube cube in occupiedGridCubes)
-        {
-            occupiedGridCubesCoords.Add(cube.coordinates);
-        }
+        this.initialOccupiedGridCubeCoord = initialOccupiedGridCubeCoord;
     }
 }

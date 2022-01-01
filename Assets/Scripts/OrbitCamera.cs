@@ -18,24 +18,24 @@ using Vector3 = UnityEngine.Vector3;
 
 public class OrbitCamera : MonoBehaviour
 {
-    private static OrbitCamera _instance;
+    static OrbitCamera _instance;
     [SerializeField]    [Range(0, 90)]      [Tooltip("Minimal pitch in degrees")]
-    private int minPitch = 5;  // Beware: Euler angles are clamped to [0, 360]
+    int minPitch = 5;  // Beware: Euler angles are clamped to [0, 360]
     [SerializeField]    [Range(0, 90)]      [Tooltip("Maximal pitch in degrees")]
-    private int maxPitch = 85;
+    int maxPitch = 85;
     [SerializeField]    [Range(0, 10000)]   [Tooltip("Minimal camera distance in scene units")]
-    private int minZoom = 5;
+    int minZoom = 5;
     [SerializeField]    [Range(0, 10000)]   [Tooltip("Maximal camera distance in scene units")]
-    private int maxZoom = 400;
+    int maxZoom = 400;
     [SerializeField]    [Range(1, 255)]
-    private byte orbitSpeed = 20;
+    byte orbitSpeed = 20;
     [SerializeField]    [Range(1, 255)]
-    private byte panSpeed = 16;
+    byte panSpeed = 16;
     [SerializeField]                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
-    private GameObject uiRotateHorizontalUiElement;
+    GameObject uiRotateHorizontalUiElement;
     public static Camera cameraComponent;
-    private static Transform _cameraTargetTransform;  // Should not be child of anything
-    private static GameObject _watchedObject;
+    static Transform _cameraTargetTransform;  // Should not be child of anything
+    static GameObject _watchedObject;
 
     void Awake()
     {
@@ -48,7 +48,7 @@ public class OrbitCamera : MonoBehaviour
         cameraComponent = GetComponent<Camera>();
     }
 
-    private void Update()
+    void Update()
     {
         if (_watchedObject)
             _cameraTargetTransform.position = _watchedObject.transform.position;

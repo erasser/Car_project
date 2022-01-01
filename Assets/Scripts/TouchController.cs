@@ -12,34 +12,34 @@ using UnityEngine.EventSystems;
 public class TouchController : MonoBehaviour
 {
     [SerializeField]    [Range(.01f, 5)]      [Tooltip("Interval in seconds, in which long touch event is fired (without touch dragging).")]
-    private float longTouchDuration = 2;
+    float longTouchDuration = 2;
     [SerializeField]
-    private bool use3DUiToo = true;
+    bool use3DUiToo = true;
     [SerializeField]
-    private GameObject cameraUi;                // TODO: Show only if use3DUiToo = true
+    GameObject cameraUi;                // TODO: Show only if use3DUiToo = true
     public static Camera cameraUiComponent;     // TODO: Show only if use3DUiToo = true
     [SerializeField]
-    private LayerMask selectableUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
-    private static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
-    private static TouchState _touchState = TouchState.NoTouch;
-    private static ControllerState _controllerState = ControllerState.NoAction;
-    private static int _scrollValue;
-    private static Vector3 _touchDownPosition;
-    private static Vector3 _touchUpPosition;
+    LayerMask selectableUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
+    static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
+    static TouchState _touchState = TouchState.NoTouch;
+    static ControllerState _controllerState = ControllerState.NoAction;
+    static int _scrollValue;
+    static Vector3 _touchDownPosition;
+    static Vector3 _touchUpPosition;
     // private static bool _wasDownOnUI;
-    private static bool _wasUpOnUI;
-    private float _touchDuration;
+    static bool _wasUpOnUI;
+    float _touchDuration;
 
 #if UNITY_EDITOR    // for debug
     public string debugTouchState;
     public string debugControllerState;
-    private readonly Dictionary<TouchState, string> _touchStates = new() {
+    readonly Dictionary<TouchState, string> _touchStates = new() {
         { TouchState.NoTouch, "no touch" },
         { TouchState.TouchedDown, "touched down" },
         { TouchState.TouchedUp, "touched up" },
         { TouchState.DoubleTouch, "double touch" },
         { TouchState.HeldTouch, "held touch" }};
-    private readonly Dictionary<ControllerState, string> _controllerStates = new() {
+    readonly Dictionary<ControllerState, string> _controllerStates = new() {
         { ControllerState.NoAction, "no action" },
         { ControllerState.Panning, "panning" },
         { ControllerState.Orbiting, "orbiting" },
@@ -159,7 +159,7 @@ public class TouchController : MonoBehaviour
     }
 
     // Is reset each frame in ProcessTouch() when processed
-    private void CheckMouseDown()
+    void CheckMouseDown()
     {
         // UI - Při přechodu na nové 3D UI udělat na to metodu. Toto použít v metodě tady, komplexnější logiku v UI.cs
         // UI elementům se dá vypnout Raycast target...

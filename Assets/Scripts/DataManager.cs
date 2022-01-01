@@ -9,6 +9,9 @@ using UnityEngine;
 
 struct DataManager
 {
+    static readonly string SaveFile = Application.persistentDataPath + "/saveData.bin";
+    static readonly BinaryFormatter MyBinaryFormatter = new ();
+
     public static void Save()
     {
         // var settings = new JsonSerializerSettings
@@ -38,39 +41,52 @@ struct DataManager
             return;
         }
 
-        Data dataToSave = new Data();
+        TrackData trackData = new TrackData();
         
-        if (!TrackEditor.canTransformBeApplied)
+        if (trackData.partsSaveData.Count == 0)
         {
             Debug.Log("track is empty, not saving");
             // TODO: Show message to user
             return;
         }
         
-        BinaryFormatter binaryFormatter = new BinaryFormatter();
-        // FileStream file = File.Create(Application.persistentDataPath + "/savedata.bin");
-        FileStream file = File.Create("c:/temp/savedata.txt");
-        binaryFormatter.Serialize(file, dataToSave);
-        // binaryFormatter.Serialize(file, new Vector3());
+        FileStream file = File.Create(SaveFile);
+        MyBinaryFormatter.Serialize(file, trackData);
         file.Close();
-        Debug.Log(JsonConvert.SerializeObject(new Data()));
+        Debug.Log(JsonConvert.SerializeObject(new TrackData()));
         // TODO: Show message to user
     }
 
     public static void Load()
     {
+        if (!File.Exists(SaveFile))
+        {
+            // TODO: Show message to user
+            Debug.Log($"Save file {SaveFile} not found.");
+            return;
+        }
+        
+        FileStream file = File.Open(SaveFile, FileMode.Open);
+        TrackData trackData = (TrackData)MyBinaryFormatter.Deserialize(file);
+        file.Close();
+
+        TrackEditor.GenerateLoadedTrack(trackData.partsSaveData);
+        
+        // TODO: Show message to user
+        Debug.Log("Game data loaded!");
+        
         // Get part from prefabs by tag
     }
 }
 
 [Serializable]
-class Data
+public class TrackData
 {
     // public List<GridCubeSaveData> gridCubesData;
     public List<PartSaveData> partsSaveData;
 
     /*  To save:  */
-    // List of GridCubes, which are occupied (parts.Count = 1)
+    // List of GridCubes, which are occupied (parts.Count = 1)  // Not used, all data is in partsSaveData
     //      • coordinates
     //      _parts will be filled from ↓
     // List of parts
@@ -79,7 +95,7 @@ class Data
     //      • tag
     // TODO: Camera information?
 
-    public Data()
+    public TrackData()
     {
         // gridCubesData = Grid3D.GetPartsSaveData();
         partsSaveData = Part.GetPartsSaveData();
