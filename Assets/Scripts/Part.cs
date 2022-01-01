@@ -7,13 +7,14 @@ using UnityEngine;
 
 public class Part : MonoBehaviour
 {
-    // public GridCube gridCube;           // The main GridCube, at which the part is held
+    // public GridCube gridCube;  // The main GridCube, at which the part is held  // occupiedGridCubes[0] is used now
     Coord _gridLocalDimensions; // Count of GridCubes, that the part is going to occupy in local space, calculated just once
     public Coord gridWorldDimensions;   // Count of GridCubes, that the part is going to occupy in world space (but with local position), updated on rotation
     public readonly List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
     byte _rotation;             // 0, 1, 2, 3
     [HideInInspector]
     public Outline outlineComponent;
+    public int partIndex;   // index in partCategory prefab
 
     void Awake()
     {
@@ -120,10 +121,9 @@ public class Part : MonoBehaviour
     /// </para>
     /// <param name="coordinates">Target coordinates</param>
     /// <returns>Target position</returns>
-    public Vector3 MovePartOnGrid(Coord coordinates)
+    public Vector3 MovePartOnGrid(Coord coordinates)  // Return value is not used, but part position is fucked ut without it, that's strange
     {
         var cubes = DistributeOverGridCubes(coordinates);
-
         return PositionPart(cubes);
     }
 
@@ -164,20 +164,22 @@ public class Part : MonoBehaviour
 
     PartSaveData GetPartSaveData()
     {
-        return new PartSaveData(tag, _rotation, occupiedGridCubes[0].coordinates);
+        return new PartSaveData(partIndex, _rotation, occupiedGridCubes[0].coordinates);
     }
 }
 
 [Serializable]
 public struct PartSaveData
 {
-    public string tag;
+    // public string tag;
+    public int partIndex;
     public byte rotation;
     public Coord initialOccupiedGridCubeCoord;
 
-    public PartSaveData(string tag, byte rotation, Coord initialOccupiedGridCubeCoord)
+    public PartSaveData(int partIndex, byte rotation, Coord initialOccupiedGridCubeCoord)
     {
-        this.tag = tag;
+        // this.tag = tag;
+        this.partIndex = partIndex;
         this.rotation = rotation;
         this.initialOccupiedGridCubeCoord = initialOccupiedGridCubeCoord;
     }

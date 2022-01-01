@@ -193,8 +193,8 @@ public class TrackEditor : MonoBehaviour
     static void AddPart()
     {
         var buttonNameParsed = EventSystem.current.currentSelectedGameObject.name.Split('_');
-        int partNo = int.Parse(buttonNameParsed[1]);
-        var partFromChildren = _partsCategory0.GetChild(partNo);
+        int partIndex = int.Parse(buttonNameParsed[1]);
+        var partFromChildren = _partsCategory0.GetChild(partIndex);
 
         if (selectedPart)
         {
@@ -206,18 +206,19 @@ public class TrackEditor : MonoBehaviour
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
         SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
-        newPart.GetComponent<Part>().MovePartOnGrid(_selectionCubeCoords);
+        var partComponent = newPart.GetComponent<Part>();
+        partComponent.partIndex = partIndex;
+        partComponent.MovePartOnGrid(_selectionCubeCoords);
     }
 
-    static Part AddPartOfLoadedTrack(string tagName, Coord coords)
+    static void AddPartOfLoadedTrack(int partIndex, Coord coords)
     {
-        var newPart = Instantiate(GameObject.FindGameObjectsWithTag(tagName)[0].transform, track.transform).gameObject;
+        var newPart = Instantiate(_partsCategory0.GetChild(partIndex).transform, track.transform).gameObject;
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
         var partComponent = newPart.GetComponent<Part>();
+        partComponent.partIndex = partIndex;
         partComponent.MovePartOnGrid(coords);
-
-        return partComponent;
     }
 
     void MoveSelection(string arrowName)
@@ -331,7 +332,7 @@ public class TrackEditor : MonoBehaviour
         _selectedPartComponent.outlineComponent.enabled = false;
 
         selectedPart = null;
-        _selectedPartComponent = null;  // for sure
+        _selectedPartComponent = null;
         _selectionCube.transform.parent = null;
         _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
     }
@@ -371,6 +372,7 @@ public class TrackEditor : MonoBehaviour
             _selectionCubeMaterial.color = SelectionCubeColors["not allowed"];
     }
 
+    // TODO: ► Set rotation
     /// <summary>
     ///     Generates a track from loaded track data. 
     /// </summary>
@@ -378,15 +380,8 @@ public class TrackEditor : MonoBehaviour
     {
         ClearTrack();
 
-        foreach (Transform trackPart in _partsCategory0.transform)
-            trackPart.gameObject.SetActive(true);
-
-        _partsInstance.SetActive(true);
         foreach (var partSaveData in partsSaveData)
-        {
-            AddPartOfLoadedTrack(partSaveData.tag, partSaveData.initialOccupiedGridCubeCoord);
-        }
-        _partsInstance.SetActive(false);
+            AddPartOfLoadedTrack(partSaveData.partIndex, partSaveData.initialOccupiedGridCubeCoord);
     }
 
     static void ClearTrack()
