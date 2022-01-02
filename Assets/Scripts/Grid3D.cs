@@ -11,6 +11,7 @@ public class Grid3D : MonoBehaviour
     [SerializeField]
     GameObject boundingBoxPrefab;    // Helper to show grid bounds
     [SerializeField][Tooltip("Width cube count, must be in [3, 255]")]  // TODO: Make better serialized field (spinner?)
+    [Space]
     public byte xCount = 10;
     [SerializeField][Tooltip("Height cube count, must be in [3, 255]")]
     public byte yCount = 7;
@@ -29,7 +30,7 @@ public class Grid3D : MonoBehaviour
         instance = this;
         Create();
     }
-    
+
     void Create()
     {
         // _origin = new Coord(Coord.xCount / 2, Coord.yCount / 2, Coord.zCount / 2);

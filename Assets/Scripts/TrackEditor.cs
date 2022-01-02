@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
 
@@ -14,24 +13,33 @@ public class TrackEditor : MonoBehaviour
     GameObject partsPrefab;
     [SerializeField]
     GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
-    // [SerializeField]
-    // private GameObject vehicleControllerPrefab;
     [SerializeField]
     LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
+
+    [SerializeField]
+    GameObject vehicleControllerPrefab;
+    [SerializeField]
+    GameObject vehiclePrefab;
+
+
     public static TrackEditor instance;
     // private static GameObject _vehicleController;
     Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
+    GameObject _uiTrackEditor;
 
     /*  Editor objects  */
     private static GameObject _partsInstance;
     static Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
     static GameObject _camera;
+    static GameObject _cameraVehicle;
     GameObject _ground;
     public static GameObject track;
+    GameObject _vehicleController;
+    GameObject _vehicle;
 
     /*  Editor states  */      // Must be reset in ResetTrack()
     public static bool canTransformBeApplied;
-    public static bool isStartPresent;
+    public static GameObject startPart;  // Used mainly as a state
 
     /*  Selection related  */
     static GameObject _selectionCube;
@@ -47,10 +55,13 @@ public class TrackEditor : MonoBehaviour
     {
         instance = this;
 
-        var ui = GameObject.Find("Canvas");
-        ui.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
-        ui.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
-        ui.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
+        _uiTrackEditor = GameObject.Find("UI_track_editor");
+        _uiTrackEditor.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
+        _uiTrackEditor.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
+        _uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
+
+        _vehicleController = Instantiate(vehicleControllerPrefab, GameObject.Find("UI").transform);
+        _vehicle = Instantiate(vehiclePrefab);
         
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
@@ -58,12 +69,11 @@ public class TrackEditor : MonoBehaviour
         SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
         SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
-        // _vehicleController = Instantiate(vehicleControllerPrefab);
         _camera = GameObject.Find("cameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
-        GenerateThumbnails();  // Initialization process continues here
         track = new GameObject("Track");
+        GenerateThumbnails();  // Initialization process continues here
     }
 
     void Update()
@@ -171,7 +181,7 @@ public class TrackEditor : MonoBehaviour
             // Create a UI thumbnail (button with image) for each part
             var sprite = Sprite.Create(texture, new Rect(0, 0, thumbSize, thumbSize), Vector2.zero);
             var buttonThumb = new GameObject($"buttonThumb_{i}", typeof(Button), typeof(Image));
-            buttonThumb.transform.SetParent(GameObject.Find("Canvas").transform);
+            buttonThumb.transform.SetParent(_uiTrackEditor.transform);
             buttonThumb.GetComponent<Image>().sprite = sprite;
 
             // imageThumbImage.transform.position = new Vector3(i * thumbSize + 10, thumbSize + 10, 0);  // also works
@@ -211,13 +221,13 @@ public class TrackEditor : MonoBehaviour
 
         if (newPart.CompareTag("partStart"))
         {
-            if (isStartPresent)
+            if (startPart)
             {
                 // TODO: Show message to user
                 Debug.Log("Start already present!");
                 return;
             }
-            isStartPresent = true;
+            startPart = newPart;
         }
 
         newPart.transform.localScale = new(2, 2, 2);
@@ -236,20 +246,16 @@ public class TrackEditor : MonoBehaviour
 
     void MoveSelection(string arrowName)
     {
-        var coords = new Coord();
-
-        if (arrowName == "arrowUp")
-            coords = _selectionCubeCoords.MoveUp();
-        else if (arrowName == "arrowDown")
-            coords = _selectionCubeCoords.MoveDown();
-        else if (arrowName == "arrowLeft")
-            coords = _selectionCubeCoords.MoveLeft();
-        else if (arrowName == "arrowRight")
-            coords = _selectionCubeCoords.MoveRight();
-        else if (arrowName == "arrowFront")
-            coords = _selectionCubeCoords.MoveCloser();
-        else if (arrowName == "arrowBack")
-            coords = _selectionCubeCoords.MoveFarther();
+        var coords = arrowName switch
+        {
+            "arrowLeft"  => _selectionCubeCoords.MoveX(-1),
+            "arrowRight" => _selectionCubeCoords.MoveX(),
+            "arrowDown"  => _selectionCubeCoords.MoveY(-1),
+            "arrowUp"    => _selectionCubeCoords.MoveY(),
+            "arrowFront" => _selectionCubeCoords.MoveZ(-1),
+            "arrowBack"  => _selectionCubeCoords.MoveZ(),
+            _ => new Coord()
+        };
 
         if (selectedPart)  // Move selected part if any
             _selectedPartComponent.MovePartOnGrid(coords);
@@ -282,22 +288,32 @@ public class TrackEditor : MonoBehaviour
 
     void Play()
     {
-        var start = GameObject.FindWithTag("partStart");
-
-        if (!start)
+        if (!_vehicle.activeSelf)  // Go ride
         {
-            Debug.LogWarning("There is no start!");
-            return;
+            if (!startPart)
+            {
+                Debug.LogWarning("There is no start!");  // TODO: Show message to user
+                return;
+            }
+
+            // Funguje i jako restart. Zjistit proč přesně a použít pro Restart()
+            _vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = _vehicle;
+            _vehicleController.SetActive(true);
+            _vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
+            _vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + 2, startPart.transform.position.z);
+            _vehicle.SetActive(true);
+
+            if (!_cameraVehicle)
+                _cameraVehicle = GameObject.Find("Camera1");
+
+            _cameraVehicle.SetActive(true);
         }
-
-        // GameObject.Find("Vehicle5(drift)").SetActive(true);
-        // _vehicleController.SetActive(true);
-        // GameObject.Find("Control").GetComponent<MSSceneControllerFree>().enabled = true;
-        
-        // var vehicle = GameObject.Find("Vehicle3");
-        // vehicle.transform.rotation = start.transform.rotation;
-        // vehicle.transform.position = new Vector3(start.transform.position.x, start.transform.position.y + 4, start.transform.position.z);
-
+        else                       // Stop ride
+        {
+            _vehicle.SetActive(false);
+            _vehicleController.SetActive(false);
+            _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle?
+        }
     }
 
     static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
@@ -403,7 +419,7 @@ public class TrackEditor : MonoBehaviour
         UpdateCanTransformBeApplied();
         UpdateSelectionCubeColor();
 
-        isStartPresent = false;
+        startPart = null;
     }
     
     static bool IsValidForPublish()

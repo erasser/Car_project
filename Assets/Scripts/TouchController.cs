@@ -17,9 +17,10 @@ public class TouchController : MonoBehaviour
     bool use3DUiToo = true;
     [SerializeField]
     GameObject cameraUi;                // TODO: Show only if use3DUiToo = true
-    public static Camera cameraUiComponent;     // TODO: Show only if use3DUiToo = true
     [SerializeField]
     LayerMask selectableUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
+
+    public static Camera cameraUiComponent;     // TODO: Show only if use3DUiToo = true
     static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
     static TouchState _touchState = TouchState.NoTouch;
     static ControllerState _controllerState = ControllerState.NoAction;
@@ -31,6 +32,7 @@ public class TouchController : MonoBehaviour
     float _touchDuration;
 
 #if UNITY_EDITOR    // for debug
+    [Space]
     public string debugTouchState;
     public string debugControllerState;
     readonly Dictionary<TouchState, string> _touchStates = new() {

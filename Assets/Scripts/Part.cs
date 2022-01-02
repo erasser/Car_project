@@ -139,7 +139,9 @@ public class Part : MonoBehaviour
 
         ClearCubes();
         Destroy(gameObject);
-        TrackEditor.isStartPresent = false;
+        
+        if (CompareTag("partStart"))
+            TrackEditor.startPart = null;
     }
 
     void ClearCubes()

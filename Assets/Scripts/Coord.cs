@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 /// <summary>
 /// <para>
@@ -51,14 +52,13 @@ public struct Coord
 
     public int Get(string axis)
     {
-        if (axis == "x")
-            return x;
-        if (axis == "y")
-            return y;
-        if (axis == "z")
-            return z;
-
-        throw new Exception($"You tried to set axis \"{axis}\", which is bullshit.");
+        return axis switch
+        {
+            "x" => x,
+            "y" => y,
+            "z" => z,
+            _ => throw new Exception($"You tried to set axis \"{axis}\", which is bullshit.")
+        };
     }
 
     public void Set(string axis, int value)
@@ -73,45 +73,21 @@ public struct Coord
             throw new Exception($"You tried to set axis \"{axis}\", which is bullshit.");
     }
 
-    public Coord MoveLeft()
+    public Coord MoveX(int increment = 1)
     {
-        if (x > 0)
-            --x;
+        x = Mathf.Clamp(x += increment, 1, Grid3D.instance.xCount - 2);
         return this;
     }
 
-    public Coord MoveRight()
+    public Coord MoveY(int increment = 1)
     {
-        if (x < Grid3D.instance.xCount - 1)
-            ++x;
+        y = Mathf.Clamp(y += increment, 1, Grid3D.instance.yCount - 2);
         return this;
     }
 
-    public Coord MoveDown()
+    public Coord MoveZ(int increment = 1)
     {
-        if (y > 0)
-            --y;
-        return this;
-    }
-    
-    public Coord MoveUp()
-    {
-        if (y < Grid3D.instance.yCount - 1)
-            ++y;
-        return this;
-    }
-
-    public Coord MoveCloser()
-    {
-        if (z > 0)
-            --z;
-        return this;
-    }
-
-    public Coord MoveFarther()
-    {
-        if (z < Grid3D.instance.zCount - 1)
-            ++z;
+        z = Mathf.Clamp(z += increment, 1, Grid3D.instance.zCount - 2);
         return this;
     }
 }
