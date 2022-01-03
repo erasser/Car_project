@@ -15,27 +15,27 @@ public class TrackEditor : MonoBehaviour
     GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
     [SerializeField]
     LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
-
+    [Space]
     [SerializeField]
     GameObject vehicleControllerPrefab;
     [SerializeField]
     GameObject vehiclePrefab;
 
-
     public static TrackEditor instance;
     // private static GameObject _vehicleController;
-    Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
-    GameObject _uiTrackEditor;
+    static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
+    static GameObject _uiTrackEditor;
 
     /*  Editor objects  */
-    private static GameObject _partsInstance;
+    static GameObject _partsInstance;
     static Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
     static GameObject _camera;
     static GameObject _cameraVehicle;
     GameObject _ground;
     public static GameObject track;
-    GameObject _vehicleController;
-    GameObject _vehicle;
+    static GameObject _vehicleController;
+    public static GameObject vehicle;
+    public static Rigidbody vehicleRigidBody;
 
     /*  Editor states  */      // Must be reset in ResetTrack()
     public static bool canTransformBeApplied;
@@ -61,18 +61,21 @@ public class TrackEditor : MonoBehaviour
         _uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
 
         _vehicleController = Instantiate(vehicleControllerPrefab, GameObject.Find("UI").transform);
-        _vehicle = Instantiate(vehiclePrefab);
-        
+        vehicle = Instantiate(vehiclePrefab);
+        vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
+
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
         SelectionCubeColors.Add("unselected", _selectionCubeMaterial.color);
         SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
         SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
+
         _camera = GameObject.Find("cameraEditor");
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
         track = new GameObject("Track");
+
         GenerateThumbnails();  // Initialization process continues here
     }
 
@@ -87,59 +90,6 @@ public class TrackEditor : MonoBehaviour
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
     }
 
-    /// <summary>
-    ///     Processes selecting / unselecting of track parts.
-    /// </summary>
-    public void ProcessSimpleTouch()
-    {
-        if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
-        {
-            if (!selectedPart)
-                SelectPart(selectionHit.collider.gameObject);
-            else
-            {
-                // TODO: Check, is transformation can be applied, apply transform & select the part
-                if (selectionHit.collider.gameObject == selectedPart)
-                    _selectedPartComponent.Rotate();
-                else
-                    SelectPart(selectionHit.collider.gameObject);
-            }
-        }
-        else  // Unselect
-        {
-            TryUnselectPart();
-        }
-    }
-
-    /// <summary>
-    ///     Processes long touch. 
-    /// </summary>
-    /// <returns>Was something deleted?</returns>
-    public bool ProcessHeldTouch()
-    {
-        if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
-        {
-            selectionHit.collider.gameObject.GetComponent<Part>().Delete();
-            return true;
-        }
-        return false;
-    }
-
-    /// <summary>
-    ///     Processes 3D UI touch.
-    /// </summary>
-    /// <param name="selectableUiObjectsLayer">LayerMask, which 3D UI elements have.</param>
-    /// <returns>Was something moved?</returns>
-    public bool ProcessUiTouch(LayerMask selectableUiObjectsLayer)
-    {
-        if (Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))
-        {
-            MoveSelection(selectionHit.collider.name);
-            return true;
-        }
-        return false;
-    }
-    
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
         const byte thumbSize = 120;   // TODO: Should be relative to screen size
@@ -205,6 +155,53 @@ public class TrackEditor : MonoBehaviour
         SetSelectionCoords(new Coord(1, 1, 1));
         OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
+    }
+
+    /// <summary>
+    ///     Processes selecting / unselecting of track parts.
+    /// </summary>
+    public void ProcessSimpleTouch()
+    {
+        if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
+        {
+            if (selectionHit.collider.gameObject == selectedPart)
+                _selectedPartComponent.Rotate();  // TODO: Check, is transformation can be applied, apply transform & select the part
+            else
+                SelectPart(selectionHit.collider.gameObject);
+        }
+        else  // Unselect
+        {
+            TryUnselectPart();
+        }
+    }
+
+    /// <summary>
+    ///     Processes long touch. 
+    /// </summary>
+    /// <returns>Was something deleted?</returns>
+    public bool ProcessHeldTouch()
+    {
+        if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
+        {
+            selectionHit.collider.gameObject.GetComponent<Part>().Delete();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    ///     Processes 3D UI touch.
+    /// </summary>
+    /// <param name="selectableUiObjectsLayer">LayerMask, which 3D UI elements have.</param>
+    /// <returns>Was something moved?</returns>
+    public bool ProcessUiTouch(LayerMask selectableUiObjectsLayer)
+    {
+        if (Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))
+        {
+            MoveSelection(selectionHit.collider.name);
+            return true;
+        }
+        return false;
     }
 
     static void AddPart(int partIndex, Coord coords)
@@ -288,7 +285,7 @@ public class TrackEditor : MonoBehaviour
 
     void Play()
     {
-        if (!_vehicle.activeSelf)  // Go ride
+        if (!vehicle.activeSelf)  // Go ride
         {
             if (!startPart)
             {
@@ -297,11 +294,11 @@ public class TrackEditor : MonoBehaviour
             }
 
             // Funguje i jako restart. Zjistit proč přesně a použít pro Restart()
-            _vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = _vehicle;
+            _vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
             _vehicleController.SetActive(true);
-            _vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
-            _vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + 2, startPart.transform.position.z);
-            _vehicle.SetActive(true);
+            vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
+            vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + 2, startPart.transform.position.z);
+            vehicle.SetActive(true);
 
             if (!_cameraVehicle)
                 _cameraVehicle = GameObject.Find("Camera1");
@@ -310,7 +307,7 @@ public class TrackEditor : MonoBehaviour
         }
         else                       // Stop ride
         {
-            _vehicle.SetActive(false);
+            vehicle.SetActive(false);
             _vehicleController.SetActive(false);
             _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle?
         }

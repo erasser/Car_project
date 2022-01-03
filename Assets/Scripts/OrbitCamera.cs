@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations;
 using Vector3 = UnityEngine.Vector3;
@@ -18,7 +19,6 @@ using Vector3 = UnityEngine.Vector3;
 
 public class OrbitCamera : MonoBehaviour
 {
-    static OrbitCamera _instance;
     [SerializeField]    [Range(0, 90)]      [Tooltip("Minimal pitch in degrees")]
     int minPitch = 5;  // Beware: Euler angles are clamped to [0, 360]
     [SerializeField]    [Range(0, 90)]      [Tooltip("Maximal pitch in degrees")]
@@ -31,11 +31,16 @@ public class OrbitCamera : MonoBehaviour
     byte orbitSpeed = 20;
     [SerializeField]    [Range(1, 255)]
     byte panSpeed = 16;
+    [Space]
     [SerializeField]                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
     GameObject uiRotateHorizontalUiElement;
+
+    static OrbitCamera _instance;
     public static Camera cameraComponent;
     static Transform _cameraTargetTransform;  // Should not be child of anything
     static GameObject _watchedObject;
+    static Vector3 _minTargetPosition;  // Must be set "from the outside" for pan to work. Use SetTargetPositionLimits().
+    static Vector3 _maxTargetPosition;  //                            ——————||——————
 
     void Awake()
     {
@@ -58,12 +63,10 @@ public class OrbitCamera : MonoBehaviour
     {
         var translationV3 = touchPositionDiff * Time.deltaTime * _instance.panSpeed;
         var newPosition = _cameraTargetTransform.position - _cameraTargetTransform.TransformDirection(translationV3);
-        var minPosition = Grid3D.Grid[0][0][0].position;
-        var maxPosition = Grid3D.Grid[Grid3D.instance.xCount - 1][Grid3D.instance.yCount - 1][Grid3D.instance.zCount - 1].position;
-        
-        newPosition.x = Mathf.Clamp(newPosition.x, minPosition.x, maxPosition.x);
-        newPosition.y = Mathf.Clamp(newPosition.y, minPosition.y, maxPosition.y);
-        newPosition.z = Mathf.Clamp(newPosition.z, minPosition.z, maxPosition.z);
+
+        newPosition.x = Mathf.Clamp(newPosition.x, _minTargetPosition.x, _maxTargetPosition.x);
+        newPosition.y = Mathf.Clamp(newPosition.y, _minTargetPosition.y, _maxTargetPosition.y);
+        newPosition.z = Mathf.Clamp(newPosition.z, _minTargetPosition.z, _maxTargetPosition.z);
 
         _cameraTargetTransform.position = newPosition;
     }
@@ -199,6 +202,17 @@ public class OrbitCamera : MonoBehaviour
     {
         Set(targetPosition, pitch, yaw);
         SetDistance(distance);
+    }
+
+    /// <summary>
+    ///     Use this to set scene bounds. Camera target will move inside these limits when camera panning.
+    /// </summary>
+    /// <param name="min">A point determining minimal limits.</param>
+    /// <param name="max">A point determining maximal limits.</param>
+    public static void SetTargetPositionLimits(Vector3 min, Vector3 max)
+    {
+        _minTargetPosition = min;
+        _maxTargetPosition = max;
     }
 
     /// <summary>

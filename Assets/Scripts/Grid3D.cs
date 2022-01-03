@@ -66,6 +66,8 @@ public class Grid3D : MonoBehaviour
         Bounds.Add("min", - bound);
         Bounds.Add("max", bound);
 
+        OrbitCamera.SetTargetPositionLimits(Bounds["min"], Bounds["max"]);
+
         Toggle();
     }
 

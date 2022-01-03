@@ -67,12 +67,16 @@ public class Part : MonoBehaviour
         // For ■■ shape
         if (gridWorldDimensions.x == 1 && gridWorldDimensions.z == 2) // from _ to |
         {
-            Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1)).SetPart(this);
+            Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1))
+                .SetPart(this);
             occupiedGridCubes[1].UnsetPart(this);
         }
         else if (gridWorldDimensions.x == 2 && gridWorldDimensions.z == 1) // from | to _
         {
-
+            // TODO: ► Zde jsem skončil. Vyřešit.
+            Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1))
+                .SetPart(this);
+            occupiedGridCubes[1].UnsetPart(this);
         }
 
         
