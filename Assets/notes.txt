@@ -2,10 +2,11 @@
 
 Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
 
-• Nějaký tréninkový levely? Objíýdění kuželů?
+• Co rychle slerpovat rotaci part? (u některých kostek není hned zřejmé, na kterou stranu se točí). Musela by se i lerpovat pozice. 
+• Nějaký tréninkový levely? Objíždění kuželů?
 • Zčervenat rychlost, když user ťukne autem o něco?
 • Pokročilé možnosti editace - hromadné selectování a úpravy
-• Udělat viditelnou řadu kostek od selectedCube do směrů všech os? 
+• Udělat viditelnou řadu kostek od selectedCube do směrů všech os? Popř. stín směrem dolů.
 • Consider using lines to vizialize 3D grid (Handles.DrawLine or ten vector helper, co používám v UFO)
 • Try slowmotion!
 • Měnící se směr gravitace!
@@ -17,8 +18,6 @@ Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
 • počasí \m/
 - pro implementaci ledu zkusit snížit mass vozidla
 
-info: nejdřív enable vehicle, potom control
 
 wrong placement blinking
 
-implement start & finish

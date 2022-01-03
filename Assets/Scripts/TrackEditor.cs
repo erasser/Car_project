@@ -271,18 +271,6 @@ public class TrackEditor : MonoBehaviour
         // _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));  // Will be replaced by free camera
     }
 
-    // TODO: Merge with Part.Rotate()?
-    void RotatePart()
-    {
-        // old code...
-        var part = Part.GetPartAtCoords(_selectionCubeCoords);
-
-        if (!part) return;
-        
-        // old code...
-        part.Rotate();
-    }
-
     void Play()
     {
         if (!vehicle.activeSelf)  // Go ride

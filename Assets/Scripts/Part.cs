@@ -49,37 +49,20 @@ public class Part : MonoBehaviour
 
     public void Rotate()
     {
-        // TODO: occupiedGridCubes.Clear();  // clear cubes.cs also  // See MovePartOnGrid()
-        // TODO: update UpdateCanTransformBeApplied() when it's done
+        if (++_rotation == 4)  // I tried using modulo, but it's not applicable to byte type
+            _rotation = 0;
 
-        print("rotate!");
-        transform.eulerAngles = new (0, ++_rotation * 90, 0);  // Rotates right
+        transform.eulerAngles = new (0, _rotation * 90, 0);
+
         UpdateWorldCubeDimensions();
 
+        DistributeOverGridCubes(occupiedGridCubes[0].coordinates);  // Also calls UpdateCanTransformBeApplied()
+        
+        PositionPart(occupiedGridCubes);
     }
 
     void UpdateWorldCubeDimensions()
     {
-        /*  IMPLEMENT THE FOLLOWING HERE  */
-
-        // TODO: V Rotate() se volá UpdateWorldCubeDimensions()
-        // TODO: Check, if rotation is possible
-        // For ■■ shape
-        if (gridWorldDimensions.x == 1 && gridWorldDimensions.z == 2) // from _ to |
-        {
-            Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1))
-                .SetPart(this);
-            occupiedGridCubes[1].UnsetPart(this);
-        }
-        else if (gridWorldDimensions.x == 2 && gridWorldDimensions.z == 1) // from | to _
-        {
-            // TODO: ► Zde jsem skončil. Vyřešit.
-            Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1))
-                .SetPart(this);
-            occupiedGridCubes[1].UnsetPart(this);
-        }
-
-        
         if (_rotation is 0 or 2) // :-o
             gridWorldDimensions = _gridLocalDimensions;
         else
@@ -87,6 +70,22 @@ public class Part : MonoBehaviour
             gridWorldDimensions.x = _gridLocalDimensions.z;
             gridWorldDimensions.z = _gridLocalDimensions.x;
         }
+
+        // This should be solved by the code above ↑
+        // For ■■ shape (It's presumed the part is oriented in the x axis)
+        // if (gridWorldDimensions.x == 1 && gridWorldDimensions.z == 2) // from _ to |
+        // {
+        //     occupiedGridCubes[1].UnsetPart(this);  // the cube on the right
+        //     Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z + 1))
+        //         .SetPart(this);  // the cube to the back
+        // }
+        // else if (gridWorldDimensions.x == 2 && gridWorldDimensions.z == 1) // from | to _
+        // {
+        //     occupiedGridCubes[1].UnsetPart(this);  // the cube to the back
+        //     Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x + 1, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z))
+        //         .SetPart(this);  // the cube to the right
+        // }
+
     }
 
     /// <summary>
@@ -111,10 +110,13 @@ public class Part : MonoBehaviour
 
     Vector3 PositionPart(List<GridCube> gridCubes)
     {
+        // GameObject.Find("CubeHelper1").transform.position = gridCubes[0].position;         
+        // GameObject.Find("CubeHelper2").transform.position = gridCubes[^1].position;
+        
         return transform.position = new(
-            (gridCubes[^1].position.x + gridCubes[0].position.x) / 2,
+            (gridCubes[0].position.x + gridCubes[^1].position.x) / 2,
             gridCubes[0].position.y,
-            (gridCubes[^1].position.z + gridCubes[0].position.z) / 2);
+            (gridCubes[0].position.z + gridCubes[^1].position.z) / 2);
     }
 
     /// <summary>
