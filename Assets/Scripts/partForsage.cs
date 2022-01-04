@@ -6,11 +6,11 @@ public class PartForsage : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        _forsageForce = transform.parent.right * 40000;  // It's 'right', because the default parts direction is on x+ axis
+        _forsageForce = transform.parent.right * 2000000;  // It's 'right', because the default parts direction is on x+ axis
     }
 
     void OnTriggerStay(Collider other)
     {
-        TrackEditor.vehicleRigidBody.AddForce(_forsageForce);
+        TrackEditor.vehicleRigidBody.AddForce(_forsageForce * Time.fixedDeltaTime);
     }
 }

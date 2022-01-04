@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8243138011867388520}
   - component: {fileID: 3703787215674449941}
   - component: {fileID: 4099927679747828097}
-  - component: {fileID: 1471781473783317462}
+  - component: {fileID: 7443027104072589432}
   m_Layer: 0
   m_Name: forsageCollider
   m_TagString: Untagged
@@ -55,7 +55,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1471781473783317462
+--- !u!114 &7443027104072589432
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -386,6 +386,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -557,6 +561,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -714,6 +722,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -842,6 +854,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -1007,6 +1023,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -1155,6 +1175,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -1302,6 +1326,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -1467,6 +1495,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -1624,6 +1656,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -1752,6 +1788,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -1922,6 +1962,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -2055,6 +2099,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -2225,6 +2273,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -2368,6 +2420,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -2519,6 +2575,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -2676,6 +2736,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -2833,6 +2897,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -2990,6 +3058,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -3147,6 +3219,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0
@@ -3317,6 +3393,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab302ad431220745b5cd5b429a76342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridLocalDimensions:
+    x: 0
+    y: 0
+    z: 0
   gridWorldDimensions:
     x: 0
     y: 0

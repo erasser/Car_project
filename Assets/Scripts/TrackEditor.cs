@@ -4,7 +4,6 @@ using UnityEngine;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
 
-// TODO: ► Svislý stín (vertikální světlo dolů)
 // TODO: Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 
 public class TrackEditor : MonoBehaviour
@@ -110,7 +109,7 @@ public class TrackEditor : MonoBehaviour
         var cameraThumbCamera = cameraThumb.GetComponent<Camera>();
         cameraThumbCamera.targetTexture = renderTexture;
 
-        var i = 0;
+        byte i = 0;
         foreach (Transform part in _partsCategory0)
         {
             // Set camera position & look at the part
@@ -139,8 +138,8 @@ public class TrackEditor : MonoBehaviour
             rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
             rectTransform.sizeDelta = rectSize;
             // rectTransform.AddComponent<Outline>();  // TODO: Collides with Outline asset
-            int index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
-            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(index, Coord.Null);});
+            byte index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
+            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(new PartSaveData(index, 0, Coord.Null));});
 
             ++i;
         }
@@ -204,9 +203,9 @@ public class TrackEditor : MonoBehaviour
         return false;
     }
 
-    static void AddPart(int partIndex, Coord coords)
+    static void AddPart(PartSaveData partSaveData)
     {
-        var partFromChildren = _partsCategory0.GetChild(partIndex);
+        var partFromChildren = _partsCategory0.GetChild(partSaveData.partIndex);
 
         if (selectedPart)     // Doesn't apply when a track is loaded
         {
@@ -229,16 +228,27 @@ public class TrackEditor : MonoBehaviour
 
         newPart.transform.localScale = new(2, 2, 2);
         newPart.SetActive(true);
-        var partComponent = newPart.GetComponent<Part>();
-        partComponent.partIndex = partIndex;
-
-        if (coords.IsNull())  // The part is chosen by user
+        var newPartComponent = newPart.GetComponent<Part>();
+        newPartComponent.partIndex = partSaveData.partIndex;
+        
+        var coords = partSaveData.initialOccupiedGridCubeCoord;  // The part is loaded
+        if (partSaveData.IsNull())  // The part is chosen by user
         {
+            print("added by user");
             SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
             coords = _selectionCubeCoords;
         }
 
-        partComponent.MovePartOnGrid(coords);
+        newPartComponent.MovePartOnGrid(coords);
+
+        if (partSaveData.IsNull()) // The part is chosen by user
+        {
+            newPartComponent.SetRotationForNewPart();
+        }
+        else
+        {
+            newPartComponent.SetRotation(partSaveData.rotation);
+        }
     }
 
     void MoveSelection(string arrowName)
@@ -311,7 +321,7 @@ public class TrackEditor : MonoBehaviour
         _selectedPartComponent = part.GetComponent<Part>();
 
         _selectedPartComponent.outlineComponent.enabled = true;
-        var partDimensions = _selectedPartComponent.gridWorldDimensions;
+        var partDimensions = _selectedPartComponent.gridLocalDimensions;  // Local dimensions, because the selection cube is rotated with the part
 
         _selectionCube.transform.SetParent(part.transform);
         _selectionCube.transform.localPosition = Vector3.zero;
@@ -329,19 +339,25 @@ public class TrackEditor : MonoBehaviour
 
         if (!selectedPart) return;
 
+        _selectionCube.transform.parent = null;  // Must be set before SetSelectionCoords()
         SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
-        _selectedPartComponent.outlineComponent.enabled = false;
-
         selectedPart = null;
+        _selectedPartComponent.outlineComponent.enabled = false;
         _selectedPartComponent = null;
-        _selectionCube.transform.parent = null;
+
         _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
     }
 
+    /// <summary>
+    ///     This is where a part quits editing mode (i.e. current transform is left as is).
+    /// </summary>
     static void TryUnselectPart()
     {
         if (canTransformBeApplied)
+        {
+            _selectedPartComponent.SaveLastRotation();
             UnselectPart();
+        }
         else
         {
             
@@ -373,7 +389,6 @@ public class TrackEditor : MonoBehaviour
             _selectionCubeMaterial.color = SelectionCubeColors["not allowed"];
     }
 
-    // TODO: ► Set rotation
     /// <summary>
     ///     Generates a track from loaded track data. 
     /// </summary>
@@ -382,7 +397,11 @@ public class TrackEditor : MonoBehaviour
         ResetTrack();
 
         foreach (var partSaveData in partsSaveData)
-            AddPart(partSaveData.partIndex, partSaveData.initialOccupiedGridCubeCoord);
+        {
+            AddPart(partSaveData);
+        }
+
+        Part.ClearLastRotation();
     }
 
     static void ResetTrack()

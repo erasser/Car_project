@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 // using UnityEngine.UI;
 
@@ -8,13 +9,14 @@ using UnityEngine;
 public class Part : MonoBehaviour
 {
     // public GridCube gridCube;  // The main GridCube, at which the part is held  // occupiedGridCubes[0] is used now
-    Coord _gridLocalDimensions; // Count of GridCubes, that the part is going to occupy in local space, calculated just once
+    public Coord gridLocalDimensions; // Count of GridCubes, that the part is going to occupy in local space, calculated just once
     public Coord gridWorldDimensions;   // Count of GridCubes, that the part is going to occupy in world space (but with local position), updated on rotation
     public readonly List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
-    byte _rotation;             // 0, 1, 2, 3
+    byte _rotation;             // 0, 1, 2, 3 (type of rotation)
     [HideInInspector]
     public Outline outlineComponent;
-    public int partIndex;   // index in partCategory prefab
+    public byte partIndex;   // index in partCategory prefab
+    private static readonly Dictionary<byte, byte> _lastRotation = new();  // See SetLastRotation() for meaning.
 
     void Awake()
     {
@@ -34,7 +36,7 @@ public class Part : MonoBehaviour
     {
         var meshSize = GetComponent<MeshFilter>().sharedMesh.bounds.size;
 
-        _gridLocalDimensions = new Coord(GetCubesCount(meshSize.x), GetCubesCount(meshSize.y), GetCubesCount(meshSize.z));
+        gridLocalDimensions = new Coord(GetCubesCount(meshSize.x), GetCubesCount(meshSize.y), GetCubesCount(meshSize.z));
 
         int GetCubesCount(float meshDimension)
         {
@@ -52,7 +54,12 @@ public class Part : MonoBehaviour
         if (++_rotation == 4)  // I tried using modulo, but it's not applicable to byte type
             _rotation = 0;
 
-        transform.eulerAngles = new (0, _rotation * 90, 0);
+        SetRotation(_rotation);
+    }
+
+    public void SetRotation(byte rotation)
+    {
+        transform.eulerAngles = new (0, rotation * 90, 0);
 
         UpdateWorldCubeDimensions();
 
@@ -64,11 +71,11 @@ public class Part : MonoBehaviour
     void UpdateWorldCubeDimensions()
     {
         if (_rotation is 0 or 2) // :-o
-            gridWorldDimensions = _gridLocalDimensions;
+            gridWorldDimensions = gridLocalDimensions;
         else
         {
-            gridWorldDimensions.x = _gridLocalDimensions.z;
-            gridWorldDimensions.z = _gridLocalDimensions.x;
+            gridWorldDimensions.x = gridLocalDimensions.z;
+            gridWorldDimensions.z = gridLocalDimensions.x;
         }
 
         // This should be solved by the code above ↑
@@ -159,6 +166,31 @@ public class Part : MonoBehaviour
         occupiedGridCubes.Clear();
     }
 
+    /// <summary>
+    ///     Remember the rotation of this type of part, so the next part of the same type gets the same rotation.
+    /// </summary>
+    public void SaveLastRotation()
+    {
+        _lastRotation[partIndex] = _rotation;
+
+        if (_rotation == 0)
+            _lastRotation.Remove(_lastRotation[partIndex]);  // So the rotation is not set redundantly in SetRotationForNewPart()
+    }
+
+    /// <summary>
+    ///     Sets the same rotation that the last part of this type used.
+    /// </summary>
+    public void SetRotationForNewPart()
+    {
+        _rotation = _lastRotation.ContainsKey(partIndex) ? _lastRotation[partIndex] : (byte)0;
+        SetRotation(_rotation);
+    }
+
+    public static void ClearLastRotation()
+    {
+        _lastRotation.Clear();
+    }
+
     public static List<PartSaveData> GetPartsSaveData()
     {
         List<PartSaveData> partsSaveData = new();
@@ -180,15 +212,21 @@ public class Part : MonoBehaviour
 public struct PartSaveData
 {
     // public string tag;
-    public int partIndex;
+    public byte partIndex;
     public byte rotation;
     public Coord initialOccupiedGridCubeCoord;
+    // public static PartSaveData Null = new (0, 0, Coord.Null);
 
-    public PartSaveData(int partIndex, byte rotation, Coord initialOccupiedGridCubeCoord)
+    public PartSaveData(byte partIndex, byte rotation, Coord initialOccupiedGridCubeCoord)
     {
         // this.tag = tag;
         this.partIndex = partIndex;
         this.rotation = rotation;
         this.initialOccupiedGridCubeCoord = initialOccupiedGridCubeCoord;
+    }
+
+    public bool IsNull()
+    {
+        return initialOccupiedGridCubeCoord.IsNull();  // My dirty hack for null value
     }
 }

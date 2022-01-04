@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 ///     Can be attached to anything (e.g. GameController).
 /// </summary>
 
+// TODO: Make it relative to screen dimensions, so the pan and orbit speed is always constant
 // See UFO to implement touch
 // TODO: ► Process only if screen is touched? Přece musí jít ty eventy pověsit nějak na celý okno hry
 
