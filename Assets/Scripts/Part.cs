@@ -177,12 +177,17 @@ public class Part : MonoBehaviour
     }
 
     /// <summary>
-    ///     Sets the same rotation that the last part of this type used.
+    ///     Sets the same rotation that the last part of this type used or sets the loaded rotation.
     /// </summary>
-    public void SetRotationForNewPart()
+    public void SetRotationForNewPart(PartSaveData partSaveData)
     {
-        _rotation = _lastRotation.ContainsKey(partIndex) ? _lastRotation[partIndex] : (byte)0;
-        SetRotation(_rotation);
+        if (partSaveData.IsNull())  // Added by user
+        {
+            _rotation = _lastRotation.ContainsKey(partIndex) ? _lastRotation[partIndex] : (byte)0;
+            SetRotation(_rotation);
+        }
+        else                        // Loaded
+            SetRotation(partSaveData.rotation);
     }
 
     public static void ClearLastRotation()

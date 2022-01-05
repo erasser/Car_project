@@ -24,6 +24,8 @@ public class TrackEditor : MonoBehaviour
     // private static GameObject _vehicleController;
     static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     static GameObject _uiTrackEditor;
+    static TouchController _touchController;
+    static GameObject _ui3D;
 
     /*  Editor objects  */
     static GameObject _partsInstance;
@@ -74,6 +76,8 @@ public class TrackEditor : MonoBehaviour
         _ground = GameObject.Find("ground");
         _ground.SetActive(false);
         track = new GameObject("Track");
+        _touchController = GetComponent<TouchController>();
+        _ui3D = GameObject.Find("Camera_3D_UI");
 
         GenerateThumbnails();  // Initialization process continues here
     }
@@ -233,19 +237,14 @@ public class TrackEditor : MonoBehaviour
 
         var coords = partSaveData.initialOccupiedGridCubeCoord;  // The part is loaded
 
-        if (partSaveData.IsNull())  // The part is chosen by user
+        if (partSaveData.IsNull()) // The part is chosen by user
         {
-            SelectPart(newPart /*, true*/);  // Must be called before MovePartOnGrid()  // This is not true anymore
+            SelectPart(newPart, true);
             coords = _selectionCubeCoords;
-            newPartComponent.DistributeOverGridCubes(coords);
-            newPartComponent.SetRotationForNewPart();
-        }
-        else
-        {
-            newPartComponent.DistributeOverGridCubes(coords);
-            newPartComponent.SetRotation(partSaveData.rotation);
         }
 
+        newPartComponent.DistributeOverGridCubes(coords);
+        newPartComponent.SetRotationForNewPart(partSaveData);
         newPartComponent.MovePartOnGrid(coords);
     }
 
@@ -300,12 +299,20 @@ public class TrackEditor : MonoBehaviour
                 _cameraVehicle = GameObject.Find("Camera1");
 
             _cameraVehicle.SetActive(true);
+            _touchController.enabled = false;
+            Grid3D.gridParent.SetActive(false);
+            _selectionCube.SetActive(false);
+            _ui3D.SetActive(false);
         }
         else                       // Stop ride
         {
             vehicle.SetActive(false);
             _vehicleController.SetActive(false);
             _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle?
+            _touchController.enabled = true;
+            Grid3D.gridParent.SetActive(true);
+            _selectionCube.SetActive(true);
+            _ui3D.SetActive(true);
         }
     }
 
@@ -327,8 +334,9 @@ public class TrackEditor : MonoBehaviour
         _selectionCubeMaterial.color = SelectionCubeColors["selected"];
         _selectionCubeAlphaStartTime = Time.time;
 
-        // if (!afterAddPart)  // Object was selected by touch => set new coordinates for selection cube.
-            // SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
+        // Object was selected by touch => set new coordinates for selection cube. Without this, part moves from coordinates of last selected part.
+        if (!afterAddPart)
+            SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
     }
 
     public static void UnselectPart()  // Must reflect SelectPart()

@@ -22,7 +22,7 @@ public class Grid3D : MonoBehaviour
     public static Grid3D instance;
     static GameObject _boundingBox;
     public static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
-    static GameObject _gridParent;
+    public static GameObject gridParent;
     public static readonly Dictionary<string, Vector3> Bounds = new();
 
     void Awake()
@@ -35,7 +35,7 @@ public class Grid3D : MonoBehaviour
     {
         // _origin = new Coord(Coord.xCount / 2, Coord.yCount / 2, Coord.zCount / 2);
 
-        _gridParent = new GameObject("gridParent");
+        gridParent = new GameObject("gridParent");
 
         for (int x = 0; x < xCount; ++x)
         {
@@ -52,8 +52,8 @@ public class Grid3D : MonoBehaviour
                         new Coord(x, y, z));
 
                     xCubes.Add(gridCube);
-                    var cubeHelper = Instantiate(gridCubeHelperPrefab, _gridParent.transform);
-                    cubeHelper.transform.SetParent(_gridParent.transform);
+                    var cubeHelper = Instantiate(gridCubeHelperPrefab, gridParent.transform);
+                    cubeHelper.transform.SetParent(gridParent.transform);
                     cubeHelper.transform.position = gridCube.position;
                     cubeHelper.transform.localScale = new (CubeSize, CubeSize, CubeSize);
                 }
@@ -73,7 +73,7 @@ public class Grid3D : MonoBehaviour
 
     public static void Toggle()
     {
-        _gridParent.SetActive(!_gridParent.activeSelf);
+        gridParent.SetActive(!gridParent.activeSelf);
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public class Grid3D : MonoBehaviour
     /// <param name="coordinates">GridCube coordinates</param>
     /// <returns>GridCube</returns>
     public static GridCube GetGridCubeAt(Coord coordinates)
-    {print(coordinates);
+    {
         return Grid[coordinates.x][coordinates.y][coordinates.z];
     }
 
@@ -151,7 +151,7 @@ public class Grid3D : MonoBehaviour
 
     public static void SetBoundingBox()
     {
-        _boundingBox = Instantiate(instance.boundingBoxPrefab);
+        _boundingBox = Instantiate(instance.boundingBoxPrefab, gridParent.transform);
         _boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
         _boundingBox.SetActive(true);
     }
