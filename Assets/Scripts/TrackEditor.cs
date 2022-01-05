@@ -230,25 +230,23 @@ public class TrackEditor : MonoBehaviour
         newPart.SetActive(true);
         var newPartComponent = newPart.GetComponent<Part>();
         newPartComponent.partIndex = partSaveData.partIndex;
-        
+
         var coords = partSaveData.initialOccupiedGridCubeCoord;  // The part is loaded
+
         if (partSaveData.IsNull())  // The part is chosen by user
         {
-            print("added by user");
-            SelectPart(newPart, true);  // Must be called before MovePartOnGrid()
+            SelectPart(newPart /*, true*/);  // Must be called before MovePartOnGrid()  // This is not true anymore
             coords = _selectionCubeCoords;
-        }
-
-        newPartComponent.MovePartOnGrid(coords);
-
-        if (partSaveData.IsNull()) // The part is chosen by user
-        {
+            newPartComponent.DistributeOverGridCubes(coords);
             newPartComponent.SetRotationForNewPart();
         }
         else
         {
+            newPartComponent.DistributeOverGridCubes(coords);
             newPartComponent.SetRotation(partSaveData.rotation);
         }
+
+        newPartComponent.MovePartOnGrid(coords);
     }
 
     void MoveSelection(string arrowName)
@@ -329,8 +327,8 @@ public class TrackEditor : MonoBehaviour
         _selectionCubeMaterial.color = SelectionCubeColors["selected"];
         _selectionCubeAlphaStartTime = Time.time;
 
-        if (!afterAddPart)  // Object was selected by touch => set new coordinates for selection cube.
-            SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
+        // if (!afterAddPart)  // Object was selected by touch => set new coordinates for selection cube.
+            // SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
     }
 
     public static void UnselectPart()  // Must reflect SelectPart()

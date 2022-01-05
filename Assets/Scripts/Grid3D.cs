@@ -82,7 +82,7 @@ public class Grid3D : MonoBehaviour
     /// <param name="coordinates">GridCube coordinates</param>
     /// <returns>GridCube</returns>
     public static GridCube GetGridCubeAt(Coord coordinates)
-    {
+    {print(coordinates);
         return Grid[coordinates.x][coordinates.y][coordinates.z];
     }
 

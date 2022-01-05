@@ -92,14 +92,13 @@ public class Part : MonoBehaviour
         //     Grid3D.GetGridCubeAt(new Coord(occupiedGridCubes[0].coordinates.x + 1, occupiedGridCubes[0].coordinates.y, occupiedGridCubes[0].coordinates.z))
         //         .SetPart(this);  // the cube to the right
         // }
-
     }
 
     /// <summary>
     ///     Clears occupied cubes and updates occupiedGridCubes based on new coordinates.
     /// </summary>
     /// <returns>List of occupied gridCubes</returns>
-    List<GridCube> DistributeOverGridCubes(Coord coordinates)
+    public List<GridCube> DistributeOverGridCubes(Coord coordinates)
     {
         ClearCubes();
 
