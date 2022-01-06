@@ -91,6 +91,14 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.b,
                 Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
+
+        if (Input.GetKey(KeyCode.M))  // TODO: To be used to change track part materials
+        {
+            print("setting tire slip factor");
+            var tmp = vehicle.GetComponent<MSVehicleControllerFree>();
+            tmp._vehicleSettings.improveControl.tireSlipsFactor = tmp._vehicleSettings.improveControl.tireSlipsFactor > .8f ? 0 : .85f;
+            print(tmp._vehicleSettings.improveControl.tireSlipsFactor);
+        }
     }
 
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
@@ -150,10 +158,10 @@ public class TrackEditor : MonoBehaviour
 
         _partsInstance.SetActive(false);
         cameraThumb.SetActive(false);
-        _ground.SetActive(true);
         Grid3D.Toggle();  // Shows grid
         Grid3D.SetBoundingBox();
-        GameObject.Find("ground").transform.position = new Vector3(0, Grid3D.Bounds["min"].y - .05f, 0);
+        _ground.transform.position = new Vector3(0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
+        _ground.SetActive(true);
         _selectionCube.SetActive(true);
         SetSelectionCoords(new Coord(1, 1, 1));
         OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
@@ -292,7 +300,8 @@ public class TrackEditor : MonoBehaviour
             _vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
             _vehicleController.SetActive(true);
             vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
-            vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + 2, startPart.transform.position.z);
+            vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + .5f, startPart.transform.position.z);
+            vehicle.transform.Translate(Vector3.back * 4);
             vehicle.SetActive(true);
 
             if (!_cameraVehicle)
@@ -308,7 +317,7 @@ public class TrackEditor : MonoBehaviour
         {
             vehicle.SetActive(false);
             _vehicleController.SetActive(false);
-            _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle?
+            _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle? (Maybe that's how follow camera works?)
             _touchController.enabled = true;
             Grid3D.gridParent.SetActive(true);
             _selectionCube.SetActive(true);

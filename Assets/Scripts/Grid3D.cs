@@ -17,7 +17,7 @@ public class Grid3D : MonoBehaviour
     public byte yCount = 7;
     [SerializeField][Tooltip("Depth cube count, must be in [3, 255]")]
     public byte zCount = 8;
-    const byte CubeSize = 20;
+    public const byte CubeSize = 20;
 
     public static Grid3D instance;
     static GameObject _boundingBox;

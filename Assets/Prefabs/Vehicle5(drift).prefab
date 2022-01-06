@@ -769,7 +769,7 @@ MonoBehaviour:
       downForceAngleFactor: 0.2
       verticalDownForce: 0
       minDownForceValue: 2
-    centerOfMass: {fileID: 0}
+    centerOfMass: {fileID: 3284720509960203689}
     volant: {fileID: 7304847387291868987}
     angle_x_Velocity:
       serializedVersion: 2

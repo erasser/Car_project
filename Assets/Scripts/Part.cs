@@ -187,7 +187,10 @@ public class Part : MonoBehaviour
             SetRotation(_rotation);
         }
         else                        // Loaded
+        {
+            _rotation = partSaveData.rotation;
             SetRotation(partSaveData.rotation);
+        }
     }
 
     public static void ClearLastRotation()
