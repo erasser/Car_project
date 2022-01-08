@@ -250,6 +250,8 @@ GameObject:
   - component: {fileID: 7310014351415423801}
   - component: {fileID: 7323888516471262113}
   - component: {fileID: 7274702289662351327}
+  - component: {fileID: 4913557895424226266}
+  - component: {fileID: 8369153523057581840}
   m_Layer: 0
   m_Name: Vehicle5(drift)
   m_TagString: Untagged
@@ -870,6 +872,31 @@ MonoBehaviour:
   disableVehicle: 0
   handBrakeTrue: 0
   isInsideTheCar: 0
+--- !u!65 &4913557895424226266
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7304955087782839063}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.2563217, y: 0.17720962, z: 5.1329}
+  m_Center: {x: -0.00000011920929, y: -0.95959115, z: -0.3265438}
+--- !u!114 &8369153523057581840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7304955087782839063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b810f38a0d13fa4291f7b167ff6bbaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7304978616217966381
 GameObject:
   m_ObjectHideFlags: 0

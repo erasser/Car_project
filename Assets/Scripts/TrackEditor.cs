@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
 
@@ -10,10 +11,13 @@ public class TrackEditor : MonoBehaviour
 {
     [SerializeField]
     GameObject partsPrefab;
-    [SerializeField]
-    GameObject selectionCubePrefab;  // Wireframe cube visualizer (to show grid lines)
-    [SerializeField]
-    LayerMask selectableObjectsLayer;  // Layer of objects pickable by raycaster (i.e. track parts)
+    [SerializeField] [Tooltip("List of materials assignable to track parts. Used to physically affect the vehicle behavior.")]
+    public List<Material> surfaceMaterials;
+    [Space]
+    [SerializeField] [Tooltip("Wireframe cube visualizer (to show grid lines)")]
+    GameObject selectionCubePrefab;
+    [SerializeField] [Tooltip("Layer of objects pickable by raycaster (i.e. track parts)")]
+    LayerMask selectableObjectsLayer;
     [Space]
     [SerializeField]
     GameObject vehicleControllerPrefab;
@@ -79,6 +83,7 @@ public class TrackEditor : MonoBehaviour
         _touchController = GetComponent<TouchController>();
         _ui3D = GameObject.Find("Camera_3D_UI");
 
+        GenerateSurfaceMaterialsThumbnails();
         GenerateThumbnails();  // Initialization process continues here
     }
 
@@ -91,14 +96,6 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.b,
                 Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
-
-        if (Input.GetKey(KeyCode.M))  // TODO: To be used to change track part materials
-        {
-            print("setting tire slip factor");
-            var tmp = vehicle.GetComponent<MSVehicleControllerFree>();
-            tmp._vehicleSettings.improveControl.tireSlipsFactor = tmp._vehicleSettings.improveControl.tireSlipsFactor > .8f ? 0 : .85f;
-            print(tmp._vehicleSettings.improveControl.tireSlipsFactor);
-        }
     }
 
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
@@ -121,7 +118,7 @@ public class TrackEditor : MonoBehaviour
         var cameraThumbCamera = cameraThumb.GetComponent<Camera>();
         cameraThumbCamera.targetTexture = renderTexture;
 
-        byte i = 0;
+        byte i = 0;  // TODO: Change to FOR loop
         foreach (Transform part in _partsCategory0)
         {
             // Set camera position & look at the part
@@ -166,6 +163,51 @@ public class TrackEditor : MonoBehaviour
         SetSelectionCoords(new Coord(1, 1, 1));
         OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
         _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
+    }
+
+    void GenerateSurfaceMaterialsThumbnails()
+    {
+        const byte thumbSize = 120;
+        const float thumbSpacing = 3.5f;
+        var rectSize = new Vector2(thumbSize, thumbSize);
+        
+        byte i = 0;  // TODO: Change to FOR loop
+        foreach (Material material in surfaceMaterials)
+        {
+            var buttonThumb = new GameObject($"buttonSurfaceThumb_{i}", typeof(Button), typeof(Image));
+            buttonThumb.transform.SetParent(_uiTrackEditor.transform);
+            // buttonThumb.GetComponent<Image>().material = material;
+
+            var rectTransform = buttonThumb.GetComponent<RectTransform>();
+            rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * 1.5f + 2 * thumbSpacing, 0);
+            rectTransform.sizeDelta = rectSize;
+            
+            byte index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
+            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {ApplySurface(index);});
+
+            if (i == 0)
+                buttonThumb.GetComponent<Image>().color = Color.gray;
+
+            ++i;
+        }
+    }
+
+    void ApplySurface(byte index)
+    {
+        // TODO: Store material list in Part.cs list to pick material more effectively?
+
+        if (!selectedPart) return;
+
+        var partRenderer = selectedPart.GetComponent<Renderer>();
+        var materials = partRenderer.materials;
+
+        if (materials.Length == 1) return;  // hotfix for ground
+
+        if (!selectedPart.CompareTag("partRoad1"))  // hotfix for road1 (has swapped materials)
+            materials[1] = surfaceMaterials[index];
+        else
+            materials[0] = surfaceMaterials[index];
+        partRenderer.materials = materials;
     }
 
     /// <summary>
@@ -368,6 +410,8 @@ public class TrackEditor : MonoBehaviour
     /// </summary>
     static void TryUnselectPart()
     {
+        if (!selectedPart) return;
+
         if (canTransformBeApplied)
         {
             _selectedPartComponent.SaveLastRotation();

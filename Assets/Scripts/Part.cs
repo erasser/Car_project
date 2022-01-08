@@ -9,12 +9,15 @@ using UnityEngine;
 public class Part : MonoBehaviour
 {
     // public GridCube gridCube;  // The main GridCube, at which the part is held  // occupiedGridCubes[0] is used now
+    [HideInInspector]
     public Coord gridLocalDimensions; // Count of GridCubes, that the part is going to occupy in local space, calculated just once
+    [HideInInspector]
     public Coord gridWorldDimensions;   // Count of GridCubes, that the part is going to occupy in world space (but with local position), updated on rotation
     public readonly List<GridCube> occupiedGridCubes = new();    // List of all GridCubes the part is occupying, including the main gridCube ↑
     byte _rotation;             // 0, 1, 2, 3 (type of rotation)
     [HideInInspector]
     public Outline outlineComponent;
+    [HideInInspector]
     public byte partIndex;   // index in partCategory prefab
     private static readonly Dictionary<byte, byte> _lastRotation = new();  // See SetLastRotation() for meaning.
 
