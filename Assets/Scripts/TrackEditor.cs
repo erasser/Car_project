@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
@@ -11,7 +12,7 @@ public class TrackEditor : MonoBehaviour
 {
     [SerializeField]
     GameObject partsPrefab;
-    [SerializeField] [Tooltip("List of materials assignable to track parts. Used to physically affect the vehicle behavior.")]
+    [SerializeField] [Tooltip("List of materials assignable to track parts.\nUsed to physically affect the vehicle behavior.\n\nThe first material must be the default one, which prefabs have assigned.")]
     public List<Material> surfaceMaterials;
     [Space]
     [SerializeField] [Tooltip("Wireframe cube visualizer (to show grid lines)")]
@@ -148,7 +149,7 @@ public class TrackEditor : MonoBehaviour
             rectTransform.sizeDelta = rectSize;
             // rectTransform.AddComponent<Outline>();  // TODO: Collides with Outline asset
             byte index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
-            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(new PartSaveData(index, 0, Coord.Null));});
+            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(new PartSaveData(index, 0, Coord.Null, 0));});
 
             ++i;
         }
@@ -198,16 +199,7 @@ public class TrackEditor : MonoBehaviour
 
         if (!selectedPart) return;
 
-        var partRenderer = selectedPart.GetComponent<Renderer>();
-        var materials = partRenderer.materials;
-
-        if (materials.Length == 1) return;  // hotfix for ground
-
-        if (!selectedPart.CompareTag("partRoad1"))  // hotfix for road1 (has swapped materials)
-            materials[1] = surfaceMaterials[index];
-        else
-            materials[0] = surfaceMaterials[index];
-        partRenderer.materials = materials;
+        selectedPart.GetComponent<Part>().SetMaterial(index);
     }
 
     /// <summary>
@@ -292,6 +284,8 @@ public class TrackEditor : MonoBehaviour
             SelectPart(newPart, true);
             coords = _selectionCubeCoords;
         }
+        else
+            newPartComponent.SetMaterial(partSaveData.materialIndex);
 
         newPartComponent.DistributeOverGridCubes(coords);
         newPartComponent.SetRotationForNewPart(partSaveData);
@@ -330,6 +324,8 @@ public class TrackEditor : MonoBehaviour
 
     void Play()
     {
+        EventSystem.current.SetSelectedGameObject(null);
+    
         if (!vehicle.activeSelf)  // Go ride
         {
             if (!startPart)

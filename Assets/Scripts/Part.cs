@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using UnityEditor.AssetImporters;
 using UnityEngine;
 // using UnityEngine.UI;
 
@@ -20,6 +21,7 @@ public class Part : MonoBehaviour
     [HideInInspector]
     public byte partIndex;   // index in partCategory prefab
     private static readonly Dictionary<byte, byte> _lastRotation = new();  // See SetLastRotation() for meaning.
+    public byte materialIndex;
 
     void Awake()
     {
@@ -201,6 +203,22 @@ public class Part : MonoBehaviour
         _lastRotation.Clear();
     }
 
+    public void SetMaterial(byte index)
+    {
+        materialIndex = index;
+        var partRenderer = GetComponent<Renderer>();
+        var materials = partRenderer.materials;
+
+        if (materials.Length == 1) return;  // hotfix for ground
+
+        if (!CompareTag("partRoad1"))       // hotfix for road1 (has swapped materials)
+            materials[1] = TrackEditor.instance.surfaceMaterials[index];
+        else
+            materials[0] = TrackEditor.instance.surfaceMaterials[index];
+
+        partRenderer.materials = materials;
+    }
+
     public static List<PartSaveData> GetPartsSaveData()
     {
         List<PartSaveData> partsSaveData = new();
@@ -214,7 +232,7 @@ public class Part : MonoBehaviour
 
     PartSaveData GetPartSaveData()
     {
-        return new PartSaveData(partIndex, _rotation, occupiedGridCubes[0].coordinates);
+        return new PartSaveData(partIndex, _rotation, occupiedGridCubes[0].coordinates, materialIndex);
     }
 }
 
@@ -225,14 +243,16 @@ public struct PartSaveData
     public byte partIndex;
     public byte rotation;
     public Coord initialOccupiedGridCubeCoord;
+    public byte materialIndex;
     // public static PartSaveData Null = new (0, 0, Coord.Null);
 
-    public PartSaveData(byte partIndex, byte rotation, Coord initialOccupiedGridCubeCoord)
+    public PartSaveData(byte partIndex, byte rotation, Coord initialOccupiedGridCubeCoord, byte materialIndex)
     {
         // this.tag = tag;
         this.partIndex = partIndex;
         this.rotation = rotation;
         this.initialOccupiedGridCubeCoord = initialOccupiedGridCubeCoord;
+        this.materialIndex = materialIndex;
     }
 
     public bool IsNull()
