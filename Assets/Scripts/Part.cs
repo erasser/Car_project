@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Unity.VisualScripting.FullSerializer;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 // using UnityEngine.UI;
@@ -22,6 +23,13 @@ public class Part : MonoBehaviour
     public byte partIndex;   // index in partCategory prefab
     private static readonly Dictionary<byte, byte> _lastRotation = new();  // See SetLastRotation() for meaning.
     public byte materialIndex;
+
+    public enum Surface : byte  // It's stored in materialIndex as a byte
+    {
+        Asphalt = 0,  // default
+        Mud = 1,
+        Snow = 2
+    }
 
     void Awake()
     {
@@ -211,11 +219,10 @@ public class Part : MonoBehaviour
 
         if (materials.Length == 1) return;  // hotfix for ground
 
-        if (!CompareTag("partRoad1"))       // hotfix for road1 (has swapped materials)
-            materials[1] = TrackEditor.instance.surfaceMaterials[index];
-        else
-            materials[0] = TrackEditor.instance.surfaceMaterials[index];
+        int i;
+        i = !CompareTag("partRoad1") ? 1 : 0;  // hotfix for road1 (has swapped materials)
 
+        materials[i] = TrackEditor.instance.surfaceMaterials[index];
         partRenderer.materials = materials;
     }
 

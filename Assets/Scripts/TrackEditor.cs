@@ -172,8 +172,7 @@ public class TrackEditor : MonoBehaviour
         const float thumbSpacing = 3.5f;
         var rectSize = new Vector2(thumbSize, thumbSize);
         
-        byte i = 0;  // TODO: Change to FOR loop
-        foreach (Material material in surfaceMaterials)
+        for (byte i = 0; i < surfaceMaterials.Count; ++i)
         {
             var buttonThumb = new GameObject($"buttonSurfaceThumb_{i}", typeof(Button), typeof(Image));
             buttonThumb.transform.SetParent(_uiTrackEditor.transform);
@@ -186,10 +185,12 @@ public class TrackEditor : MonoBehaviour
             byte index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
             buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {ApplySurface(index);});
 
+            var image = buttonThumb.GetComponent<Image>();
+            
             if (i == 0)
-                buttonThumb.GetComponent<Image>().color = Color.gray;
-
-            ++i;
+                image.color = Color.gray;
+            else if (i == 1)
+                image.color = new Color(0.43f, 0.19f, 0.06f);
         }
     }
 
@@ -284,7 +285,7 @@ public class TrackEditor : MonoBehaviour
             SelectPart(newPart, true);
             coords = _selectionCubeCoords;
         }
-        else
+        else if (partSaveData.materialIndex != (byte)Part.Surface.Asphalt)  // Loaded Part. Material index = 0 is considered default.
             newPartComponent.SetMaterial(partSaveData.materialIndex);
 
         newPartComponent.DistributeOverGridCubes(coords);

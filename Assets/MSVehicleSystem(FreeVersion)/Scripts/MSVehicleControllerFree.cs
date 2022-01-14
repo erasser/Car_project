@@ -65,7 +65,7 @@ public class VehicleAdjustmentClassFree {
 }
 [Serializable]
 public class StabilizeTurnsClassFree {
-	[Range(0.0f,1.2f)][Tooltip("How much the code will stabilize the vehicle's skidding.")]
+	[Range(0.0f,1.8f)][Tooltip("How much the code will stabilize the vehicle's skidding.")] // MG: I increased the max value from 1.2
 	public float tireSlipsFactor = 0.85f;
 	[Range(0.1f,2.0f)][Tooltip("This variable defines how much lateral force the vehicle will receive when the steering wheel is rotated. This helps the vehicle to rotate more realistically.")]
 	public float helpToTurn = 0.35f;

@@ -1,5 +1,7 @@
-using System;
 using UnityEngine;
+/// <summary>
+///     Changes vehicle behavior based on surface type. Added to vehicle prefab.
+/// </summary>
 
 public class CarTrigger : MonoBehaviour
 {
@@ -10,7 +12,8 @@ public class CarTrigger : MonoBehaviour
         _vehicleController = TrackEditor.vehicle.GetComponent<MSVehicleControllerFree>();
     }
 
-    void OnTriggerEnter(Collider other)
+    //  TODO: Restrict to collide with track parts only
+    void OnTriggerEnter(Collider other)  // Collider is a track part, which the surface is picked from.
     {
         var go = other.gameObject;
 
@@ -21,14 +24,20 @@ public class CarTrigger : MonoBehaviour
         if (materials.Length == 1) return;  // hotfix for ground
 
         int index;
-        if (!other.gameObject.CompareTag("partRoad1")) // hotfix for road1 (has swapped materials)
-            index = 1;
-        else
-            index = 0;
+        index = !other.gameObject.CompareTag("partRoad1") ? 1 : 0;  // hotfix for road1 (has swapped materials)
 
-        if (materials[index].name[0] == TrackEditor.instance.surfaceMaterials[1].name[0])
-            _vehicleController._vehicleSettings.improveControl.tireSlipsFactor = 0;
-        else
-            _vehicleController._vehicleSettings.improveControl.tireSlipsFactor = .85f;
+        // Material is cloned, that's why I compare just the first char
+        if (materials[index].name[0] == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Asphalt].name[0])
+            SetVehicleParams(1.7f, 9);  // TODO: At this point this should be equal to default parameters in Unity editor, because default material & asphalt material are not the same one (but should be) 
+        else if (materials[index].name[0] == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Mud].name[0])
+            SetVehicleParams(.9f, 8);
+        else if (materials[index].name[0] == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Snow].name[0])
+            SetVehicleParams(0, 7);
+    }
+
+    void SetVehicleParams(float tireSlipsFactor, float engineTorque)
+    {
+        _vehicleController._vehicleSettings.improveControl.tireSlipsFactor = tireSlipsFactor;
+        _vehicleController._vehicleTorque.engineTorque = engineTorque;
     }
 }
