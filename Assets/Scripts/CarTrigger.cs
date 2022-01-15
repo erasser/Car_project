@@ -1,4 +1,6 @@
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
+
 /// <summary>
 ///     Changes vehicle behavior based on surface type. Added to vehicle prefab.
 /// </summary>
@@ -8,20 +10,22 @@ using UnityEngine;
 public class CarTrigger : MonoBehaviour
 {
     private MSVehicleControllerFree _vehicleController;
-    private GameObject _wheelMudParticleEffectLeft;
-    private GameObject _wheelMudParticleEffectRight;
-    private GameObject _wheelSnowParticleEffectLeft;
-    private GameObject _wheelSnowParticleEffectRight;
+    private EmissionModule _wheelMudParticleEffectLeft;
+    private EmissionModule _wheelMudParticleEffectRight;
+    private EmissionModule _wheelSnowParticleEffectLeft;
+    private EmissionModule _wheelSnowParticleEffectRight;
 
     private void Start()
     {
         _vehicleController = TrackEditor.vehicle.GetComponent<MSVehicleControllerFree>();
 
         // TODO: ► Make those Unity editor fields, so they don't need to be searched for.
-        _wheelMudParticleEffectLeft   = GameObject.Find("wheelMudParticleEffect");
-        _wheelMudParticleEffectRight  = GameObject.Find("wheelMudParticleEffect2");
-        _wheelSnowParticleEffectLeft  = GameObject.Find("wheelSnowParticleEffect");
-        _wheelSnowParticleEffectRight = GameObject.Find("wheelSnowParticleEffect2");
+        _wheelMudParticleEffectLeft   = GameObject.Find("wheelMudParticleEffect").GetComponent<ParticleSystem>().emission;
+        _wheelMudParticleEffectRight  = GameObject.Find("wheelMudParticleEffect2").GetComponent<ParticleSystem>().emission;
+        _wheelSnowParticleEffectLeft  = GameObject.Find("wheelSnowParticleEffect").GetComponent<ParticleSystem>().emission;
+        _wheelSnowParticleEffectRight = GameObject.Find("wheelSnowParticleEffect2").GetComponent<ParticleSystem>().emission;
+
+        DisableParticleEffects();
     }
 
     //  TODO: Restrict to collide with track parts only
@@ -38,12 +42,7 @@ public class CarTrigger : MonoBehaviour
         // Material is cloned, that's why I compare just the first char
         var materialFirstChar = materials[other.gameObject.CompareTag("partRoad1") ? 0 : 1].name[0];  // hotfix for road1 (has swapped materials)
 
-        if (materialFirstChar == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Asphalt].name[0])
-        {
-            SetPhysicalParams(1.7f, 9);  // TODO: At this point this should be equal to default parameters in Unity editor, because default material & asphalt material are not the same one (but should be)
-            DisableParticleEffects();
-        } 
-        else if (materialFirstChar == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Mud].name[0])
+        if (materialFirstChar == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Mud].name[0])
         {
             SetPhysicalParams(.9f, 8);
             SetMudParticleEffect();
@@ -53,6 +52,11 @@ public class CarTrigger : MonoBehaviour
             SetPhysicalParams(0, 7);
             SetSnowParticleEffect();
         }
+        else  // Default = asphalt surface
+        {
+            SetPhysicalParams(1.7f, 9);
+            DisableParticleEffects();
+        } 
     }
 
     /// <summary>
@@ -68,25 +72,25 @@ public class CarTrigger : MonoBehaviour
 
     void DisableParticleEffects()
     {
-        _wheelMudParticleEffectLeft.SetActive(false);
-        _wheelMudParticleEffectRight.SetActive(false);
-        _wheelSnowParticleEffectLeft.SetActive(false);
-        _wheelSnowParticleEffectRight.SetActive(false);
+        _wheelMudParticleEffectLeft.enabled = false;
+        _wheelMudParticleEffectRight.enabled = false;
+        _wheelSnowParticleEffectLeft.enabled = false;
+        _wheelSnowParticleEffectRight.enabled = false;
     }
 
     void SetMudParticleEffect()
     {
-        _wheelMudParticleEffectLeft.SetActive(true);
-        _wheelMudParticleEffectRight.SetActive(true);
-        _wheelSnowParticleEffectLeft.SetActive(false);
-        _wheelSnowParticleEffectRight.SetActive(false);
+        _wheelMudParticleEffectLeft.enabled = true;
+        _wheelMudParticleEffectRight.enabled = true;
+        _wheelSnowParticleEffectLeft.enabled = false;
+        _wheelSnowParticleEffectRight.enabled = false;
     }
 
     void SetSnowParticleEffect()
     {
-        _wheelMudParticleEffectLeft.SetActive(false);
-        _wheelMudParticleEffectRight.SetActive(false);
-        _wheelSnowParticleEffectLeft.SetActive(true);
-        _wheelSnowParticleEffectRight.SetActive(true);
+        _wheelMudParticleEffectLeft.enabled = false;
+        _wheelMudParticleEffectRight.enabled = false;
+        _wheelSnowParticleEffectLeft.enabled = true;
+        _wheelSnowParticleEffectRight.enabled = true;
     }
 }
