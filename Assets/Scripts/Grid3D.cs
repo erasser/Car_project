@@ -21,7 +21,7 @@ public class Grid3D : MonoBehaviour
 
     public static Grid3D instance;
     static GameObject _boundingBox;
-    public static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
+    static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
     public static GameObject gridParent;
     public static readonly Dictionary<string, Vector3> Bounds = new();
 
@@ -68,13 +68,20 @@ public class Grid3D : MonoBehaviour
 
         OrbitCamera.SetTargetPositionLimits(Bounds["min"], Bounds["max"]);
 
-        Toggle();
+        ToggleGridHelper();
     }
 
-    public static void Toggle()
+    public static void ToggleGridHelper(/*bool enable*/)
     {
         gridParent.SetActive(!gridParent.activeSelf);
+        // gridParent.SetActive(enable);
     }
+
+    // public static void ToggleBoundingHelper(bool enable)
+    // {
+        // _boundingBox.SetActive(!_boundingBox.activeSelf);
+    //     _boundingBox.SetActive(enable);
+    // }
 
     /// <summary>
     ///     Gets GridCube at coordinates
@@ -134,7 +141,7 @@ public class Grid3D : MonoBehaviour
 
         return cubes;
     }
-    
+
     /// <summary>
     ///     Align object position to GridCube coordinates
     /// </summary>
@@ -151,7 +158,7 @@ public class Grid3D : MonoBehaviour
 
     public static void SetBoundingBox()
     {
-        _boundingBox = Instantiate(instance.boundingBoxPrefab, gridParent.transform);
+        _boundingBox = Instantiate(instance.boundingBoxPrefab);
         _boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
         _boundingBox.SetActive(true);
     }
@@ -163,7 +170,7 @@ public class Grid3D : MonoBehaviour
                 foreach (var cube in rowY)
                     cube.Clear();
     }
-    
+
     /// <summary>  // If this is used, try to use recursion \m/
     ///     Checks if cubes are valid
     /// </summary>
@@ -182,7 +189,7 @@ public class Grid3D : MonoBehaviour
     //     }
     //     return true;
     // }
-    
+
     // public static List<GridCubeSaveData> GetOccupiedCubesSaveData()
     // {
     //     var cubesSaveData = new List<GridCubeSaveData>();

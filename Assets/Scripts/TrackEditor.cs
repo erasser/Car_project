@@ -65,6 +65,7 @@ public class TrackEditor : MonoBehaviour
         _uiTrackEditor.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
         _uiTrackEditor.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
         _uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
+        _uiTrackEditor.transform.Find("buttonToggleGridHelper").GetComponent<Button>().onClick.AddListener(Grid3D.ToggleGridHelper);
 
         _vehicleController = Instantiate(vehicleControllerPrefab, GameObject.Find("UI").transform);
         vehicle = Instantiate(vehiclePrefab);
@@ -156,7 +157,7 @@ public class TrackEditor : MonoBehaviour
 
         _partsInstance.SetActive(false);
         cameraThumb.SetActive(false);
-        Grid3D.Toggle();  // Shows grid
+        Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
         _ground.transform.position = new Vector3(0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
         _ground.SetActive(true);
