@@ -244,7 +244,7 @@ public class Part : MonoBehaviour
 public struct PartSaveData
 {
     // public string tag;
-    public byte partIndex;
+    public byte partIndex;  // Serves as a unique identifier of a part
     public byte rotation;
     public Coord initialOccupiedGridCubeCoord;
     public byte materialIndex;

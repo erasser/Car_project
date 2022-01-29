@@ -26,7 +26,6 @@ public class TrackEditor : MonoBehaviour
     GameObject vehiclePrefab;
 
     public static TrackEditor instance;
-    // private static GameObject _vehicleController;
     static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     static GameObject _uiTrackEditor;
     static TouchController _touchController;
@@ -34,7 +33,8 @@ public class TrackEditor : MonoBehaviour
 
     /*  Editor objects  */
     static GameObject _partsInstance;
-    static Transform _partsCategory0;  // Transform is iterable. Use GetChild(index) to get n-th child.
+    static readonly List<Transform> PartCategories = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
+    static readonly List<Transform> Parts = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     static GameObject _camera;
     static GameObject _cameraVehicle;
     GameObject _ground;
@@ -107,8 +107,7 @@ public class TrackEditor : MonoBehaviour
         var rectSize = new Vector2(thumbSize, thumbSize);  // How can I make it const?
 
         _partsInstance = Instantiate(partsPrefab);
-        _partsCategory0 = _partsInstance.transform.Find("Category0").transform;
-        
+
         // Create a render texture for the camera
         var renderTexture = new RenderTexture(thumbSize, thumbSize, 16)
         {
@@ -120,39 +119,60 @@ public class TrackEditor : MonoBehaviour
         var cameraThumbCamera = cameraThumb.GetComponent<Camera>();
         cameraThumbCamera.targetTexture = renderTexture;
 
-        byte i = 0;  // TODO: Change to FOR loop
-        foreach (Transform part in _partsCategory0)
+        byte categoryIndex = 0;
+        byte partIndex = 0;
+        foreach (Transform category in _partsInstance.transform)  // Iterate over part categories
         {
-            // Set camera position & look at the part
-            cameraThumb.transform.position = part.position + new Vector3(-4, 8, -15);
-            cameraThumb.transform.LookAt(part.position);
+            if (categoryIndex > 2) continue;  // hotfix to ignore additional object in parts prefab
 
-            part.gameObject.SetActive(true);  // Show the part for render shot
-            RenderTexture.active = cameraThumbCamera.targetTexture;
-            cameraThumbCamera.Render();
+            // PartCategories.Add(category);
 
-            // Create a new texture and read the active Render Texture into it.
-            var texture = new Texture2D(thumbSize, thumbSize);
-            texture.ReadPixels(new Rect(0, 0, thumbSize, thumbSize), 0, 0);
-            texture.Apply();
+            var categoryUiWrapper = new GameObject($"category_{category.name}");
+            categoryUiWrapper.transform.SetParent(_uiTrackEditor.transform);
 
-            part.gameObject.SetActive(false);  // Hide the part after shot is taken
+            byte partInCategoryIndex = 0;  // TODO: Change to FOR loop
+            foreach (Transform partTransform in category)  // Iterate over parts in a category
+            {
+                Parts.Add(partTransform);
 
-            // Create a UI thumbnail (button with image) for each part
-            var sprite = Sprite.Create(texture, new Rect(0, 0, thumbSize, thumbSize), Vector2.zero);
-            var buttonThumb = new GameObject($"buttonThumb_{i}", typeof(Button), typeof(Image));
-            buttonThumb.transform.SetParent(_uiTrackEditor.transform);
-            buttonThumb.GetComponent<Image>().sprite = sprite;
+                // Set camera position & look at the part
+                cameraThumb.transform.position = partTransform.position + new Vector3(-4, 8, -15);
+                cameraThumb.transform.LookAt(partTransform.position);
 
-            // imageThumbImage.transform.position = new Vector3(i * thumbSize + 10, thumbSize + 10, 0);  // also works
-            var rectTransform = buttonThumb.GetComponent<RectTransform>();
-            rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * .5f + thumbSpacing, 0);
-            rectTransform.sizeDelta = rectSize;
-            // rectTransform.AddComponent<Outline>();  // TODO: Collides with Outline asset
-            byte index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
-            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(new PartSaveData(index, 0, Coord.Null, 0));});
+                partTransform.gameObject.SetActive(true);  // Show the part for render shot
+                RenderTexture.active = cameraThumbCamera.targetTexture;
+                cameraThumbCamera.Render();
 
-            ++i;
+                // Create a new texture and read the active Render Texture into it.
+                var texture = new Texture2D(thumbSize, thumbSize);
+                texture.ReadPixels(new Rect(0, 0, thumbSize, thumbSize), 0, 0);
+                texture.Apply();
+
+                partTransform.gameObject.SetActive(false);  // Hide the part after shot is taken
+
+                // Create a UI thumbnail (button with image) for each part
+                var sprite = Sprite.Create(texture, new Rect(0, 0, thumbSize, thumbSize), Vector2.zero);
+                var buttonThumb = new GameObject($"buttonThumb_{partIndex}", typeof(Button), typeof(Image));
+                //TODO: delete : buttonThumb.transform.SetParent(_uiTrackEditor.transform);
+                buttonThumb.transform.SetParent(categoryUiWrapper.transform);
+                buttonThumb.GetComponent<Image>().sprite = sprite;
+
+                // imageThumbImage.transform.position = new Vector3(i * thumbSize + 10, thumbSize + 10, 0);  // also works
+                var rectTransform = buttonThumb.GetComponent<RectTransform>();
+                rectTransform.transform.position = new (
+                    partInCategoryIndex * (thumbSize + thumbSpacing) + thumbSize * .5f,
+                    // thumbSize * .5f + thumbSpacing,
+                    thumbSize * .5f + categoryIndex * (thumbSize + thumbSpacing),
+                    0);
+                rectTransform.sizeDelta = rectSize;
+                // rectTransform.AddComponent<Outline>();  // TODO: Collides with Outline asset - Could be solved by creating button prefab with Outline already assigned 
+                byte index = partIndex;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
+                buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(new PartSaveData(index, 0, Coord.Null, 0));});
+
+                ++partInCategoryIndex;
+                ++partIndex;
+            }
+            ++categoryIndex;
         }
 
         _partsInstance.SetActive(false);
@@ -253,7 +273,8 @@ public class TrackEditor : MonoBehaviour
 
     static void AddPart(PartSaveData partSaveData)
     {
-        var partFromChildren = _partsCategory0.GetChild(partSaveData.partIndex);
+        // var partFromChildren = _partsCategory0.GetChild(partSaveData.partIndex);
+        var partFromChildren = Parts[partSaveData.partIndex];
 
         if (selectedPart)     // Doesn't apply when a track is loaded
         {
