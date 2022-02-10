@@ -1,5 +1,5 @@
 ﻿using System;
-using UnityEngine;
+using static UnityEngine.Mathf;
 
 /// <summary>
 /// <para>
@@ -75,19 +75,19 @@ public struct Coord
 
     public Coord MoveX(int increment = 1)
     {
-        x = Mathf.Clamp(x += increment, 1, Grid3D.instance.xCount - 2);
+        x = Clamp(x += increment, 1, Grid3D.instance.xCount - 2);
         return this;
     }
 
     public Coord MoveY(int increment = 1)
     {
-        y = Mathf.Clamp(y += increment, 1, Grid3D.instance.yCount - 2);
+        y = Clamp(y += increment, 1, Grid3D.instance.yCount - 2);
         return this;
     }
 
     public Coord MoveZ(int increment = 1)
     {
-        z = Mathf.Clamp(z += increment, 1, Grid3D.instance.zCount - 2);
+        z = Clamp(z += increment, 1, Grid3D.instance.zCount - 2);
         return this;
     }
 }

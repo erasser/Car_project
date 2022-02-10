@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
+using static UnityEngine.Debug;
+using static UnityEngine.GameObject;
+using static UnityEngine.Mathf;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
+// using UnityEngine.UI;
 
 // TODO: Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 
@@ -29,7 +32,8 @@ public class TrackEditor : MonoBehaviour
     static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     static GameObject _uiTrackEditor;
     static TouchController _touchController;
-    static GameObject _ui3D;
+    // static GameObject _ui3D;
+    static GameObject _3dUiOverlayRenderTextureImage;
 
     /*  Editor objects  */
     static GameObject _partsInstance;
@@ -61,13 +65,13 @@ public class TrackEditor : MonoBehaviour
     {
         instance = this;
 
-        _uiTrackEditor = GameObject.Find("UI_track_editor");
-        _uiTrackEditor.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
+        Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
+        _uiTrackEditor = Find("UI_track_editor");
         _uiTrackEditor.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
         _uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
         _uiTrackEditor.transform.Find("buttonToggleGridHelper").GetComponent<Button>().onClick.AddListener(Grid3D.ToggleGridHelper);
 
-        _vehicleController = Instantiate(vehicleControllerPrefab, GameObject.Find("UI").transform);
+        _vehicleController = Instantiate(vehicleControllerPrefab, Find("UI").transform);
         vehicle = Instantiate(vehiclePrefab);
         vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
 
@@ -78,15 +82,18 @@ public class TrackEditor : MonoBehaviour
         SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
 
-        _camera = GameObject.Find("cameraEditor");
-        _ground = GameObject.Find("ground");
+        _camera = Find("cameraEditor");
+        _ground = Find("ground");
         _ground.SetActive(false);
         track = new GameObject("Track");
         _touchController = GetComponent<TouchController>();
-        _ui3D = GameObject.Find("Camera_3D_UI");
+        // _ui3D = GameObject.Find("Camera_3D_UI");  // old solution
+        // _ui3D = Find("Camera_3D_UI_to_render_texture");  // new solution, but not needed in the script
+        _3dUiOverlayRenderTextureImage = Find("3D_UI_overlay_image");
 
         GenerateSurfaceMaterialsThumbnails();
         GenerateThumbnails();  // Initialization process continues here
+        Set3dUiRenderTexture();
     }
 
     void Update()
@@ -96,15 +103,17 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.r,
                 _selectionCubeMaterial.color.g,
                 _selectionCubeMaterial.color.b,
-                Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
+                Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
+                
+        var ray = TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition);
+        DrawRay(ray.origin, ray.direction * 200, Color.red);
     }
 
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
         const byte thumbSize = 120;   // TODO: Should be relative to screen size
         const float thumbSpacing = 3.5f;  // Total space between two thumbnails
-        var rectSize = new Vector2(thumbSize, thumbSize);  // How can I make it const?
 
         _partsInstance = Instantiate(partsPrefab);
 
@@ -148,26 +157,21 @@ public class TrackEditor : MonoBehaviour
                 texture.ReadPixels(new Rect(0, 0, thumbSize, thumbSize), 0, 0);
                 texture.Apply();
 
-                partTransform.gameObject.SetActive(false);  // Hide the part after shot is taken
+                partTransform.gameObject.SetActive(false);  // Hide the part after a shot is taken
 
                 // Create a UI thumbnail (button with image) for each part
                 var sprite = Sprite.Create(texture, new Rect(0, 0, thumbSize, thumbSize), Vector2.zero);
-                var buttonThumb = new GameObject($"buttonThumb_{partIndex}", typeof(Button), typeof(Image));
-                //TODO: delete : buttonThumb.transform.SetParent(_uiTrackEditor.transform);
-                buttonThumb.transform.SetParent(categoryUiWrapper.transform);
-                buttonThumb.GetComponent<Image>().sprite = sprite;
+                byte index = partIndex;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093                
 
-                // imageThumbImage.transform.position = new Vector3(i * thumbSize + 10, thumbSize + 10, 0);  // also works
-                var rectTransform = buttonThumb.GetComponent<RectTransform>();
-                rectTransform.transform.position = new (
+                new ImageButton(
+                    $"buttonPartThumb_{partIndex}",
+                    categoryUiWrapper,
                     partInCategoryIndex * (thumbSize + thumbSpacing) + thumbSize * .5f,
-                    // thumbSize * .5f + thumbSpacing,
                     thumbSize * .5f + categoryIndex * (thumbSize + thumbSpacing),
-                    0);
-                rectTransform.sizeDelta = rectSize;
-                // rectTransform.AddComponent<Outline>();  // TODO: Collides with Outline asset - Could be solved by creating button prefab with Outline already assigned 
-                byte index = partIndex;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
-                buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {AddPart(new PartSaveData(index, 0, Coord.Null, 0));});
+                    thumbSize,
+                    delegate {AddPart(new PartSaveData(index, 0, Coord.Null, 0));},
+                    true)
+                .image.sprite = sprite;
 
                 ++partInCategoryIndex;
                 ++partIndex;
@@ -191,27 +195,24 @@ public class TrackEditor : MonoBehaviour
     {
         const byte thumbSize = 120;
         const float thumbSpacing = 3.5f;
-        var rectSize = new Vector2(thumbSize, thumbSize);
-        
+
         for (byte i = 0; i < surfaceMaterials.Count; ++i)
         {
-            var buttonThumb = new GameObject($"buttonSurfaceThumb_{i}", typeof(Button), typeof(Image));
-            buttonThumb.transform.SetParent(_uiTrackEditor.transform);
-            // buttonThumb.GetComponent<Image>().material = material;
-
-            var rectTransform = buttonThumb.GetComponent<RectTransform>();
-            rectTransform.transform.position = new (i * (thumbSize + thumbSpacing) + thumbSize * .5f, thumbSize * 1.5f + 2 * thumbSpacing, 0);
-            rectTransform.sizeDelta = rectSize;
-            
             byte index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
-            buttonThumb.GetComponent<Button>().onClick.AddListener(delegate {ApplySurface(index);});
 
-            var image = buttonThumb.GetComponent<Image>();
-            
+            var buttonThumb = new ImageButton(
+                $"buttonSurfaceThumb_{i}",
+                _uiTrackEditor,
+                i * (thumbSize + thumbSpacing) + thumbSize * .5f,
+                thumbSize * 1.5f + 2 * thumbSpacing,
+                thumbSize,
+                delegate {ApplySurface(index);},
+                true);
+
             if (i == 0)
-                image.color = Color.gray;
+                buttonThumb.image.color = Color.gray;
             else if (i == 1)
-                image.color = new Color(0.43f, 0.19f, 0.06f);
+                buttonThumb.image.color = new (.43f, .19f, .06f);
         }
     }
 
@@ -289,7 +290,7 @@ public class TrackEditor : MonoBehaviour
             if (startPart)
             {
                 // TODO: Show message to user
-                Debug.Log("Start already present!");
+                Log("Start already present!");
                 return;
             }
             startPart = newPart;
@@ -353,7 +354,7 @@ public class TrackEditor : MonoBehaviour
         {
             if (!startPart)
             {
-                Debug.LogWarning("There is no start!");  // TODO: Show message to user
+                LogWarning("There is no start!");  // TODO: Show message to user
                 return;
             }
 
@@ -366,13 +367,13 @@ public class TrackEditor : MonoBehaviour
             vehicle.SetActive(true);
 
             if (!_cameraVehicle)
-                _cameraVehicle = GameObject.Find("Camera1");
+                _cameraVehicle = Find("Camera1");
 
             _cameraVehicle.SetActive(true);
             _touchController.enabled = false;
             Grid3D.gridParent.SetActive(false);
             _selectionCube.SetActive(false);
-            _ui3D.SetActive(false);
+            _uiTrackEditor.SetActive(false);
         }
         else                       // Stop ride
         {
@@ -382,7 +383,7 @@ public class TrackEditor : MonoBehaviour
             _touchController.enabled = true;
             Grid3D.gridParent.SetActive(true);
             _selectionCube.SetActive(true);
-            _ui3D.SetActive(true);
+            _uiTrackEditor.SetActive(true);
         }
     }
 
@@ -508,5 +509,14 @@ public class TrackEditor : MonoBehaviour
     {
         // TODO: Check if user finishes the track
         return true;
+    }
+    
+    static void Set3dUiRenderTexture()
+    {
+        var rectTransform = _3dUiOverlayRenderTextureImage.GetComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
+        rectTransform.transform.position = new(Screen.width / 2f, Screen.height / 2f, 0);
+        _3dUiOverlayRenderTextureImage.GetComponent<Image>().material.mainTexture.width = Screen.width;
+        _3dUiOverlayRenderTextureImage.GetComponent<Image>().material.mainTexture.height = Screen.height;
     }
 }

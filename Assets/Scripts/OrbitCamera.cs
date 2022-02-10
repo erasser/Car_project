@@ -1,6 +1,6 @@
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations;
+using static UnityEngine.Mathf;
 using Vector3 = UnityEngine.Vector3;
 
 // TODO: Limit serialized fields values (pitch [-90, 90], distance: positive values), allow to disable pitch limiting) 
@@ -64,9 +64,9 @@ public class OrbitCamera : MonoBehaviour
         var translationV3 = touchPositionDiff * Time.deltaTime * _instance.panSpeed;
         var newPosition = _cameraTargetTransform.position - _cameraTargetTransform.TransformDirection(translationV3);
 
-        newPosition.x = Mathf.Clamp(newPosition.x, _minTargetPosition.x, _maxTargetPosition.x);
-        newPosition.y = Mathf.Clamp(newPosition.y, _minTargetPosition.y, _maxTargetPosition.y);
-        newPosition.z = Mathf.Clamp(newPosition.z, _minTargetPosition.z, _maxTargetPosition.z);
+        newPosition.x = Clamp(newPosition.x, _minTargetPosition.x, _maxTargetPosition.x);
+        newPosition.y = Clamp(newPosition.y, _minTargetPosition.y, _maxTargetPosition.y);
+        newPosition.z = Clamp(newPosition.z, _minTargetPosition.z, _maxTargetPosition.z);
 
         _cameraTargetTransform.position = newPosition;
     }
@@ -94,7 +94,7 @@ public class OrbitCamera : MonoBehaviour
         // var coefficient = - cameraComponent.transform.localPosition.z / instance.maxZoom;  // Could be used for faster zoom on higher distance
 
         cameraComponent.transform.localPosition = new Vector3(0, 0,                 // z must be inverted, because it's supposed to be negative
-            Mathf.Clamp(cameraComponent.transform.localPosition.z + zoomValue * 5 /* * coefficient*/, - _instance.maxZoom, - _instance.minZoom));
+            Clamp(cameraComponent.transform.localPosition.z + zoomValue * 5 /* * coefficient*/, - _instance.maxZoom, - _instance.minZoom));
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="yaw">Yaw angle in degrees</param>
     public static void SetRotation(float pitch, float yaw)
     {
-        pitch = Mathf.Clamp(pitch, _instance.minPitch, _instance.maxPitch);
+        pitch = Clamp(pitch, _instance.minPitch, _instance.maxPitch);
         _cameraTargetTransform.eulerAngles = new Vector3(pitch, yaw, 0);
 
         UpdateRotateHorizontalUiElement();
@@ -185,7 +185,7 @@ public class OrbitCamera : MonoBehaviour
         if (distance < _instance.minZoom || distance > _instance.maxZoom)
         {
             var oldDistance = distance;
-            distance = Mathf.Clamp(oldDistance, _instance.minZoom, _instance.maxZoom);
+            distance = Clamp(oldDistance, _instance.minZoom, _instance.maxZoom);
             Debug.LogWarning($"Distance = {oldDistance} is out of zoom limits [{_instance.minZoom}, {_instance.maxZoom}]. Value was clamped to distance = {distance}");
         }
 

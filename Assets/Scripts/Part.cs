@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using Unity.VisualScripting.FullSerializer;
-using UnityEditor.AssetImporters;
 using UnityEngine;
+using static UnityEngine.Mathf;
+
 // using UnityEngine.UI;
 
 // Všechny GridCube, přes které part zabírá místo, budou referencovat ten part
@@ -56,7 +55,7 @@ public class Part : MonoBehaviour
             // Subtract .1 to fix model vertices position inaccuracy
             // 10 units is the edge size of one cube
             // Must be at least 1
-            return Mathf.Max(Mathf.CeilToInt((meshDimension - .1f) / 10), 1);
+            return Max(CeilToInt((meshDimension - .1f) / 10), 1);
         }
 
         UpdateWorldCubeDimensions();

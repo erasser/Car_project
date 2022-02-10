@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Mathf;
 
 /// <summary>
 ///     Grid holds GridCubes, which holds parts and their position
@@ -103,10 +104,10 @@ public class Grid3D : MonoBehaviour
     /// <returns>List of GridCubes</returns>
     public static List<GridCube> GetGridCubesInLine(Coord coordinates, string axis, int count, bool excludeInitial = false)
     {
-        var sign = (int)Mathf.Sign(count);
+        var sign = (int)Sign(count);
         var cubes = new List<GridCube>();
         var coord = coordinates;
-        count = Mathf.Abs(count);
+        count = Abs(count);
 
         for (int i = excludeInitial ? 1 : 0; i < count; ++i)
         {

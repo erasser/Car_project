@@ -1,5 +1,5 @@
-using System;
 using UnityEngine;
+using static UnityEngine.GameObject;
 using static UnityEngine.ParticleSystem;
 
 /// <summary>
@@ -25,10 +25,10 @@ public class CarTrigger : MonoBehaviour
         _vehicleController = TrackEditor.vehicle.GetComponent<MSVehicleControllerFree>();
 
         // TODO: ► Make those Unity editor fields, so they don't need to be searched for.
-        _wheelMudParticleEffectLeftEmission   = GameObject.Find("wheelMudParticleEffect").GetComponent<ParticleSystem>().emission;
-        _wheelMudParticleEffectRightEmission  = GameObject.Find("wheelMudParticleEffect2").GetComponent<ParticleSystem>().emission;
-        _wheelSnowParticleEffectLeftEmission  = GameObject.Find("wheelSnowParticleEffect").GetComponent<ParticleSystem>().emission;
-        _wheelSnowParticleEffectRightEmission = GameObject.Find("wheelSnowParticleEffect2").GetComponent<ParticleSystem>().emission;
+        _wheelMudParticleEffectLeftEmission   = Find("wheelMudParticleEffect").GetComponent<ParticleSystem>().emission;
+        _wheelMudParticleEffectRightEmission  = Find("wheelMudParticleEffect2").GetComponent<ParticleSystem>().emission;
+        _wheelSnowParticleEffectLeftEmission  = Find("wheelSnowParticleEffect").GetComponent<ParticleSystem>().emission;
+        _wheelSnowParticleEffectRightEmission = Find("wheelSnowParticleEffect2").GetComponent<ParticleSystem>().emission;
 
         DisableParticleEffects();
     }
