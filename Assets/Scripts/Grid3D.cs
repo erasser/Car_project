@@ -21,7 +21,7 @@ public class Grid3D : MonoBehaviour
     public const byte CubeSize = 20;
 
     public static Grid3D instance;
-    static GameObject _boundingBox;
+    public static GameObject boundingBox;
     static readonly List<List<List<GridCube>>> Grid = new();  // 3D grid of coordinates
     public static GameObject gridParent;
     public static readonly Dictionary<string, Vector3> Bounds = new();
@@ -159,9 +159,9 @@ public class Grid3D : MonoBehaviour
 
     public static void SetBoundingBox()
     {
-        _boundingBox = Instantiate(instance.boundingBoxPrefab);
-        _boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
-        _boundingBox.SetActive(true);
+        boundingBox = Instantiate(instance.boundingBoxPrefab);
+        boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
+        boundingBox.SetActive(true);
     }
 
     public static void Clear()

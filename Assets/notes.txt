@@ -1,4 +1,8 @@
-﻿► Render object on top: https://answers.unity.com/questions/17841/always-render-a-object-on-top-of-another.html
+﻿- align 3D UI to the left
+- Vytvořit třídu na UI, Selection, možná i nějakou States apod., pro zredukování TrackEditor kódu
+- Implement some compression to track saves 
+
+► Render object on top: https://answers.unity.com/questions/17841/always-render-a-object-on-top-of-another.html
 https://forum.unity.com/threads/wheel-collider-on-different-surfaces.812121/
 
 Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);

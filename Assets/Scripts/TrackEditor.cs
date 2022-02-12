@@ -9,6 +9,7 @@ using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
 // using UnityEngine.UI;
 
+// ► There exists Canvas Scaler component
 // TODO: Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 
 public class TrackEditor : MonoBehaviour
@@ -23,7 +24,7 @@ public class TrackEditor : MonoBehaviour
     [SerializeField] [Tooltip("Layer of objects pickable by raycaster (i.e. track parts)")]
     LayerMask selectableObjectsLayer;
     [Space]
-    [SerializeField]
+    [SerializeField] [Tooltip("This serves to not to be run from the game start, which would cause \"missing MSSceneController\" error.")]
     GameObject vehicleControllerPrefab;
     [SerializeField]
     GameObject vehiclePrefab;
@@ -71,9 +72,9 @@ public class TrackEditor : MonoBehaviour
         _uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
         _uiTrackEditor.transform.Find("buttonToggleGridHelper").GetComponent<Button>().onClick.AddListener(Grid3D.ToggleGridHelper);
 
-        _vehicleController = Instantiate(vehicleControllerPrefab, Find("UI").transform);
         vehicle = Instantiate(vehiclePrefab);
         vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
+        _vehicleController = Instantiate(vehicleControllerPrefab, Find("UI").transform);
 
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
@@ -106,8 +107,8 @@ public class TrackEditor : MonoBehaviour
                 Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
                 
-        var ray = TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition);
-        DrawRay(ray.origin, ray.direction * 200, Color.red);
+        // var ray = TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition);
+        // DrawRay(ray.origin, ray.direction * 200, Color.red);
     }
 
     void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
@@ -264,12 +265,14 @@ public class TrackEditor : MonoBehaviour
     /// <returns>Was something moved?</returns>
     public bool ProcessUiTouch(LayerMask selectableUiObjectsLayer)
     {
-        if (Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))
-        {
-            MoveSelection(selectionHit.collider.name);
-            return true;
-        }
-        return false;
+        if (!Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))
+            return false;
+
+        // if (string.CompareOrdinal(selectionHit.collider.name, "centerButton") == 0)  // Fuck me. This is most efficient according to https://cc.davelozinski.com/c-sharp/fastest-way-to-compare-strings
+            // TODO: ► Zde jsem skončil. Process center button. + GPU caching
+        
+        MoveSelection(selectionHit.collider.name);
+        return true;
     }
 
     static void AddPart(PartSaveData partSaveData)
@@ -349,8 +352,8 @@ public class TrackEditor : MonoBehaviour
     void Play()
     {
         EventSystem.current.SetSelectedGameObject(null);
-    
-        if (!vehicle.activeSelf)  // Go ride
+
+        if (!vehicle.activeSelf)   // Go ride
         {
             if (!startPart)
             {
@@ -372,6 +375,7 @@ public class TrackEditor : MonoBehaviour
             _cameraVehicle.SetActive(true);
             _touchController.enabled = false;
             Grid3D.gridParent.SetActive(false);
+            Grid3D.boundingBox.SetActive(false);
             _selectionCube.SetActive(false);
             _uiTrackEditor.SetActive(false);
         }
@@ -379,9 +383,10 @@ public class TrackEditor : MonoBehaviour
         {
             vehicle.SetActive(false);
             _vehicleController.SetActive(false);
-            _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle? (Maybe that's how follow camera works?)
+            _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle? (Maybe that's how the follow camera works?)
             _touchController.enabled = true;
             Grid3D.gridParent.SetActive(true);
+            Grid3D.boundingBox.SetActive(true);
             _selectionCube.SetActive(true);
             _uiTrackEditor.SetActive(true);
         }
@@ -458,12 +463,10 @@ public class TrackEditor : MonoBehaviour
 
     static void UpdateSelectionCubeColor()  // Called when a part is moved or a track is loaded // TODO: Should be called also when part is rotated
     {
-        if (!selectedPart) {
-            _selectionCubeMaterial.color = SelectionCubeColors["unselected"];}
+        if (!selectedPart)
+            _selectionCubeMaterial.color = SelectionCubeColors["unselected"];
         else if (canTransformBeApplied)
-        {
             _selectionCubeMaterial.color = SelectionCubeColors["selected"];
-        }
         else if (!canTransformBeApplied)
             _selectionCubeMaterial.color = SelectionCubeColors["not allowed"];
     }
@@ -476,9 +479,7 @@ public class TrackEditor : MonoBehaviour
         ResetTrack();
 
         foreach (var partSaveData in partsSaveData)
-        {
             AddPart(partSaveData);
-        }
 
         Part.ClearLastRotation();
     }
@@ -486,9 +487,7 @@ public class TrackEditor : MonoBehaviour
     static void ResetTrack()
     {
         foreach (Transform partTransform in track.transform)
-        {
             Destroy(partTransform.gameObject);
-        }
 
         Grid3D.Clear();
 

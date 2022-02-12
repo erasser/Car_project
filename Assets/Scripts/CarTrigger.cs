@@ -42,7 +42,7 @@ public class CarTrigger : MonoBehaviour
             DisableParticleEffects();
 
         /*  Adjusts wheels particle effects according to car speed */
-        if (_wheelMudParticleEffectLeftEmission.enabled)  // TODO: Implement wheelie (when car is stationary)
+        if (_wheelMudParticleEffectLeftEmission.enabled)  // TODO: Make it relevant to rear wheels rotation speed, implement wheelie (when car is stationary).
         {
             var rate = _rigidBody.velocity.magnitude * 1.1f + _rigidBody.angularVelocity.magnitude * 20;
 

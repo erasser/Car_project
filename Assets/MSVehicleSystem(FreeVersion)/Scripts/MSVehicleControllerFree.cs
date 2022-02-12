@@ -157,7 +157,8 @@ public class OrbitalCameraSettingsClassFree {
 #region vehicleTorqueClass
 [Serializable]
 public class TorqueAdjustmentClassFree {
-	[Range(20,420)][Tooltip("This variable sets the maximum speed that the vehicle can achieve. It must be configured on the KMh unit")]
+	// original values: (20,420)
+	[Range(20,800)][Tooltip("This variable sets the maximum speed that the vehicle can achieve. It must be configured on the KMh unit")]
 	public int  maxVelocityKMh = 250;
 	[Range(0.5f,2000.0f)][Tooltip("This variable defines the torque that the motor of the vehicle will have.")]
 	public float engineTorque = 3;
