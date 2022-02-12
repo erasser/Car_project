@@ -7,6 +7,8 @@ https://forum.unity.com/threads/wheel-collider-on-different-surfaces.812121/
 
 Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
 
+• Forsage - udělat lepší směr, nemělo by to úplně pushovat auto do boku (dozadu ale jo). Tzn. něco jako dot nebo cross product.
+• MSVehicleController contains more camera (rotation) types - check them
 • Co rychle slerpovat rotaci part? (u některých kostek není hned zřejmé, na kterou stranu se točí). Musela by se i lerpovat pozice. 
 • Nějaký tréninkový levely? Objíždění kuželů?
 • Zčervenat rychlost, když user ťukne autem o něco?

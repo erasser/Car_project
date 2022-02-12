@@ -32,6 +32,7 @@ public class TrackEditor : MonoBehaviour
     public static TrackEditor instance;
     static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
     static GameObject _uiTrackEditor;
+    static GameObject _uiGame;
     static TouchController _touchController;
     // static GameObject _ui3D;
     static GameObject _3dUiOverlayRenderTextureImage;
@@ -41,7 +42,7 @@ public class TrackEditor : MonoBehaviour
     static readonly List<Transform> PartCategories = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     static readonly List<Transform> Parts = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     static GameObject _camera;
-    static GameObject _cameraVehicle;
+    static GameObject _camera3dUi;
     GameObject _ground;
     public static GameObject track;
     static GameObject _vehicleController;
@@ -66,15 +67,14 @@ public class TrackEditor : MonoBehaviour
     {
         instance = this;
 
-        Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
         _uiTrackEditor = Find("UI_track_editor");
         _uiTrackEditor.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
         _uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
         _uiTrackEditor.transform.Find("buttonToggleGridHelper").GetComponent<Button>().onClick.AddListener(Grid3D.ToggleGridHelper);
-
-        vehicle = Instantiate(vehiclePrefab);
-        vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
-        _vehicleController = Instantiate(vehicleControllerPrefab, Find("UI").transform);
+        _uiTrackEditor.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
+        _uiGame = Find("UI_game");
+        _uiGame.transform.Find("Stop").GetComponent<Button>().onClick.AddListener(Stop);
+        _uiGame.SetActive(false);
 
         _selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
@@ -84,12 +84,11 @@ public class TrackEditor : MonoBehaviour
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
 
         _camera = Find("cameraEditor");
+        _camera3dUi = Find("Camera_3D_UI_to_render_texture");
         _ground = Find("ground");
         _ground.SetActive(false);
         track = new GameObject("Track");
         _touchController = GetComponent<TouchController>();
-        // _ui3D = GameObject.Find("Camera_3D_UI");  // old solution
-        // _ui3D = Find("Camera_3D_UI_to_render_texture");  // new solution, but not needed in the script
         _3dUiOverlayRenderTextureImage = Find("3D_UI_overlay_image");
 
         GenerateSurfaceMaterialsThumbnails();
@@ -353,43 +352,46 @@ public class TrackEditor : MonoBehaviour
     {
         EventSystem.current.SetSelectedGameObject(null);
 
-        if (!vehicle.activeSelf)   // Go ride
+        if (!startPart)
         {
-            if (!startPart)
-            {
-                LogWarning("There is no start!");  // TODO: Show message to user
-                return;
-            }
-
-            // Funguje i jako restart. Zjistit proč přesně a použít pro Restart()
-            _vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
-            _vehicleController.SetActive(true);
-            vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
-            vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + .5f, startPart.transform.position.z);
-            vehicle.transform.Translate(Vector3.back * 4);
-            vehicle.SetActive(true);
-
-            if (!_cameraVehicle)
-                _cameraVehicle = Find("Camera1");
-
-            _cameraVehicle.SetActive(true);
-            _touchController.enabled = false;
-            Grid3D.gridParent.SetActive(false);
-            Grid3D.boundingBox.SetActive(false);
-            _selectionCube.SetActive(false);
-            _uiTrackEditor.SetActive(false);
+            LogWarning("There is no start!");  // TODO: Show message to user
+            return;
         }
-        else                       // Stop ride
-        {
-            vehicle.SetActive(false);
-            _vehicleController.SetActive(false);
-            _cameraVehicle.SetActive(false);  // Why the fuck is it not attached to the vehicle? (Maybe that's how the follow camera works?)
-            _touchController.enabled = true;
-            Grid3D.gridParent.SetActive(true);
-            Grid3D.boundingBox.SetActive(true);
-            _selectionCube.SetActive(true);
-            _uiTrackEditor.SetActive(true);
-        }
+
+        vehicle = Instantiate(vehiclePrefab);
+        vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
+        _vehicleController = Instantiate(vehicleControllerPrefab, Find("UI").transform);
+        _vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
+        _vehicleController.SetActive(true);
+        vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
+        vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + .5f, startPart.transform.position.z);
+        vehicle.transform.Translate(Vector3.back * 4);
+        vehicle.SetActive(true);
+
+        _camera.SetActive(false);
+        _camera3dUi.SetActive(false);
+        _touchController.enabled = false;
+        Grid3D.gridParent.SetActive(false);
+        Grid3D.boundingBox.SetActive(false);
+        _selectionCube.SetActive(false);
+        _uiTrackEditor.SetActive(false);
+        _uiGame.SetActive(true);
+    }
+
+    static void Stop()
+    {
+        Destroy(vehicle);
+        Destroy(_vehicleController);
+        vehicleRigidBody = null;
+        Destroy(Find("CameraCar"));  // Because it remains in the scene after car is destroyed >:-[
+        _camera.SetActive(true);
+        _camera3dUi.SetActive(true);
+        _touchController.enabled = true;
+        Grid3D.gridParent.SetActive(true);
+        Grid3D.boundingBox.SetActive(true);
+        _selectionCube.SetActive(true);
+        _uiTrackEditor.SetActive(true);
+        _uiGame.SetActive(false);
     }
 
     static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
