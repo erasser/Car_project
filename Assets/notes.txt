@@ -1,5 +1,5 @@
 ﻿- align 3D UI to the left
-- Vytvořit třídu na UI, Selection, možná i nějakou States apod., pro zredukování TrackEditor kódu
+- Vytvořit třídu na UI, Selection, pro zredukování TrackEditor kódu
 - Implement some compression to track saves 
 
 ► Render object on top: https://answers.unity.com/questions/17841/always-render-a-object-on-top-of-another.html
