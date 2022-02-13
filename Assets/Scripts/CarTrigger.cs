@@ -37,8 +37,8 @@ public class CarTrigger : MonoBehaviour
     {
         _noTriggerTimeSum += Time.fixedDeltaTime;
 
-        /*  Disable wheels particle effect when car if flying  */
-        if (_noTriggerTimeSum > .2f)    // if (!_isOnGround) - another option, see declaration comment
+        /*  Disable wheels particle effect when car goes flying  */
+        if (_noTriggerTimeSum > .6f)    // if (!_isOnGround) - another option, see declaration comment
             DisableParticleEffects();
 
         /*  Adjusts wheels particle effects according to car speed */

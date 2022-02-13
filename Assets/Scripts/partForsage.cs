@@ -1,16 +1,18 @@
 using UnityEngine;
+using static TrackEditor;
 
 public class PartForsage : MonoBehaviour
 {
-    Vector3 _forsageForce;
+    const float Force = 25000;
 
-    void OnTriggerEnter(Collider other)
+    void OnTriggerStay(Collider other)  // Doesn't need fixedDeltaTime, this method is already updated regularly by physics.
     {
-        _forsageForce = transform.parent.right * 40000;  // It's 'right', because the default parts direction is on x+ axis
-    }
+        // Causes bigger force, when the car is more aligned with the force part.
+        var forceCoefficient = Vector3.Dot(transform.parent.right, vehicleRigidBody.transform.forward);
+        if (forceCoefficient < 0)
+            forceCoefficient *= .7f;  // for  _direction = vehicleRigidBody.transform.forward;
+            // forceCoefficient *= -.8f;  // for  _direction = transform.parent.right (old solution)
 
-    void OnTriggerStay(Collider other)  // Doesn't need fixedDeltaTime, this method is already updated regularly by physics
-    {
-        TrackEditor.vehicleRigidBody.AddForce(_forsageForce);
+        vehicleRigidBody.AddForce(vehicleRigidBody.transform.forward * Force * forceCoefficient);
     }
 }

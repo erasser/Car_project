@@ -161,8 +161,10 @@ public class TrackEditor : MonoBehaviour
         if (!Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))
             return false;
 
-        // if (string.CompareOrdinal(selectionHit.collider.name, "centerButton") == 0)  // Fuck me. This is most efficient according to https://cc.davelozinski.com/c-sharp/fastest-way-to-compare-strings
-            // TODO: ► Zde jsem skončil. Process center button. + GPU caching
+        if (string.CompareOrdinal(selectionHit.collider.name, "centerButton") == 0) // Fuck me. This is most efficient according to https://cc.davelozinski.com/c-sharp/fastest-way-to-compare-strings
+        {
+            TryUnselectPart();
+        }
         
         MoveSelection(selectionHit.collider.name);
         return true;

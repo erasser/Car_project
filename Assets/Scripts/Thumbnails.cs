@@ -3,19 +3,17 @@ using static TrackEditor;
 
 public class Thumbnails : MonoBehaviour
 {
-    static GameObject _partsInstance;
-
     public static void GenerateThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
         const byte thumbSize = 120;   // TODO: Should be relative to screen size
         const float thumbSpacing = 3.5f;  // Total space between two thumbnails
 
-        _partsInstance = Instantiate(trackEditor.partsPrefab);
+        var partsInstance = Instantiate(trackEditor.partsPrefab);
 
         // Create a render texture for the camera
         var renderTexture = new RenderTexture(thumbSize, thumbSize, 16)
         {
-            antiAliasing = 2,
+            antiAliasing = 8
         };
 
         // Create a camera for shooting partsPrefab
@@ -25,7 +23,7 @@ public class Thumbnails : MonoBehaviour
 
         byte categoryIndex = 0;
         byte partIndex = 0;
-        foreach (Transform category in _partsInstance.transform)  // Iterate over part categories
+        foreach (Transform category in partsInstance.transform)  // Iterate over part categories
         {
             if (categoryIndex > 2) continue;  // hotfix to ignore additional object in parts prefab
 
@@ -74,16 +72,11 @@ public class Thumbnails : MonoBehaviour
             ++categoryIndex;
         }
 
-        _partsInstance.SetActive(false);
-        cameraThumb.SetActive(false);
-        Grid3D.ToggleGridHelper();  // Shows grid
-        Grid3D.SetBoundingBox();
-        trackEditor.ground.transform.position = new Vector3(0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
-        trackEditor.ground.SetActive(true);
-        selectionCube.SetActive(true);
-        SetSelectionCoords(new Coord(1, 1, 1));
-        OrbitCamera.Set(selectionCube.transform.position, 50, -30, 200);
-        cameraEditor.SetActive(false);cameraEditor.SetActive(true);  // Something is fucked up, this is a hotfix
+        cameraThumbCamera.targetTexture = null;
+        partsInstance.SetActive(false);
+        Destroy(cameraThumb);
+
+        GameStateManager.Init();    // Initialization process continues here
     }
 
     public static void GenerateSurfaceMaterialsThumbnails()

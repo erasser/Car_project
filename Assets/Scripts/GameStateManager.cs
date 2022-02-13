@@ -9,6 +9,18 @@ using static TrackEditor;
 
 public class GameStateManager : MonoBehaviour
 {
+    public static void Init()
+    {
+        Grid3D.ToggleGridHelper();  // Shows grid
+        Grid3D.SetBoundingBox();
+        trackEditor.ground.transform.position = new Vector3(0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
+        trackEditor.ground.SetActive(true);
+        selectionCube.SetActive(true);
+        SetSelectionCoords(new Coord(1, 1, 1));
+        OrbitCamera.Set(selectionCube.transform.position, 50, -30, 200);
+        // cameraEditor.SetActive(false);cameraEditor.SetActive(true);  // Something is fucked up, this is a hotfix
+    }
+
     public static void Play()
     {
         EventSystem.current.SetSelectedGameObject(null);
