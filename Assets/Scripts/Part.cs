@@ -218,7 +218,7 @@ public class Part : MonoBehaviour
 
         if (materials.Length == 1) return;  // hotfix for ground
 
-        materials[CompareTag("partRoad1") ? 0 : 1] = TrackEditor.instance.surfaceMaterials[index];  // hotfix for road1 (has swapped materials)
+        materials[CompareTag("partRoad1") ? 0 : 1] = TrackEditor.trackEditor.surfaceMaterials[index];  // hotfix for road1 (has swapped materials)
         partRenderer.materials = materials;
     }
 

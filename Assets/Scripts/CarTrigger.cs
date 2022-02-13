@@ -78,12 +78,12 @@ public class CarTrigger : MonoBehaviour
         // Material is cloned, that's why I compare just the first char
         var materialFirstChar = materials[other.gameObject.CompareTag("partRoad1") ? 0 : 1].name[0];  // hotfix for road1 (has swapped materials)
 
-        if (materialFirstChar == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Mud].name[0])
+        if (materialFirstChar == TrackEditor.trackEditor.surfaceMaterials[(byte)Part.Surface.Mud].name[0])
         {
             SetPhysicalParams(.9f, 8);
             SetMudParticleEffect();
         }
-        else if (materialFirstChar == TrackEditor.instance.surfaceMaterials[(byte)Part.Surface.Snow].name[0])
+        else if (materialFirstChar == TrackEditor.trackEditor.surfaceMaterials[(byte)Part.Surface.Snow].name[0])
         {
             SetPhysicalParams(0, 7);
             SetSnowParticleEffect();

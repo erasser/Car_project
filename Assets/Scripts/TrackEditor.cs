@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using static UnityEngine.Debug;
 using static UnityEngine.GameObject;
 using static UnityEngine.Mathf;
@@ -25,15 +24,16 @@ public class TrackEditor : MonoBehaviour
     LayerMask selectableObjectsLayer;
     [Space]
     [SerializeField] [Tooltip("This serves to not to be run from the game start, which would cause \"missing MSSceneController\" error.")]
-    GameObject vehicleControllerPrefab;
+    public GameObject vehicleControllerPrefab;
     [SerializeField]
-    GameObject vehiclePrefab;
+    public GameObject vehiclePrefab;
 
-    public static TrackEditor instance;
+    public static TrackEditor trackEditor;
     static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
-    static GameObject _uiTrackEditor;
-    static GameObject _uiGame;
-    static TouchController _touchController;
+    public static GameObject ui;
+    public static GameObject uiTrackEditor;
+    public static GameObject uiGame;
+    public static TouchController touchController;
     // static GameObject _ui3D;
     static GameObject _3dUiOverlayRenderTextureImage;
 
@@ -41,11 +41,11 @@ public class TrackEditor : MonoBehaviour
     static GameObject _partsInstance;
     static readonly List<Transform> PartCategories = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     static readonly List<Transform> Parts = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
-    static GameObject _camera;
-    static GameObject _camera3dUi;
+    public static GameObject cameraEditor;
+    public static GameObject camera3dUi;
     GameObject _ground;
     public static GameObject track;
-    static GameObject _vehicleController;
+    public static GameObject vehicleController;
     public static GameObject vehicle;
     public static Rigidbody vehicleRigidBody;
 
@@ -54,7 +54,7 @@ public class TrackEditor : MonoBehaviour
     public static GameObject startPart;  // Used mainly as a state
 
     /*  Selection related  */
-    static GameObject _selectionCube;
+    public static GameObject selectionCube;
     static readonly Dictionary<String, Color> SelectionCubeColors = new();
     float _selectionCubeAlphaHalf;
     static float _selectionCubeAlphaStartTime;
@@ -65,30 +65,31 @@ public class TrackEditor : MonoBehaviour
 
     void Start()
     {
-        instance = this;
+        trackEditor = this;
 
-        _uiTrackEditor = Find("UI_track_editor");
-        _uiTrackEditor.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
-        _uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
-        _uiTrackEditor.transform.Find("buttonToggleGridHelper").GetComponent<Button>().onClick.AddListener(Grid3D.ToggleGridHelper);
-        _uiTrackEditor.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(Play);
-        _uiGame = Find("UI_game");
-        _uiGame.transform.Find("Stop").GetComponent<Button>().onClick.AddListener(Stop);
-        _uiGame.SetActive(false);
+        ui = Find("UI");
+        uiGame = ui.transform.Find("UI_game").gameObject;
+        uiTrackEditor = ui.transform.Find("UI_track_editor").gameObject;
+        uiTrackEditor.transform.Find("buttonLoad").GetComponent<Button>().onClick.AddListener(DataManager.Load);
+        uiTrackEditor.transform.Find("buttonSave").GetComponent<Button>().onClick.AddListener(DataManager.Save);
+        uiTrackEditor.transform.Find("buttonToggleGridHelper").GetComponent<Button>().onClick.AddListener(Grid3D.ToggleGridHelper);
+        uiTrackEditor.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(GameStateManager.Play);
+        uiGame.transform.Find("Stop").GetComponent<Button>().onClick.AddListener(GameStateManager.Stop);
+        uiGame.SetActive(false);
 
-        _selectionCube = Instantiate(selectionCubePrefab);
-        _selectionCubeMaterial = _selectionCube.GetComponent<MeshRenderer>().material;
+        selectionCube = Instantiate(selectionCubePrefab);
+        _selectionCubeMaterial = selectionCube.GetComponent<MeshRenderer>().material;
         SelectionCubeColors.Add("unselected", _selectionCubeMaterial.color);
         SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
         SelectionCubeColors.Add("not allowed", new Color(1, .5f, .5f, .4f));  // apply transform not allowed
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
 
-        _camera = Find("cameraEditor");
-        _camera3dUi = Find("Camera_3D_UI_to_render_texture");
+        cameraEditor = Find("cameraEditor");
+        camera3dUi = Find("Camera_3D_UI_to_render_texture");
         _ground = Find("ground");
         _ground.SetActive(false);
         track = new GameObject("Track");
-        _touchController = GetComponent<TouchController>();
+        touchController = GetComponent<TouchController>();
         _3dUiOverlayRenderTextureImage = Find("3D_UI_overlay_image");
 
         GenerateSurfaceMaterialsThumbnails();
@@ -137,7 +138,7 @@ public class TrackEditor : MonoBehaviour
             // PartCategories.Add(category);
 
             var categoryUiWrapper = new GameObject($"category_{category.name}");
-            categoryUiWrapper.transform.SetParent(_uiTrackEditor.transform);
+            categoryUiWrapper.transform.SetParent(uiTrackEditor.transform);
 
             byte partInCategoryIndex = 0;  // TODO: Change to FOR loop
             foreach (Transform partTransform in category)  // Iterate over parts in a category
@@ -185,10 +186,10 @@ public class TrackEditor : MonoBehaviour
         Grid3D.SetBoundingBox();
         _ground.transform.position = new Vector3(0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
         _ground.SetActive(true);
-        _selectionCube.SetActive(true);
+        selectionCube.SetActive(true);
         SetSelectionCoords(new Coord(1, 1, 1));
-        OrbitCamera.Set(_selectionCube.transform.position, 50, -30, 200);
-        _camera.SetActive(false);_camera.SetActive(true);  // Something is fucked up, this is a hotfix
+        OrbitCamera.Set(selectionCube.transform.position, 50, -30, 200);
+        cameraEditor.SetActive(false);cameraEditor.SetActive(true);  // Something is fucked up, this is a hotfix
     }
 
     void GenerateSurfaceMaterialsThumbnails()
@@ -202,7 +203,7 @@ public class TrackEditor : MonoBehaviour
 
             var buttonThumb = new ImageButton(
                 $"buttonSurfaceThumb_{i}",
-                _uiTrackEditor,
+                uiTrackEditor,
                 i * (thumbSize + thumbSpacing) + thumbSize * .5f,
                 thumbSize * 1.5f + 2 * thumbSpacing,
                 thumbSize,
@@ -342,56 +343,10 @@ public class TrackEditor : MonoBehaviour
         _selectionCubeCoords = coords;
 
         // Position selection cube only if it's not attached to a part
-        if (!_selectionCube.transform.parent)
-            Grid3D.PositionToGrid(_selectionCube, coords);
+        if (!selectionCube.transform.parent)
+            Grid3D.PositionToGrid(selectionCube, coords);
 
         // _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));  // Will be replaced by free camera
-    }
-
-    void Play()
-    {
-        EventSystem.current.SetSelectedGameObject(null);
-
-        if (!startPart)
-        {
-            LogWarning("There is no start!");  // TODO: Show message to user
-            return;
-        }
-
-        vehicle = Instantiate(vehiclePrefab);
-        vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
-        _vehicleController = Instantiate(vehicleControllerPrefab, Find("UI").transform);
-        _vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
-        _vehicleController.SetActive(true);
-        vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
-        vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + .5f, startPart.transform.position.z);
-        vehicle.transform.Translate(Vector3.back * 4);
-        vehicle.SetActive(true);
-
-        _camera.SetActive(false);
-        _camera3dUi.SetActive(false);
-        _touchController.enabled = false;
-        Grid3D.gridParent.SetActive(false);
-        Grid3D.boundingBox.SetActive(false);
-        _selectionCube.SetActive(false);
-        _uiTrackEditor.SetActive(false);
-        _uiGame.SetActive(true);
-    }
-
-    static void Stop()
-    {
-        Destroy(vehicle);
-        Destroy(_vehicleController);
-        vehicleRigidBody = null;
-        Destroy(Find("CameraCar"));  // Because it remains in the scene after car is destroyed >:-[
-        _camera.SetActive(true);
-        _camera3dUi.SetActive(true);
-        _touchController.enabled = true;
-        Grid3D.gridParent.SetActive(true);
-        Grid3D.boundingBox.SetActive(true);
-        _selectionCube.SetActive(true);
-        _uiTrackEditor.SetActive(true);
-        _uiGame.SetActive(false);
     }
 
     static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
@@ -406,9 +361,9 @@ public class TrackEditor : MonoBehaviour
         _selectedPartComponent.outlineComponent.enabled = true;
         var partDimensions = _selectedPartComponent.gridLocalDimensions;  // Local dimensions, because the selection cube is rotated with the part
 
-        _selectionCube.transform.SetParent(part.transform);
-        _selectionCube.transform.localPosition = Vector3.zero;
-        _selectionCube.transform.localScale = new Vector3(partDimensions.x * 10 + .1f, 10.1f, partDimensions.z * 10 + .1f);  // parts scale is 2
+        selectionCube.transform.SetParent(part.transform);
+        selectionCube.transform.localPosition = Vector3.zero;
+        selectionCube.transform.localScale = new Vector3(partDimensions.x * 10 + .1f, 10.1f, partDimensions.z * 10 + .1f);  // parts scale is 2
         _selectionCubeMaterial.color = SelectionCubeColors["selected"];
         _selectionCubeAlphaStartTime = Time.time;
 
@@ -423,13 +378,13 @@ public class TrackEditor : MonoBehaviour
 
         if (!selectedPart) return;
 
-        _selectionCube.transform.parent = null;  // Must be set before SetSelectionCoords()
+        selectionCube.transform.parent = null;  // Must be set before SetSelectionCoords()
         SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
         selectedPart = null;
         _selectedPartComponent.outlineComponent.enabled = false;
         _selectedPartComponent = null;
 
-        _selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
+        selectionCube.transform.localScale = new Vector3(20.1f, 20.1f, 20.1f);
     }
 
     /// <summary>

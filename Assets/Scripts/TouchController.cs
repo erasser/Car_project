@@ -98,7 +98,7 @@ public class TouchController : MonoBehaviour
         /*  3D UI touch  */
         if (use3DUiToo && _touchState == TouchState.TouchedDown && _controllerState == ControllerState.NoAction) 
         {
-            if (TrackEditor.instance.ProcessUiTouch(selectableUiObjectsLayer))
+            if (TrackEditor.trackEditor.ProcessUiTouch(selectableUiObjectsLayer))
             {
                 _touchState = TouchState.NoTouch;
                 _controllerState = ControllerState.Ui3DUsed;
@@ -114,7 +114,7 @@ public class TouchController : MonoBehaviour
             {
                 _touchState = TouchState.HeldTouch;
 
-                if (TrackEditor.instance.ProcessHeldTouch())  // This approach deletes also unselected parts
+                if (TrackEditor.trackEditor.ProcessHeldTouch())  // This approach deletes also unselected parts
                     _controllerState = ControllerState.PartDeleted;
                 
                 // if (TrackEditor.selectedPart)  // This approach needs a part to be selected
@@ -148,7 +148,7 @@ public class TouchController : MonoBehaviour
         {
             if (!_wasUpOnUI && _controllerState == ControllerState.NoAction)
             {
-                TrackEditor.instance.ProcessSimpleTouch();
+                TrackEditor.trackEditor.ProcessSimpleTouch();
             }
             else
             {
