@@ -31,6 +31,7 @@ public class GameStateManager : MonoBehaviour
             return;
         }
 
+        trackEditor.vehiclePrefab.SetActive(false);  // Ensures that MSSceneController is not needed before the vehicle is active (so the vehicle prefab can be active)
         vehicle = Instantiate(trackEditor.vehiclePrefab);
         vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
         vehicleController = Instantiate(trackEditor.vehicleControllerPrefab, Find("UI").transform);

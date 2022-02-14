@@ -19,7 +19,7 @@ public class TouchController : MonoBehaviour
     [SerializeField]
     GameObject cameraUi;                // TODO: Show only if use3DUiToo = true
     [SerializeField]
-    LayerMask selectableUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
+    LayerMask selectable3dUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
 
     public static Camera cameraUiComponent;     // TODO: Show only if use3DUiToo = true
     static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
@@ -96,9 +96,9 @@ public class TouchController : MonoBehaviour
         }
 
         /*  3D UI touch  */
-        if (use3DUiToo && _touchState == TouchState.TouchedDown && _controllerState == ControllerState.NoAction) 
+        if (use3DUiToo && _touchState == TouchState.TouchedDown && _controllerState == ControllerState.NoAction)
         {
-            if (TrackEditor.trackEditor.ProcessUiTouch(selectableUiObjectsLayer))
+            if (TrackEditor.trackEditor.Process3dUiTouch(selectable3dUiObjectsLayer))
             {
                 _touchState = TouchState.NoTouch;
                 _controllerState = ControllerState.Ui3DUsed;

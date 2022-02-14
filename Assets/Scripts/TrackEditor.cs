@@ -98,6 +98,9 @@ public class TrackEditor : MonoBehaviour
 
     void Update()
     {
+        // Use in combination with Ctrl + Shift + P
+        // DrawRay(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition).origin, TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition).direction * 1000, Color.magenta);
+        
         if (selectedPart)
             _selectionCubeMaterial.color = new Color(
                 _selectionCubeMaterial.color.r,
@@ -154,19 +157,18 @@ public class TrackEditor : MonoBehaviour
     /// <summary>
     ///     Processes 3D UI touch.
     /// </summary>
-    /// <param name="selectableUiObjectsLayer">LayerMask, which 3D UI elements have.</param>
-    /// <returns>Was something moved?</returns>
-    public bool ProcessUiTouch(LayerMask selectableUiObjectsLayer)
+    /// <param name="selectable3dUiObjectsLayer">LayerMask, which 3D UI elements have.</param>
+    /// <returns>Was 3D UI element touched?</returns>
+    public bool Process3dUiTouch(LayerMask selectable3dUiObjectsLayer)
     {
-        if (!Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableUiObjectsLayer))
+        if (!Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectable3dUiObjectsLayer))
             return false;
 
         if (string.CompareOrdinal(selectionHit.collider.name, "centerButton") == 0) // Fuck me. This is most efficient according to https://cc.davelozinski.com/c-sharp/fastest-way-to-compare-strings
-        {
-            TryUnselectPart();
-        }
-        
-        MoveSelection(selectionHit.collider.name);
+            TryUnselectPart();  // ► Zde jsem skončil. Funguje, ale napiču.
+        else
+            MoveSelection(selectionHit.collider.name);
+
         return true;
     }
 
@@ -369,5 +371,10 @@ public class TrackEditor : MonoBehaviour
         rectTransform.transform.position = new(Screen.width / 2f, Screen.height / 2f, 0);
         _3dUiOverlayRenderTextureImage.GetComponent<Image>().material.mainTexture.width = Screen.width;
         _3dUiOverlayRenderTextureImage.GetComponent<Image>().material.mainTexture.height = Screen.height;
+    }
+
+    void OnApplicationQuit()  // Can't be in GameStateManager, since it's not attached to a gameObject
+    {
+        vehiclePrefab.SetActive(true);  // So the vehicle prefab remains active in the project
     }
 }
