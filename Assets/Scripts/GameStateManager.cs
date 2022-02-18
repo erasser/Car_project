@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using static UnityEngine.GameObject;
 using static UnityEngine.Debug;
 using static TrackEditor;
+using static UiController;
 /// <summary>
 /// Takes care of switching between track editor and play mode
 /// </summary>
@@ -13,7 +14,7 @@ public class GameStateManager : MonoBehaviour
     {
         Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
-        trackEditor.ground.transform.position = new Vector3(0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
+        trackEditor.ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
         trackEditor.ground.SetActive(true);
         selectionCube.SetActive(true);
         SetSelectionCoords(new Coord(1, 1, 1));
@@ -37,8 +38,8 @@ public class GameStateManager : MonoBehaviour
         vehicleController = Instantiate(trackEditor.vehicleControllerPrefab, Find("UI").transform);
         vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
         vehicleController.SetActive(true);
-        vehicle.transform.eulerAngles = new Vector3(startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
-        vehicle.transform.position = new Vector3(startPart.transform.position.x, startPart.transform.position.y + .5f, startPart.transform.position.z);
+        vehicle.transform.eulerAngles = new (startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
+        vehicle.transform.position = new (startPart.transform.position.x, startPart.transform.position.y + .5f, startPart.transform.position.z);
         vehicle.transform.Translate(Vector3.back * 4);
         vehicle.SetActive(true);
 

@@ -8,7 +8,6 @@ using Outline = UnityEngine.UI.Outline;
 /// Used to dynamically create image buttons. Only square buttons are supported at the moment.
 /// </summary>
 
-// TODO: Try to support click listener?
 // TODO: Support outline
 
 public class ImageButton
@@ -17,7 +16,7 @@ public class ImageButton
     public readonly RectTransform rectTransform;
     public readonly Button button;
     public readonly Image image;
-    public Outline outline;
+    // public Outline outline;
 
     public ImageButton(string buttonName, GameObject parent, float xPos, float yPos, float size, UnityAction callback, bool addOutline = false)
     {
@@ -35,7 +34,7 @@ public class ImageButton
         if (addOutline)
         {
             gameObject.AddComponent<Outline>();
-            outline = gameObject.GetComponent<Outline>();
+            // outline = gameObject.GetComponent<Outline>();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using static TrackEditor;
+using static UiController;
 
 public class Thumbnails : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class Thumbnails : MonoBehaviour
     {
         const byte thumbSize = 120;   // TODO: Should be relative to screen size
         const float thumbSpacing = 3.5f;  // Total space between two thumbnails
+        var cameraOffset = new Vector3(-4, 8, -15);
 
         var partsInstance = Instantiate(trackEditor.partsPrefab);
 
@@ -38,7 +40,7 @@ public class Thumbnails : MonoBehaviour
                 Parts.Add(partTransform);
 
                 // Set camera position & look at the part
-                cameraThumb.transform.position = partTransform.position + new Vector3(-4, 8, -15);
+                cameraThumb.transform.position = partTransform.position + cameraOffset;
                 cameraThumb.transform.LookAt(partTransform.position);
 
                 partTransform.gameObject.SetActive(true);  // Show the part for render shot

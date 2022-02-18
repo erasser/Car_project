@@ -160,7 +160,7 @@ public class Grid3D : MonoBehaviour
     public static void SetBoundingBox()
     {
         boundingBox = Instantiate(instance.boundingBoxPrefab);
-        boundingBox.transform.localScale = new Vector3((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
+        boundingBox.transform.localScale = new ((instance.xCount - 2) * CubeSize, (instance.yCount - 2) * CubeSize, (instance.zCount - 2) * CubeSize);
         boundingBox.SetActive(true);
     }
 
