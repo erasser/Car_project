@@ -43,7 +43,6 @@ public class GameStateManager : MonoBehaviour
         vehicle.SetActive(true);
 
         cameraEditor.SetActive(false);
-        camera3dUi.SetActive(false);
         touchController.enabled = false;
         Grid3D.gridParent.SetActive(false);
         Grid3D.boundingBox.SetActive(false);
@@ -59,7 +58,6 @@ public class GameStateManager : MonoBehaviour
         vehicleRigidBody = null;
         Destroy(Find("CameraCar"));  // Because it remains in the scene after car is destroyed >:-[
         cameraEditor.SetActive(true);
-        camera3dUi.SetActive(true);
         touchController.enabled = true;
         Grid3D.gridParent.SetActive(true);
         Grid3D.boundingBox.SetActive(true);

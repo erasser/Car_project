@@ -33,9 +33,9 @@ public class OrbitCamera : MonoBehaviour
     byte panSpeed = 16;
     [Space]
     [SerializeField]                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
-    GameObject uiRotateHorizontalUiElement;
+    public GameObject uiRotateHorizontalUiElement;
 
-    static OrbitCamera _instance;
+    public static OrbitCamera orbitCamera;
     public static Camera cameraComponent;
     static Transform _cameraTargetTransform;  // Should not be child of anything
     static GameObject _watchedObject;
@@ -44,12 +44,12 @@ public class OrbitCamera : MonoBehaviour
 
     void Awake()
     {
-        _instance = this;
+        orbitCamera = this;
         _cameraTargetTransform = new GameObject("cameraTarget").transform;
         _cameraTargetTransform.Translate(0, transform.position.y, 0);
         transform.SetParent(_cameraTargetTransform, true);
         gameObject.AddComponent<LookAtConstraint>().constraintActive = true;  // It works without source object, strange...
-        SetPitch(_instance.minPitch);  // So the pitch limit is satisfied
+        SetPitch(orbitCamera.minPitch);  // So the pitch limit is satisfied
         cameraComponent = GetComponent<Camera>();
     }
 
@@ -61,7 +61,7 @@ public class OrbitCamera : MonoBehaviour
 
     public static void Pan(Vector3 touchPositionDiff)
     {
-        var translationV3 = touchPositionDiff * Time.deltaTime * _instance.panSpeed;
+        var translationV3 = touchPositionDiff * Time.deltaTime * orbitCamera.panSpeed;
         var newPosition = _cameraTargetTransform.position - _cameraTargetTransform.TransformDirection(translationV3);
 
         newPosition.x = Clamp(newPosition.x, _minTargetPosition.x, _maxTargetPosition.x);
@@ -77,7 +77,7 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="touchPositionDiff">Should be <c>Input.mousePosition - lastMousePosition</c>.</param>
     public static void Orbit(Vector3 touchPositionDiff)
     {
-        var rotationV3 = touchPositionDiff * Time.deltaTime * _instance.orbitSpeed;
+        var rotationV3 = touchPositionDiff * Time.deltaTime * orbitCamera.orbitSpeed;
         var localEulerAngles = _cameraTargetTransform.localEulerAngles;
                                     // ↓ Slower orbit speed when nearer to orbit pole
         var rotY = rotationV3.x /* * Mathf.Cos(localEulerAngles.x * .0174533f)*/;
@@ -93,8 +93,8 @@ public class OrbitCamera : MonoBehaviour
     {
         // var coefficient = - cameraComponent.transform.localPosition.z / instance.maxZoom;  // Could be used for faster zoom on higher distance
 
-        cameraComponent.transform.localPosition = new Vector3(0, 0,                 // z must be inverted, because it's supposed to be negative
-            Clamp(cameraComponent.transform.localPosition.z + zoomValue * 5 /* * coefficient*/, - _instance.maxZoom, - _instance.minZoom));
+        cameraComponent.transform.localPosition = new (0, 0,                 // z must be inverted, because it's supposed to be negative
+            Clamp(cameraComponent.transform.localPosition.z + zoomValue * 5 /* * coefficient*/, - orbitCamera.maxZoom, - orbitCamera.minZoom));
     }
 
     /// <summary>
@@ -146,10 +146,10 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="yaw">Yaw angle in degrees</param>
     public static void SetRotation(float pitch, float yaw)
     {
-        pitch = Clamp(pitch, _instance.minPitch, _instance.maxPitch);
-        _cameraTargetTransform.eulerAngles = new Vector3(pitch, yaw, 0);
+        pitch = Clamp(pitch, orbitCamera.minPitch, orbitCamera.maxPitch);
+        _cameraTargetTransform.eulerAngles = new (pitch, yaw, 0);
 
-        UpdateRotateHorizontalUiElement();
+        Update3dUiTransform();
     }
 
     /// <summary>
@@ -182,14 +182,14 @@ public class OrbitCamera : MonoBehaviour
             return;
         }
 
-        if (distance < _instance.minZoom || distance > _instance.maxZoom)
+        if (distance < orbitCamera.minZoom || distance > orbitCamera.maxZoom)
         {
             var oldDistance = distance;
-            distance = Clamp(oldDistance, _instance.minZoom, _instance.maxZoom);
-            Debug.LogWarning($"Distance = {oldDistance} is out of zoom limits [{_instance.minZoom}, {_instance.maxZoom}]. Value was clamped to distance = {distance}");
+            distance = Clamp(oldDistance, orbitCamera.minZoom, orbitCamera.maxZoom);
+            Debug.LogWarning($"Distance = {oldDistance} is out of zoom limits [{orbitCamera.minZoom}, {orbitCamera.maxZoom}]. Value was clamped to distance = {distance}");
         }
 
-        cameraComponent.transform.localPosition = new Vector3(0, 0, - distance);
+        cameraComponent.transform.localPosition = new (0, 0, - distance);
     }
 
     public static void Set(Vector3 targetPosition, float pitch, float yaw)
@@ -219,10 +219,27 @@ public class OrbitCamera : MonoBehaviour
     ///     Aligns Y rotation with camera Y rotation
     /// </summary>
     /// <param name="rotY">Camera Y rotation component</param>
-    static void UpdateRotateHorizontalUiElement()
+    static void Update3dUiTransform()
     {
-        if (_instance.uiRotateHorizontalUiElement)
-            _instance.uiRotateHorizontalUiElement.transform.localEulerAngles = new Vector3(0, - _cameraTargetTransform.localEulerAngles.y, 0);
-        // _instance.uiRotateHorizontalUiElement.transform.Rotate(Vector3.up, oldRotY - rotY);  // rotate relatively
+        if (!orbitCamera.uiRotateHorizontalUiElement) return;
+
+        var cameraLocalEulerAngles = _cameraTargetTransform.localEulerAngles;
+        orbitCamera.uiRotateHorizontalUiElement.transform.localEulerAngles = new(90 - cameraLocalEulerAngles.x, 0, cameraLocalEulerAngles.y);
+        // orbitCamera.uiRotateHorizontalUiElement.transform.localEulerAngles.x, 0, _cameraTargetTransform.localEulerAngles.y);  // just for y rotation
+
+        // This transforms vertical arrows too. Needs to have VerticalPanel with arrowDown and VerticalPanel (1) with arrowUp
+        // var trans = GameObject.Find("VerticalPanel").transform;
+        // var angles = trans.localEulerAngles;
+        // angles.x = - cameraLocalEulerAngles.x;
+        // trans.localEulerAngles = angles;
+        // GameObject.Find("VerticalPanel (1)").transform.localEulerAngles = angles;
+
+        var trans = GameObject.Find("arrowUp").transform;
+        var angles = trans.localEulerAngles;
+        angles.x = - cameraLocalEulerAngles.x * .8f;
+        trans.localEulerAngles = angles;
+        var arrowDownTransform = GameObject.Find("arrowDown").transform;
+        arrowDownTransform.localEulerAngles = angles;
+        arrowDownTransform.Rotate(Vector3.right * 180 + Vector3.right * 20); // inefficient calculation and bad angle
     }
 }

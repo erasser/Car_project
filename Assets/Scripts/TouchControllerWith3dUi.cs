@@ -8,18 +8,27 @@ using UnityEngine.EventSystems;
 
 // TODO: Make it relative to screen dimensions, so the pan and orbit speed is always constant
 // See UFO to implement touch
+// TODO: ► Process only if screen is touched? Přece musí jít ty eventy pověsit nějak na celý okno hry
 
-public class TouchController : MonoBehaviour
+public class TouchControllerWith3dUi : MonoBehaviour
 {
     [SerializeField]    [Range(.01f, 5)]      [Tooltip("Interval in seconds, in which long touch event is fired (without touch dragging).")]
     float longTouchDuration = 2;
+    [SerializeField]
+    bool use3DUiToo = true;
+    [SerializeField]
+    GameObject cameraUi;                // TODO: Show only if use3DUiToo = true
+    [SerializeField]
+    LayerMask selectable3dUiObjectsLayer; // TODO: Show only if use3DUiToo = true  https://answers.unity.com/questions/1284988/custom-inspector-2.html
 
+    public static Camera cameraUiComponent;     // TODO: Show only if use3DUiToo = true
     static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
     static TouchState _touchState = TouchState.NoTouch;
     static ControllerState _controllerState = ControllerState.NoAction;
     static int _scrollValue;
     static Vector3 _touchDownPosition;
     static Vector3 _touchUpPosition;
+    // private static bool _wasDownOnUI;
     static bool _wasUpOnUI;
     float _touchDuration;
 
@@ -37,6 +46,7 @@ public class TouchController : MonoBehaviour
         { ControllerState.NoAction, "no action" },
         { ControllerState.Panning, "panning" },
         { ControllerState.Orbiting, "orbiting" },
+        { ControllerState.Ui3DUsed, "UI 3D used" },
         { ControllerState.PartDeleted, "part deleted" }};
 #endif
 
@@ -54,14 +64,20 @@ public class TouchController : MonoBehaviour
         NoAction,
         Panning,     // dragging with double touch
         Orbiting,    // dragging with single touch
+        Ui3DUsed,
         PartDeleted
+    }
+
+    void Start()
+    {
+        cameraUiComponent = cameraUi.GetComponent<Camera>();
     }
 
     void Update()
     {
         ProcessTouch();
     }
-
+    
     void ProcessTouch()
     {
         CheckMouseDown();
@@ -77,6 +93,17 @@ public class TouchController : MonoBehaviour
         {
             OrbitCamera.Zoom(_scrollValue);
             return;
+        }
+
+        /*  3D UI touch  */
+        if (use3DUiToo && _touchState == TouchState.TouchedDown && _controllerState == ControllerState.NoAction)
+        {
+            /*  process 3D UI touch  */
+            // if (TrackEditor.trackEditor.Process3dUiTouch(selectable3dUiObjectsLayer))
+            // {
+            //     _touchState = TouchState.NoTouch;
+            //     _controllerState = ControllerState.Ui3DUsed;
+            // }
         }
 
         if (_touchState == TouchState.TouchedDown)
@@ -138,13 +165,19 @@ public class TouchController : MonoBehaviour
     // Is reset each frame in ProcessTouch() when processed
     void CheckMouseDown()
     {
+        // UI - Při přechodu na nové 3D UI udělat na to metodu. Toto použít v metodě tady, komplexnější logiku v UI.cs
+        // UI elementům se dá vypnout Raycast target...
         if (EventSystem.current.IsPointerOverGameObject()) return;
 
         if (Input.GetMouseButtonDown(0))
+        {
             _touchState = TouchState.TouchedDown;
+        }
 
         if (Input.GetMouseButtonDown(1) && _touchState == TouchState.TouchedDown)
+        {
             _touchState = TouchState.DoubleTouch; // Need to press LMB, then RMB
+        }
     }
 
     // Is reset each frame in ProcessTouch() when processed

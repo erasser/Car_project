@@ -1,12 +1,21 @@
-﻿- align 3D UI to the left
+﻿----- NEW UI -----
+► Optimize Update3dUiTransform(), if I want to use vertical arrows rotation
+------------------
+
+Process3dUiTouch se spouští několikrát po 1 kliknutí - bude odstraněno s novým flat 3D UI
+
+zkontrolovat thumbnail buttons, odstranit jim transition a navigation
+
+
 - Vytvořit třídu na UI, Selection, pro zredukování TrackEditor kódu
 - Implement some compression to track saves 
 
-► Render object on top: https://answers.unity.com/questions/17841/always-render-a-object-on-top-of-another.html
+Render object on top: https://answers.unity.com/questions/17841/always-render-a-object-on-top-of-another.html
 https://forum.unity.com/threads/wheel-collider-on-different-surfaces.812121/
 
 Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
 
+• Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 • Forsage - udělat lepší směr, nemělo by to úplně pushovat auto do boku (dozadu ale jo). Tzn. něco jako dot nebo cross product.
 • MSVehicleController contains more camera (rotation) types - check them
 • Co rychle slerpovat rotaci part? (u některých kostek není hned zřejmé, na kterou stranu se točí). Musela by se i lerpovat pozice. 

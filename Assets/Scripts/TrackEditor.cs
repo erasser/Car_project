@@ -5,11 +5,7 @@ using static UnityEngine.Debug;
 using static UnityEngine.GameObject;
 using static UnityEngine.Mathf;
 using Button = UnityEngine.UI.Button;
-using Image = UnityEngine.UI.Image;
 // using UnityEngine.UI;
-
-// ► There exists Canvas Scaler component
-// TODO: Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 
 public class TrackEditor : MonoBehaviour
 {
@@ -34,14 +30,11 @@ public class TrackEditor : MonoBehaviour
     public static GameObject uiTrackEditor;
     public static GameObject uiGame;
     public static TouchController touchController;
-    // static GameObject _ui3D;
-    static GameObject _3dUiOverlayRenderTextureImage;
 
     /*  Editor objects  */
     static readonly List<Transform> PartCategories = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     public static readonly List<Transform> Parts = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     public static GameObject cameraEditor;
-    public static GameObject camera3dUi;
     public GameObject ground;
     public static GameObject track;
     public static GameObject vehicleController;
@@ -75,6 +68,12 @@ public class TrackEditor : MonoBehaviour
         uiTrackEditor.transform.Find("Go!").GetComponent<Button>().onClick.AddListener(GameStateManager.Play);
         uiGame.transform.Find("Stop").GetComponent<Button>().onClick.AddListener(GameStateManager.Stop);
         uiGame.SetActive(false);
+        Find("arrowUp").GetComponent<Button>().onClick.AddListener( delegate { MoveSelection("arrowUp"); });
+        Find("arrowDown").GetComponent<Button>().onClick.AddListener( delegate { MoveSelection("arrowDown"); });
+        Find("arrowLeft").GetComponent<Button>().onClick.AddListener( delegate { MoveSelection("arrowLeft"); });
+        Find("arrowRight").GetComponent<Button>().onClick.AddListener( delegate { MoveSelection("arrowRight"); });
+        Find("arrowFront").GetComponent<Button>().onClick.AddListener( delegate { MoveSelection("arrowFront"); });
+        Find("arrowBack").GetComponent<Button>().onClick.AddListener( delegate { MoveSelection("arrowBackward"); });
 
         selectionCube = Instantiate(selectionCubePrefab);
         _selectionCubeMaterial = selectionCube.GetComponent<MeshRenderer>().material;
@@ -84,23 +83,17 @@ public class TrackEditor : MonoBehaviour
         _selectionCubeAlphaHalf = SelectionCubeColors["selected"].a / 2;
 
         cameraEditor = Find("cameraEditor");
-        camera3dUi = Find("Camera_3D_UI_to_render_texture");
         ground = Find("ground");
         ground.SetActive(false);
         track = new GameObject("Track");
         touchController = GetComponent<TouchController>();
-        _3dUiOverlayRenderTextureImage = Find("3D_UI_overlay_image");
 
         Thumbnails.GenerateSurfaceMaterialsThumbnails();
         Thumbnails.GenerateThumbnails();  // Initialization process continues here
-        Set3dUiRenderTexture();
     }
 
     void Update()
     {
-        // Use in combination with Ctrl + Shift + P
-        // DrawRay(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition).origin, TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition).direction * 1000, Color.magenta);
-        
         if (selectedPart)
             _selectionCubeMaterial.color = new Color(
                 _selectionCubeMaterial.color.r,
@@ -108,9 +101,6 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.b,
                 Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
-                
-        // var ray = TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition);
-        // DrawRay(ray.origin, ray.direction * 200, Color.red);
     }
 
     public static void ApplySurface(byte index)
@@ -152,24 +142,6 @@ public class TrackEditor : MonoBehaviour
             return true;
         }
         return false;
-    }
-
-    /// <summary>
-    ///     Processes 3D UI touch.
-    /// </summary>
-    /// <param name="selectable3dUiObjectsLayer">LayerMask, which 3D UI elements have.</param>
-    /// <returns>Was 3D UI element touched?</returns>
-    public bool Process3dUiTouch(LayerMask selectable3dUiObjectsLayer)
-    {
-        if (!Physics.Raycast(TouchController.cameraUiComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectable3dUiObjectsLayer))
-            return false;
-
-        if (string.CompareOrdinal(selectionHit.collider.name, "centerButton") == 0) // Fuck me. This is most efficient according to https://cc.davelozinski.com/c-sharp/fastest-way-to-compare-strings
-            TryUnselectPart();  // ► Zde jsem skončil. Funguje, ale napiču.
-        else
-            MoveSelection(selectionHit.collider.name);
-
-        return true;
     }
 
     public static void AddPart(PartSaveData partSaveData)
@@ -357,20 +329,11 @@ public class TrackEditor : MonoBehaviour
 
         startPart = null;
     }
-    
+
     static bool IsValidForPublish()
     {
         // TODO: Check if user finishes the track
         return true;
-    }
-    
-    static void Set3dUiRenderTexture()
-    {
-        var rectTransform = _3dUiOverlayRenderTextureImage.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(Screen.width, Screen.height);
-        rectTransform.transform.position = new(Screen.width / 2f, Screen.height / 2f, 0);
-        _3dUiOverlayRenderTextureImage.GetComponent<Image>().material.mainTexture.width = Screen.width;
-        _3dUiOverlayRenderTextureImage.GetComponent<Image>().material.mainTexture.height = Screen.height;
     }
 
     void OnApplicationQuit()  // Can't be in GameStateManager, since it's not attached to a gameObject
