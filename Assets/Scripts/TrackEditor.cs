@@ -69,7 +69,9 @@ public class TrackEditor : MonoBehaviour
         touchController = GetComponent<TouchController>();
 
         Thumbnails.GenerateSurfaceMaterialsThumbnails();
-        Thumbnails.GenerateThumbnails();  // Initialization process continues here
+        Thumbnails.GeneratePartsThumbnails();  // Initialization process continues here
+
+        GameStateManager.Init();
     }
 
     void Update()

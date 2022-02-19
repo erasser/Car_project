@@ -5,11 +5,6 @@ Pořešit pořádně gitignore
 ► Optimize Update3dUiTransform(), if I want to use vertical arrows rotation
 ------------------
 
-Process3dUiTouch se spouští několikrát po 1 kliknutí - bude odstraněno s novým flat 3D UI
-
-zkontrolovat thumbnail buttons, odstranit jim transition a navigation
-
-
 - Vytvořit třídu pro Selection?
 - Implement some compression to track saves 
 
