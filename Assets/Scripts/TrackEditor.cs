@@ -46,7 +46,7 @@ public class TrackEditor : MonoBehaviour
     float _selectionCubeAlphaHalf;
     static float _selectionCubeAlphaStartTime;
     static Material _selectionCubeMaterial;
-    static Coord _selectionCubeCoords;
+    public static Coord selectionCubeCoords;
     public static GameObject selectedPart;
     static Part _selectedPartComponent;
 
@@ -160,7 +160,7 @@ public class TrackEditor : MonoBehaviour
         if (partSaveData.IsNull()) // The part is chosen by user
         {
             SelectPart(newPart, true);
-            coords = _selectionCubeCoords;
+            coords = selectionCubeCoords;
         }
         else if (partSaveData.materialIndex != (byte)Part.Surface.Asphalt)  // Loaded Part. Material index = 0 is considered default.
             newPartComponent.SetMaterial(partSaveData.materialIndex);
@@ -174,12 +174,12 @@ public class TrackEditor : MonoBehaviour
     {
         var coords = arrowName switch
         {
-            "arrowLeft"  => _selectionCubeCoords.MoveX(-1),
-            "arrowRight" => _selectionCubeCoords.MoveX(),
-            "arrowDown"  => _selectionCubeCoords.MoveY(-1),
-            "arrowUp"    => _selectionCubeCoords.MoveY(),
-            "arrowFront" => _selectionCubeCoords.MoveZ(-1),
-            "arrowBack"  => _selectionCubeCoords.MoveZ(),
+            "arrowLeft"  => selectionCubeCoords.MoveX(-1),
+            "arrowRight" => selectionCubeCoords.MoveX(),
+            "arrowDown"  => selectionCubeCoords.MoveY(-1),
+            "arrowUp"    => selectionCubeCoords.MoveY(),
+            "arrowFront" => selectionCubeCoords.MoveZ(-1),
+            "arrowBack"  => selectionCubeCoords.MoveZ(),
             _ => new Coord()
         };
 
@@ -191,7 +191,7 @@ public class TrackEditor : MonoBehaviour
 
     public static void SetSelectionCoords(Coord coords)
     {
-        _selectionCubeCoords = coords;
+        selectionCubeCoords = coords;
 
         // Position selection cube only if it's not attached to a part
         if (!selectionCube.transform.parent)
@@ -200,7 +200,7 @@ public class TrackEditor : MonoBehaviour
         // _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));  // Will be replaced by free camera
     }
 
-    static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
+    public static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
     {
         if (selectedPart == part) return;
 
@@ -241,7 +241,7 @@ public class TrackEditor : MonoBehaviour
     /// <summary>
     ///     This is where a part quits editing mode (i.e. current transform is left as is).
     /// </summary>
-    static void TryUnselectPart()
+    public static void TryUnselectPart()
     {
         if (!selectedPart) return;
 

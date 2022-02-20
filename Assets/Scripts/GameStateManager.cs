@@ -12,6 +12,9 @@ public class GameStateManager : MonoBehaviour
 {
     public static void Init()
     {
+#if !UNITY_EDITOR
+        Application.targetFrameRate = 60;
+#endif
         Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
         trackEditor.ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);

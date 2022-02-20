@@ -1,9 +1,7 @@
-﻿Jak je to s tím outlinem v ImageButton?
-Pořešit pořádně gitignore
+﻿► Co mít jako selecetedPart Part místo GameObject? Nebyla by nutnost použití _selectedPartComponent.
 
------ NEW UI -----
-► Optimize Update3dUiTransform(), if I want to use vertical arrows rotation
-------------------
+
+Pořešit pořádně gitignore
 
 - Vytvořit třídu pro Selection?
 - Implement some compression to track saves 

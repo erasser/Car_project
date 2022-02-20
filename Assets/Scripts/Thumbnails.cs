@@ -6,7 +6,6 @@ using static UiController;
 
 public class Thumbnails : MonoBehaviour
 {
-    public static GameObject PartThumbnailsWrapper;
     static readonly Vector3 CameraOffset = new (-4, 8, -15);
     const float ThumbRelativeSize = .98f;
     static int _thumbSize;
@@ -15,8 +14,6 @@ public class Thumbnails : MonoBehaviour
 
     public static void GeneratePartsThumbnails()  // Taking a screenshot of a camera's Render Texture: https://docs.unity3d.com/ScriptReference/Camera.Render.html
     {
-        PartThumbnailsWrapper = uiTrackEditor.transform.Find("partThumbnailsWrapper").gameObject;
-
         /*  Get parts  */
         var partsInstance = Instantiate(trackEditor.partsPrefab);
 
@@ -56,9 +53,9 @@ public class Thumbnails : MonoBehaviour
             // PartCategories.Add(category);
 
             var categoryUiWrapper = new GameObject($"category_{category.name}");
-            categoryUiWrapper.transform.SetParent(PartThumbnailsWrapper.transform);
+            categoryUiWrapper.transform.SetParent(UiController.partThumbnailsWrapper.transform);
 
-            byte partInCategoryIndex = 0;  // TODO: Change to FOR loop
+            byte partInCategoryIndex = 0;
             foreach (Transform partTransform in category)  // Iterate over parts in a category
             {
                 Parts.Add(partTransform);
@@ -97,7 +94,7 @@ public class Thumbnails : MonoBehaviour
             ++categoryIndex;
         }
 
-        // PartThumbnailsWrapper.GetComponent<RectTransform>().transform.localPosition = new(0, Screen.height - (3 * thumbSizeWithSpacing / 2)); /***/
+        // UiController.partThumbnailsWrapper.GetComponent<RectTransform>().transform.localPosition = new(0, Screen.height - (3 * thumbSizeWithSpacing / 2)); /***/
 
         cameraThumbCamera.targetTexture = null;
         partsInstance.SetActive(false);

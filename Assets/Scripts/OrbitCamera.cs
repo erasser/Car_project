@@ -37,7 +37,7 @@ public class OrbitCamera : MonoBehaviour
 
     public static OrbitCamera orbitCamera;
     public static Camera cameraComponent;
-    static Transform _cameraTargetTransform;  // Should not be child of anything
+    public static Transform cameraTargetTransform;  // Should not be child of anything
     static GameObject _watchedObject;
     static Vector3 _minTargetPosition;  // Must be set "from the outside" for pan to work. Use SetTargetPositionLimits().
     static Vector3 _maxTargetPosition;  //                            ——————||——————
@@ -45,9 +45,9 @@ public class OrbitCamera : MonoBehaviour
     void Awake()
     {
         orbitCamera = this;
-        _cameraTargetTransform = new GameObject("cameraTarget").transform;
-        _cameraTargetTransform.Translate(0, transform.position.y, 0);
-        transform.SetParent(_cameraTargetTransform, true);
+        cameraTargetTransform = new GameObject("cameraTarget").transform;
+        cameraTargetTransform.Translate(0, transform.position.y, 0);
+        transform.SetParent(cameraTargetTransform, true);
         gameObject.AddComponent<LookAtConstraint>().constraintActive = true;  // It works without source object, strange...
         SetPitch(orbitCamera.minPitch);  // So the pitch limit is satisfied
         cameraComponent = GetComponent<Camera>();
@@ -56,19 +56,19 @@ public class OrbitCamera : MonoBehaviour
     void Update()
     {
         if (_watchedObject)
-            _cameraTargetTransform.position = _watchedObject.transform.position;
+            cameraTargetTransform.position = _watchedObject.transform.position;
     }
 
     public static void Pan(Vector3 touchPositionDiff)
     {
         var translationV3 = touchPositionDiff * Time.deltaTime * orbitCamera.panSpeed;
-        var newPosition = _cameraTargetTransform.position - _cameraTargetTransform.TransformDirection(translationV3);
+        var newPosition = cameraTargetTransform.position - cameraTargetTransform.TransformDirection(translationV3);
 
         newPosition.x = Clamp(newPosition.x, _minTargetPosition.x, _maxTargetPosition.x);
         newPosition.y = Clamp(newPosition.y, _minTargetPosition.y, _maxTargetPosition.y);
         newPosition.z = Clamp(newPosition.z, _minTargetPosition.z, _maxTargetPosition.z);
 
-        _cameraTargetTransform.position = newPosition;
+        cameraTargetTransform.position = newPosition;
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public class OrbitCamera : MonoBehaviour
     public static void Orbit(Vector3 touchPositionDiff)
     {
         var rotationV3 = touchPositionDiff * Time.deltaTime * orbitCamera.orbitSpeed;
-        var localEulerAngles = _cameraTargetTransform.localEulerAngles;
+        var localEulerAngles = cameraTargetTransform.localEulerAngles;
                                     // ↓ Slower orbit speed when nearer to orbit pole
         var rotY = rotationV3.x /* * Mathf.Cos(localEulerAngles.x * .0174533f)*/;
 
@@ -103,7 +103,7 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="lookAt">Vector to look at</param>
     public static void LookAtV3(Vector3 lookAt)
     {
-        _cameraTargetTransform.position = lookAt;
+        cameraTargetTransform.position = lookAt;
     }
 
     /// <summary>
@@ -147,9 +147,9 @@ public class OrbitCamera : MonoBehaviour
     public static void SetRotation(float pitch, float yaw)
     {
         pitch = Clamp(pitch, orbitCamera.minPitch, orbitCamera.maxPitch);
-        _cameraTargetTransform.eulerAngles = new (pitch, yaw, 0);
+        cameraTargetTransform.eulerAngles = new (pitch, yaw, 0);
 
-        Update3dUiTransform();
+        UiController.Update3dUiTransform();
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="pitch">Pitch value in degrees, will be clamped between minPitch and maxPitch value.</param>
     public static void SetPitch(float pitch)
     {
-        SetRotation(pitch, _cameraTargetTransform.eulerAngles.y);
+        SetRotation(pitch, cameraTargetTransform.eulerAngles.y);
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class OrbitCamera : MonoBehaviour
     /// <param name="yaw">Yaw value in degrees.</param>
     public static void SetYaw(float yaw)
     {
-        SetRotation(_cameraTargetTransform.eulerAngles.x, yaw);
+        SetRotation(cameraTargetTransform.eulerAngles.x, yaw);
     }
 
     /// <summary>
@@ -213,33 +213,5 @@ public class OrbitCamera : MonoBehaviour
     {
         _minTargetPosition = min;
         _maxTargetPosition = max;
-    }
-
-    /// <summary>
-    ///     Aligns Y rotation with camera Y rotation
-    /// </summary>
-    /// <param name="rotY">Camera Y rotation component</param>
-    static void Update3dUiTransform()
-    {
-        if (!orbitCamera.uiRotateHorizontalUiElement) return;
-
-        var cameraLocalEulerAngles = _cameraTargetTransform.localEulerAngles;
-        orbitCamera.uiRotateHorizontalUiElement.transform.localEulerAngles = new(90 - cameraLocalEulerAngles.x, 0, cameraLocalEulerAngles.y);
-        // orbitCamera.uiRotateHorizontalUiElement.transform.localEulerAngles.x, 0, _cameraTargetTransform.localEulerAngles.y);  // just for y rotation
-
-        // This transforms vertical arrows too. Needs to have VerticalPanel with arrowDown and VerticalPanel (1) with arrowUp
-        // var trans = GameObject.Find("VerticalPanel").transform;
-        // var angles = trans.localEulerAngles;
-        // angles.x = - cameraLocalEulerAngles.x;
-        // trans.localEulerAngles = angles;
-        // GameObject.Find("VerticalPanel (1)").transform.localEulerAngles = angles;
-
-        var trans = GameObject.Find("arrowUp").transform;
-        var angles = trans.localEulerAngles;
-        angles.x = - cameraLocalEulerAngles.x * .8f;
-        trans.localEulerAngles = angles;
-        var arrowDownTransform = GameObject.Find("arrowDown").transform;
-        arrowDownTransform.localEulerAngles = angles;
-        arrowDownTransform.Rotate(Vector3.right * 180 + Vector3.right * 20); // inefficient calculation and bad angle
     }
 }
