@@ -44,7 +44,7 @@ public class UiController
         if (selectedPart)
             TryUnselectPart();
         else
-            SelectPart(GetPartAtCoords(selectionCubeCoords).gameObject);
+            SelectPart(GetPartAtCoords(selectionCubeCoords));
     }
 
     /// <summary>

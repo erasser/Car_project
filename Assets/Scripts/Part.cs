@@ -156,14 +156,14 @@ public class Part : MonoBehaviour
         return Grid3D.GetGridCubeAt(coordinates).GetPart();
     }
 
-    public void Delete()
+    public void DeleteSelected()
     {
-        if (TrackEditor.selectedPart == gameObject)
+        if (TrackEditor.selectedPart == this)
             TrackEditor.UnselectPart();
 
         ClearCubes();
         Destroy(gameObject);
-        
+
         if (CompareTag("partStart"))
             TrackEditor.startPart = null;
     }

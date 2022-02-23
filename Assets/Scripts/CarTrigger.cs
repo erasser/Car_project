@@ -3,10 +3,9 @@ using static UnityEngine.GameObject;
 using static UnityEngine.ParticleSystem;
 
 /// <summary>
-///     Changes vehicle behavior based on surface type. Added to vehicle prefab.
+///     Changes vehicle behavior based on surface type, also controls wheel particle effect.
+///     Added to vehicle prefab.
 /// </summary>
-
-// TODO: ► Change surface parameters only if surface changes
 
 public class CarTrigger : MonoBehaviour
 {
@@ -18,11 +17,19 @@ public class CarTrigger : MonoBehaviour
     EmissionModule _wheelSnowParticleEffectRightEmission;
     float _noTriggerTimeSum;  // Causes wheel particle effect persistence
     // bool _isOnGround; // That's 2nd option beside _noTriggerTimeSum, it's without wheel particle effect persistence after car is sent to fly. It's LITTLE bit more performant, since it doesn't increment time.
+    Transform _rearWheelTransform;
+    float _lastRotX;
+
+    Quaternion _previousRotation;
+    
+    public float particleRate;
+    public float angularVelocity;
 
     void Start()
     {
         _rigidBody = GetComponent<Rigidbody>();
         _vehicleController = TrackEditor.vehicle.GetComponent<MSVehicleControllerFree>();
+        _rearWheelTransform = transform.Find("wheelMeshes").transform.Find("4").transform;
 
         // TODO: ► Make those Unity editor fields, so they don't need to be searched for.
         _wheelMudParticleEffectLeftEmission   = Find("wheelMudParticleEffect").GetComponent<ParticleSystem>().emission;
@@ -51,11 +58,24 @@ public class CarTrigger : MonoBehaviour
         }
         else if (_wheelSnowParticleEffectLeftEmission.enabled)
         {
-            var rate = _rigidBody.velocity.magnitude * 1.1f + _rigidBody.angularVelocity.magnitude * 20;
+            // This causes particle spawn rate to be dependent on vehicle speed
+            // var rate = _rigidBody.velocity.magnitude * 1.1f + _rigidBody.angularVelocity.magnitude * 20;
 
-            _wheelSnowParticleEffectLeftEmission.rateOverTime = rate;
-            _wheelSnowParticleEffectRightEmission.rateOverTime = rate;
+            // This causes particle spawn rate to be dependent on rear wheels rotation speed
+            var rot = _rearWheelTransform.rotation;
+            Quaternion deltaRotation = rot * Quaternion.Inverse(_previousRotation);
+            _previousRotation = rot;
+            deltaRotation.ToAngleAxis(out var angle, out var axis);  // How do these parameters work?
+            particleRate = (angle * axis).sqrMagnitude / 200;
+            if (particleRate > 100)
+                print("foo");
+            particleRate = Mathf.Min(particleRate, 100);
 
+            _wheelSnowParticleEffectLeftEmission.rateOverTime = particleRate;
+            _wheelSnowParticleEffectRightEmission.rateOverTime = particleRate;
+
+            // Conclusion: These two approaches are very similar at the end. TODO: Consider, which is better
+            
             // It does pretty nothing
             // var shape = _wheelSnowParticleEffectLeft.shape;
             // shape.rotation = new Vector3(-45 + magnitude * 3, 0, 0);

@@ -129,11 +129,47 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 699557565}
   m_PrefabAsset: {fileID: 0}
+--- !u!146 &96963971 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146420680092079518, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &152704144 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1786651278641506, guid: 29e44e45327bde042a974379e6b70db3,
     type: 3}
   m_PrefabInstance: {fileID: 400767824}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &175440279 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4406589058871128, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &231011798 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146942647688434984, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &330260422 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146910609255377274, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &349880538 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4000029073390734, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &377393079 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4311182038369552, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &400767824
 PrefabInstance:
@@ -217,6 +253,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d4a7e1a08d504784ba863438fe3772d8, type: 3}
+--- !u!146 &497162461 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146792454551099108, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &550339755
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -269,6 +311,581 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 2118987524}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &564167764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 564167760}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f4a8e0c40fb2cd4c8645029d0603d60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  doorPosition:
+  - {fileID: 1003970773}
+  - {fileID: 1150235312}
+  _cameras:
+    setLayers: 1
+    cameras:
+    - _camera: {fileID: 1178306948}
+      rotationType: 2
+      volume: 1
+    - _camera: {fileID: 1580639123}
+      rotationType: 3
+      volume: 1
+    - _camera: {fileID: 987057899}
+      rotationType: 1
+      volume: 1
+    - _camera: {fileID: 1493879984}
+      rotationType: 5
+      volume: 1
+    - _camera: {fileID: 712400001}
+      rotationType: 5
+      volume: 1
+    cameraSettings:
+      near: 0.03
+      impactTremor: 0.1
+      ETS_StyleCamera:
+        sensibility: 10
+        ETS_CameraShift: 2
+      followPlayerCamera:
+        spinSpeed: 15
+        displacementSpeed: 5
+        customLookAt: 0
+      firstPersonCamera:
+        sensibility: 10
+        horizontalAngle: 65
+        verticalAngle: 20
+      orbitalCamera:
+        sensibility: 0.8
+        speedScrool: 1
+        speedYAxis: 0.5
+        minDistance: 5
+        maxDistance: 500
+        invertRotationJoystick: 1
+  _vehicleTorque:
+    maxVelocityKMh: 420
+    engineTorque: 280
+    numberOfGears: 12
+    speedOfGear: 2
+    manualAdjustmentOfTorques:
+    - 1.1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    gears:
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1.5
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 10
+        value: 2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 30
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 30
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 45
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 45
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 60
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 15
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 60
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 75
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 30
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 75
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 90
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 45
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 90
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 105
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 60
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 105
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 120
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 75
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 120
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 135
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 90
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 135
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 150
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 105
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 150
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 165
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 120
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 165
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 180
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    - serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 135
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 180
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 195
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    minVelocityGears: 000000000f0000001e0000002d0000003c0000004b0000005a00000069000000780000008700000096000000a5000000
+    idealVelocityGears: 0a0000001e0000002d0000003c0000004b0000005a00000069000000780000008700000096000000a5000000b4000000
+    maxVelocityGears: 1e0000002d0000003c0000004b0000005a00000069000000780000008700000096000000a5000000b4000000c3000000
+  _vehicleSettings:
+    startOn: 1
+    vehicleMass: 2500
+    improveControl:
+      tireSlipsFactor: 0.85
+      helpToTurn: 0.35
+      helpToStraightenOut: 0.1
+      downForce: 2
+    _aerodynamics:
+      extraGravity: 1
+      feelingHeavy: 1
+      downForceAngleFactor: 0.2
+      verticalDownForce: 0.8
+      minDownForceValue: 2
+    centerOfMass: {fileID: 1511558569}
+    volant: {fileID: 841508228}
+    angle_x_Velocity:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 500
+        value: 0.8
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  _wheels:
+    wheelMass: 300
+    rightFrontWheel:
+      wheelMesh: {fileID: 1976753616}
+      wheelCollider: {fileID: 808604545}
+      wheelDrive: 1
+      wheelHandBrake: 0
+      skidMarkShift: 0.04
+      wheelTurn: 1
+      wheelWorldPosition: {x: 0, y: 0, z: 0}
+      rendSKDmarks: {fileID: 0}
+      generateSkidBool: 0
+      wheelColliderRPM: 0
+      forwardSkid: 0
+      sidewaysSkid: 0
+    leftFrontWheel:
+      wheelMesh: {fileID: 175440279}
+      wheelCollider: {fileID: 811814000}
+      wheelDrive: 1
+      wheelHandBrake: 0
+      skidMarkShift: -0.04
+      wheelTurn: 1
+      wheelWorldPosition: {x: 0, y: 0, z: 0}
+      rendSKDmarks: {fileID: 0}
+      generateSkidBool: 0
+      wheelColliderRPM: 0
+      forwardSkid: 0
+      sidewaysSkid: 0
+    rightRearWheel:
+      wheelMesh: {fileID: 1899353206}
+      wheelCollider: {fileID: 231011798}
+      wheelDrive: 1
+      wheelHandBrake: 1
+      skidMarkShift: 0.04
+      wheelTurn: 0
+      wheelWorldPosition: {x: 0, y: 0, z: 0}
+      rendSKDmarks: {fileID: 0}
+      generateSkidBool: 0
+      wheelColliderRPM: 0
+      forwardSkid: 0
+      sidewaysSkid: 0
+    leftRearWheel:
+      wheelMesh: {fileID: 1499495754}
+      wheelCollider: {fileID: 330260422}
+      wheelDrive: 1
+      wheelHandBrake: 1
+      skidMarkShift: -0.04
+      wheelTurn: 0
+      wheelWorldPosition: {x: 0, y: 0, z: 0}
+      rendSKDmarks: {fileID: 0}
+      generateSkidBool: 0
+      wheelColliderRPM: 0
+      forwardSkid: 0
+      sidewaysSkid: 0
+  _sounds:
+    speedOfEngineSound: 3.5
+    engineSound: {fileID: 8300000, guid: ea2f6284fb2d5a44784c012c3c786f87, type: 3}
+    skiddingSound:
+      standardSound: {fileID: 8300000, guid: 034580176483184419f3393bf1cefbbb, type: 3}
+      standardVolume: 0.5
+    collisionSounds:
+    - {fileID: 8300000, guid: 3bd32420e10f29441a631f1ef300d8ae, type: 3}
+    - {fileID: 8300000, guid: e19b158a41d5aab4bbdd9699b7339dc4, type: 3}
+    volumeCollisionSounds: 0.5
+    wheelImpactSound: {fileID: 8300000, guid: a99ada3784fb7154da6bd9979d56d23a, type: 3}
+  _skidMarks:
+    standardBrandWidth: 0.4
+    sensibility: 2
+    standardColor: {r: 0.15, g: 0.15, b: 0.15, a: 0}
+  skidMarksShader: {fileID: 4800000, guid: 0e9783dda7aa8884491cd17040cdaf4b, type: 3}
+  KMh: 0
+  currentGear: 0
+  disableVehicle: 0
+  handBrakeTrue: 0
+  isInsideTheCar: 0
 --- !u!1 &656375625 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1202064416829428, guid: d4a7e1a08d504784ba863438fe3772d8,
@@ -316,6 +933,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7cb6c884a64230f4b82f02b9137acc6a, type: 3}
+--- !u!20 &712400001 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 20072152409867796, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &734621620
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -357,6 +980,78 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7080c4a69cb872f4baa07aa8ce338822, type: 3}
+--- !u!146 &808604545 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146732754730016284, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &811814000 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146213995962840946, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &841508228 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1348791910402686, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &971067438 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146872207202526172, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &987057899 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 20166107944176928, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1003970773 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1898291961229612, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!146 &1034198971 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 146143824036110106, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1150235312 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1468532455722518, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &1178306948 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 20219670089076760, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1424665872 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4389232136945192, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &1493879984 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 20956982215465380, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1499495754 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4851107922716356, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1507671124
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -398,6 +1093,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 12fd685a233730a47aad3ea62dd73ab0, type: 3}
+--- !u!4 &1511558569 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4413865669734556, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &1580639123 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 20000341100783282, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1694639598
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -552,11 +1259,29 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 550339755}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1899353206 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4563111953310022, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1976753616 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4692431241067896, guid: 304750f05d67d584b81641193636032f,
+    type: 3}
+  m_PrefabInstance: {fileID: 550339755}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2089166494 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1052612785709708, guid: 7080c4a69cb872f4baa07aa8ce338822,
     type: 3}
   m_PrefabInstance: {fileID: 734621620}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2089626671 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4632104419233438, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 2118987524}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2118987524
 PrefabInstance:
@@ -597,5 +1322,50 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0
       objectReference: {fileID: 0}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.leftRearWheel.wheelMesh
+      value: 
+      objectReference: {fileID: 1424665872}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.leftFrontWheel.wheelMesh
+      value: 
+      objectReference: {fileID: 377393079}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.rightRearWheel.wheelMesh
+      value: 
+      objectReference: {fileID: 349880538}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.rightFrontWheel.wheelMesh
+      value: 
+      objectReference: {fileID: 2089626671}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.leftRearWheel.wheelCollider
+      value: 
+      objectReference: {fileID: 1034198971}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.leftFrontWheel.wheelCollider
+      value: 
+      objectReference: {fileID: 971067438}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.rightRearWheel.wheelCollider
+      value: 
+      objectReference: {fileID: 497162461}
+    - target: {fileID: 114597767939661950, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5,
+        type: 3}
+      propertyPath: _wheels.rightFrontWheel.wheelCollider
+      value: 
+      objectReference: {fileID: 96963971}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9dd24dcb5ff8cc74d9d4fb1ef33d37b5, type: 3}

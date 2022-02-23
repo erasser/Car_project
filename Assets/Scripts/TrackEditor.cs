@@ -47,8 +47,7 @@ public class TrackEditor : MonoBehaviour
     static float _selectionCubeAlphaStartTime;
     static Material _selectionCubeMaterial;
     public static Coord selectionCubeCoords;
-    public static GameObject selectedPart;
-    static Part _selectedPartComponent;
+    public static Part selectedPart;
 
     void Start()
     {
@@ -91,7 +90,7 @@ public class TrackEditor : MonoBehaviour
 
         if (!selectedPart) return;
 
-        selectedPart.GetComponent<Part>().SetMaterial(index);
+        selectedPart.SetMaterial(index);
     }
 
     /// <summary>
@@ -101,10 +100,10 @@ public class TrackEditor : MonoBehaviour
     {
         if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
         {
-            if (selectionHit.collider.gameObject == selectedPart)
-                _selectedPartComponent.Rotate();  // TODO: Check, is transformation can be applied, apply transform & select the part
+            if (selectedPart && selectionHit.collider.gameObject.GetInstanceID() == selectedPart.gameObject.GetInstanceID())
+                selectedPart.Rotate();
             else
-                SelectPart(selectionHit.collider.gameObject);
+                SelectPart(selectionHit.collider.GetComponent<Part>());
         }
         else  // Unselect
         {
@@ -120,7 +119,7 @@ public class TrackEditor : MonoBehaviour
     {
         if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
         {
-            selectionHit.collider.gameObject.GetComponent<Part>().Delete();
+            selectionHit.collider.gameObject.GetComponent<Part>().DeleteSelected();
             return true;
         }
         return false;
@@ -134,7 +133,7 @@ public class TrackEditor : MonoBehaviour
         if (selectedPart)     // Doesn't apply when a track is loaded
         {
             if (partFromChildren.CompareTag(selectedPart.tag)) return;  // Don't do anything if selected and new part are the same one
-            selectedPart.GetComponent<Part>().Delete();                 // Selected part is going to be replaced by the new one
+            selectedPart.DeleteSelected();                 // Selected part is going to be replaced by the new one
         }
 
         var newPart = Instantiate(partFromChildren, track.transform).gameObject;
@@ -159,7 +158,7 @@ public class TrackEditor : MonoBehaviour
 
         if (partSaveData.IsNull()) // The part is chosen by user
         {
-            SelectPart(newPart, true);
+            SelectPart(newPartComponent, true);
             coords = selectionCubeCoords;
         }
         else if (partSaveData.materialIndex != (byte)Part.Surface.Asphalt)  // Loaded Part. Material index = 0 is considered default.
@@ -184,7 +183,7 @@ public class TrackEditor : MonoBehaviour
         };
 
         if (selectedPart)  // Move selected part if any
-            _selectedPartComponent.MovePartOnGrid(coords);
+            selectedPart.MovePartOnGrid(coords);
 
         SetSelectionCoords(coords);
     }
@@ -200,17 +199,16 @@ public class TrackEditor : MonoBehaviour
         // _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));  // Will be replaced by free camera
     }
 
-    public static void SelectPart(GameObject part, bool afterAddPart = false)  // Must reflect UnselectPart()
+    public static void SelectPart(Part part, bool afterAddPart = false)  // Must reflect UnselectPart()
     {
         if (selectedPart == part) return;
 
         UnselectPart();
 
         selectedPart = part;
-        _selectedPartComponent = part.GetComponent<Part>();
 
-        _selectedPartComponent.outlineComponent.enabled = true;
-        var partDimensions = _selectedPartComponent.gridLocalDimensions;  // Local dimensions, because the selection cube is rotated with the part
+        selectedPart.outlineComponent.enabled = true;
+        var partDimensions = selectedPart.gridLocalDimensions;  // Local dimensions, because the selection cube is rotated with the part
 
         selectionCube.transform.SetParent(part.transform);
         selectionCube.transform.localPosition = Vector3.zero;
@@ -220,20 +218,19 @@ public class TrackEditor : MonoBehaviour
 
         // Object was selected by touch => set new coordinates for selection cube. Without this, part moves from coordinates of last selected part.
         if (!afterAddPart)
-            SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
+            SetSelectionCoords(selectedPart.occupiedGridCubes[0].coordinates);
     }
 
     public static void UnselectPart()  // Must reflect SelectPart()
     {
-        _selectionCubeMaterial.color = SelectionCubeColors["unselected"];
-
         if (!selectedPart) return;
 
+        _selectionCubeMaterial.color = SelectionCubeColors["unselected"];
+
         selectionCube.transform.parent = null;  // Must be set before SetSelectionCoords()
-        SetSelectionCoords(_selectedPartComponent.occupiedGridCubes[0].coordinates);
+        SetSelectionCoords(selectedPart.occupiedGridCubes[0].coordinates);
+        selectedPart.outlineComponent.enabled = false;
         selectedPart = null;
-        _selectedPartComponent.outlineComponent.enabled = false;
-        _selectedPartComponent = null;
 
         selectionCube.transform.localScale = new (20.1f, 20.1f, 20.1f);
     }
@@ -247,7 +244,7 @@ public class TrackEditor : MonoBehaviour
 
         if (canTransformBeApplied)
         {
-            _selectedPartComponent.SaveLastRotation();
+            selectedPart.SaveLastRotation();
             UnselectPart();
         }
         else
@@ -264,7 +261,7 @@ public class TrackEditor : MonoBehaviour
     {
         if (!selectedPart) return;  // The state when parts are being added to the scene, after a track is loaded
 
-        canTransformBeApplied = GridCube.AreCubesValid(_selectedPartComponent.occupiedGridCubes);
+        canTransformBeApplied = GridCube.AreCubesValid(selectedPart.occupiedGridCubes);
 
         UpdateSelectionCubeColor();
     }

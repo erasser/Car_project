@@ -1,5 +1,4 @@
-﻿► Co mít jako selecetedPart Part místo GameObject? Nebyla by nutnost použití _selectedPartComponent.
-
+﻿► Co po potvrzení nové part jí zapamatovat? (tj. vytvořit znovu tutéž)
 
 Pořešit pořádně gitignore
 
@@ -11,6 +10,7 @@ https://forum.unity.com/threads/wheel-collider-on-different-surfaces.812121/
 
 Debug.DrawLine(m_TargetPoint, m_TargetPoint + Vector3.up, Color.magenta);
 
+• Particle crash effect (jiskry při kolizi)
 • Implement camera zoom to car (try CineMachine?)
 • Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)
 • Forsage - udělat lepší směr, nemělo by to úplně pushovat auto do boku (dozadu ale jo). Tzn. něco jako dot nebo cross product.

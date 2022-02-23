@@ -53,7 +53,7 @@ public class Thumbnails : MonoBehaviour
             // PartCategories.Add(category);
 
             var categoryUiWrapper = new GameObject($"category_{category.name}");
-            categoryUiWrapper.transform.SetParent(UiController.partThumbnailsWrapper.transform);
+            categoryUiWrapper.transform.SetParent(partThumbnailsWrapper.transform);
 
             byte partInCategoryIndex = 0;
             foreach (Transform partTransform in category)  // Iterate over parts in a category
@@ -69,7 +69,7 @@ public class Thumbnails : MonoBehaviour
                 cameraThumbCamera.Render();
 
                 /*  Create a new texture and read the active Render Texture into it.  */
-                var texture = new Texture2D(_thumbSize, _thumbSize);
+                Texture2D texture = new (_thumbSize, _thumbSize);
                 texture.ReadPixels(new Rect(0, 0, _thumbSize, _thumbSize), 0, 0);
                 texture.Apply();
 
