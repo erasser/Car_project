@@ -51,6 +51,10 @@ public class OrbitCamera : MonoBehaviour
         gameObject.AddComponent<LookAtConstraint>().constraintActive = true;  // It works without source object, strange...
         SetPitch(orbitCamera.minPitch);  // So the pitch limit is satisfied
         cameraComponent = GetComponent<Camera>();
+
+        #if !UNITY_EDITOR
+            orbitSpeed /= 4;
+        #endif
     }
 
     void Update()

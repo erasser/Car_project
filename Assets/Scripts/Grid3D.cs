@@ -69,7 +69,7 @@ public class Grid3D : MonoBehaviour
 
         OrbitCamera.SetTargetPositionLimits(Bounds["min"], Bounds["max"]);
 
-        ToggleGridHelper();
+        // ToggleGridHelper();
     }
 
     public static void ToggleGridHelper(/*bool enable*/)

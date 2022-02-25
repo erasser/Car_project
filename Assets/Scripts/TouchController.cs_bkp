@@ -1,20 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 /// <summary>
 ///     Can be attached to anything (e.g. GameController).
 /// </summary>
 
+// ► THIS IS THE STATE BEFORE IMPLEMENTING TOUCH SCREEN TOUCH
 // TODO: Make it relative to screen dimensions, so the pan and orbit speed is always constant
+// See UFO to implement touch
 
 public class TouchController : MonoBehaviour
 {
     [SerializeField]    [Range(.01f, 5)]      [Tooltip("Interval in seconds, in which long touch event is fired (without touch dragging).")]
     float longTouchDuration = 2;
 
-    static Vector2 _lastTouchPosition;  // https://docs.unity3d.com/ScriptReference/Input-mousePosition.html, https://docs.unity3d.com/ScriptReference/Touch-position.html
+    static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
     static TouchState _touchState = TouchState.NoTouch;
     static ControllerState _controllerState = ControllerState.NoAction;
     static int _scrollValue;
@@ -68,15 +69,15 @@ public class TouchController : MonoBehaviour
         CheckMouseUp();
         CheckScroll();
 
-        #if UNITY_EDITOR
-            DebugShowStates();
-        #endif
+#if UNITY_EDITOR
+        DebugShowStates();
+#endif
 
         /*  Zoom  */  // TODO: Implement for mobile
         if (_scrollValue != 0)
         {
             OrbitCamera.Zoom(_scrollValue);
-            // return;
+            return;
         }
 
         if (_touchState == TouchState.TouchedDown)
@@ -95,7 +96,7 @@ public class TouchController : MonoBehaviour
                 //     TrackEditor.selectedPart.GetComponent<Part>().Delete();
             }
 
-            Vector2 touchPositionDiff = GetTouchDiff();
+            var touchPositionDiff = Input.mousePosition - _lastMousePosition;
 
             /*  orbit camera */  // Now dragging with touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
@@ -108,7 +109,7 @@ public class TouchController : MonoBehaviour
         /*  pan camera  */  // Now double (or more) touching
         if (_touchState == TouchState.DoubleTouch)
         {
-            Vector2 touchPositionDiff = GetTouchDiff();
+            var touchPositionDiff = Input.mousePosition - _lastMousePosition;
             // Now moving with double touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
@@ -132,34 +133,7 @@ public class TouchController : MonoBehaviour
             _touchState = TouchState.NoTouch;
         }
 
-        // TODO: Maybe it's not necessary if the state is no touch
-        _lastTouchPosition = GetTouchPosition();
-    }
-
-    Vector2 GetTouchPosition()
-    {
-        #if UNITY_EDITOR
-            return Input.mousePosition;
-        #else
-            // if (Input.touchCount == 0 || Input.touchCount > 2) return Vector2.zero;  // TODO: Vyřešit tento stav
-            if (Input.touchCount != 1) return Vector2.zero;  // TODO: Vyřešit tento stav
-
-            return Input.GetTouch(0).position;
-        #endif
-    }
-
-    Vector2 GetTouchDiff()
-    {
-        #if UNITY_EDITOR
-            return GetTouchPosition() - _lastTouchPosition;
-        #else
-            if (Input.touchCount == 0 || Input.touchCount > 2) return Vector2.zero;  // TODO: Vyřešit tento stav
-
-            if (Input.touchCount == 1)
-                return Input.GetTouch(0).position - _lastTouchPosition;
-            else  // touchCount = 2
-                return Input.GetTouch(0).position - Input.GetTouch(1).position;
-        #endif
+        _lastMousePosition = Input.mousePosition;
     }
 
     // Is reset each frame in ProcessTouch() when processed
@@ -167,53 +141,11 @@ public class TouchController : MonoBehaviour
     {
         if (EventSystem.current.IsPointerOverGameObject()) return;
 
-        #if UNITY_EDITOR
-            if (Input.GetMouseButtonDown(0))
-                _touchState = TouchState.TouchedDown;
+        if (Input.GetMouseButtonDown(0))
+            _touchState = TouchState.TouchedDown;
 
-            if (Input.GetMouseButtonDown(1) && _touchState == TouchState.TouchedDown)
-                _touchState = TouchState.DoubleTouch; // Need to press LMB, then RMB
-        #else
-        // No touch: Ended
-        // Touch:    Began
-        // Hold:     Stationary
-        // Move:     Moved
-        // End:      Ended
-
-            if (Input.touchCount > 2) return;
-
-            if (Input.touchCount == 1)
-            {
-                if (_touchState == TouchState.NoTouch)
-                    _lastTouchPosition = GetTouchPosition();
-
-                _touchState = TouchState.TouchedDown;
-            }
-
-            else if (Input.touchCount == 2)
-                _touchState = TouchState.DoubleTouch;
-
-            // string tmp;
-            // if (Input.touchCount > 0 /*&& Input.GetTouch(0).phase == TouchPhase.Began*/)
-            //     tmp = "touch 0";
-            // else if (Input.touchCount > 1 /*&& Input.GetTouch(1).phase == TouchPhase.Began*/)
-            //     tmp = "touch 1";
-            // else
-            //     tmp = "other touch";
-            
-            // if (Input.touchCount == 1)
-            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).position.ToString();
-            // if (Input.touchCount == 2)
-            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).position + ", " + Input.GetTouch(1).position;
-
-            // if (Input.touchCount == 1)
-            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).phase.ToString();
-            // if (Input.touchCount == 2)
-            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).phase + ", " + Input.GetTouch(1).phase;
-
-            GameObject.Find("debugText").GetComponent<Text>().text = _touchState.ToString();
-
-        #endif
+        if (Input.GetMouseButtonDown(1) && _touchState == TouchState.TouchedDown)
+            _touchState = TouchState.DoubleTouch; // Need to press LMB, then RMB
     }
 
     // Is reset each frame in ProcessTouch() when processed
