@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Animations;
+using static UiController;
 using static UnityEngine.Mathf;
 using Vector3 = UnityEngine.Vector3;
 
@@ -153,7 +154,7 @@ public class OrbitCamera : MonoBehaviour
         pitch = Clamp(pitch, orbitCamera.minPitch, orbitCamera.maxPitch);
         cameraTargetTransform.eulerAngles = new (pitch, yaw, 0);
 
-        UiController.Update3dUiTransform();
+        Update3dUiTransform();
     }
 
     /// <summary>

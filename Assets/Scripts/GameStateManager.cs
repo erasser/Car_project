@@ -4,17 +4,23 @@ using static UnityEngine.GameObject;
 using static UnityEngine.Debug;
 using static TrackEditor;
 using static UiController;
+
 /// <summary>
-/// Takes care of switching between track editor and play mode
+///     Takes care of switching between track editor and play mode
 /// </summary>
 
 public class GameStateManager : MonoBehaviour
 {
+    static GameObject _touchController;
+
     public static void Init()
     {
-#if !UNITY_EDITOR
-        Application.targetFrameRate = 60;
-#endif
+        #if UNITY_EDITOR
+            _touchController = new GameObject("TouchController", typeof(TouchControllerDesktop));
+        #else
+            _touchController = new GameObject("TouchController", typeof(TouchControllerTouchScreen));
+        #endif
+
         Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
         trackEditor.ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
@@ -47,7 +53,7 @@ public class GameStateManager : MonoBehaviour
         vehicle.SetActive(true);
 
         cameraEditor.SetActive(false);
-        touchController.enabled = false;
+        _touchController.SetActive(false);
         Grid3D.gridParent.SetActive(false);
         Grid3D.boundingBox.SetActive(false);
         selectionCube.SetActive(false);
@@ -62,7 +68,7 @@ public class GameStateManager : MonoBehaviour
         vehicleRigidBody = null;
         Destroy(Find("CameraCar"));  // Because it remains in the scene after car is destroyed >:-[
         cameraEditor.SetActive(true);
-        touchController.enabled = true;
+        _touchController.SetActive(true);
         Grid3D.gridParent.SetActive(true);
         Grid3D.boundingBox.SetActive(true);
         selectionCube.SetActive(true);

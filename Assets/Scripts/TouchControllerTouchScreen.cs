@@ -1,21 +1,21 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;  // Leave it here for debug
 
 /// <summary>
-///     Can be attached to anything (e.g. GameController).
+///     It's added dynamically from GameStateManager.
 /// </summary>
 
-// ► THIS IS THE STATE BEFORE IMPLEMENTING TOUCH SCREEN TOUCH
 // TODO: Make it relative to screen dimensions, so the pan and orbit speed is always constant
-// See UFO to implement touch
 
-public class TouchController : MonoBehaviour
+public class TouchControllerTouchScreen : MonoBehaviour
 {
     [SerializeField]    [Range(.01f, 5)]      [Tooltip("Interval in seconds, in which long touch event is fired (without touch dragging).")]
     float longTouchDuration = 2;
 
-    static Vector3 _lastMousePosition;  // screen coordinates for touch  https://docs.unity3d.com/ScriptReference/Input-mousePosition.html
+    static Vector2 _lastTouchPosition;  // https://docs.unity3d.com/ScriptReference/Input-mousePosition.html, https://docs.unity3d.com/ScriptReference/Touch-position.html
+    static Vector2 _lastTouchDiff;
+    static float _lastTouchDiffVsActualTouchMagnitude;  // Difference between actual and last two simultaneous touches
     static TouchState _touchState = TouchState.NoTouch;
     static ControllerState _controllerState = ControllerState.NoAction;
     static int _scrollValue;
@@ -23,23 +23,6 @@ public class TouchController : MonoBehaviour
     static Vector3 _touchUpPosition;
     static bool _wasUpOnUI;
     float _touchDuration;
-
-#if UNITY_EDITOR    // for debug
-    [Space]
-    public string debugTouchState;
-    public string debugControllerState;
-    readonly Dictionary<TouchState, string> _touchStates = new() {
-        { TouchState.NoTouch, "no touch" },
-        { TouchState.TouchedDown, "touched down" },
-        { TouchState.TouchedUp, "touched up" },
-        { TouchState.DoubleTouch, "double touch" },
-        { TouchState.HeldTouch, "held touch" }};
-    readonly Dictionary<ControllerState, string> _controllerStates = new() {
-        { ControllerState.NoAction, "no action" },
-        { ControllerState.Panning, "panning" },
-        { ControllerState.Orbiting, "orbiting" },
-        { ControllerState.PartDeleted, "part deleted" }};
-#endif
 
     enum TouchState         // All must be contained in _touchStates
     {
@@ -69,16 +52,10 @@ public class TouchController : MonoBehaviour
         CheckMouseUp();
         CheckScroll();
 
-#if UNITY_EDITOR
-        DebugShowStates();
-#endif
-
         /*  Zoom  */  // TODO: Implement for mobile
-        if (_scrollValue != 0)
-        {
-            OrbitCamera.Zoom(_scrollValue);
-            return;
-        }
+        var magnitudeDiff = _lastTouchDiffVsActualTouchMagnitude - GetTouchDiff().magnitude;
+        if (magnitudeDiff != 0)
+            OrbitCamera.Zoom((int)(magnitudeDiff));
 
         if (_touchState == TouchState.TouchedDown)
         {
@@ -96,7 +73,7 @@ public class TouchController : MonoBehaviour
                 //     TrackEditor.selectedPart.GetComponent<Part>().Delete();
             }
 
-            var touchPositionDiff = Input.mousePosition - _lastMousePosition;
+            Vector2 touchPositionDiff = GetTouchDiff();
 
             /*  orbit camera */  // Now dragging with touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
@@ -106,10 +83,10 @@ public class TouchController : MonoBehaviour
             }
         }
 
-        /*  pan camera  */  // Now double (or more) touching
+        /*  pan camera  */  // Now double touching  // TODO: Implement for touch screen
         if (_touchState == TouchState.DoubleTouch)
         {
-            var touchPositionDiff = Input.mousePosition - _lastMousePosition;
+            Vector2 touchPositionDiff = GetTouchDiff();
             // Now moving with double touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
@@ -133,7 +110,31 @@ public class TouchController : MonoBehaviour
             _touchState = TouchState.NoTouch;
         }
 
-        _lastMousePosition = Input.mousePosition;
+        _lastTouchDiffVsActualTouchMagnitude = (GetTouchDiff() - _lastTouchDiff).magnitude;
+        _lastTouchDiff = GetTouchDiff();
+
+        // TODO: Maybe it's not necessary if the state is no touch
+        _lastTouchPosition = GetTouchPosition();
+    }
+
+    Vector2 GetTouchPosition()
+    {
+        // if (Input.touchCount == 0 || Input.touchCount > 2) return Vector2.zero;  // TODO: Vyřešit tento stav
+        if (Input.touchCount != 1) return Vector2.zero;  // TODO: Vyřešit tento stav
+
+        return Input.GetTouch(0).position;
+    }
+
+    Vector2 GetTouchDiff()
+    {
+        // UNITY_EDITOR: return GetTouchPosition() - _lastTouchPosition;
+
+        if (Input.touchCount == 0 || Input.touchCount > 2) return Vector2.zero;  // TODO: Vyřešit tento stav
+
+        if (Input.touchCount == 1)
+            return Input.GetTouch(0).position - _lastTouchPosition;
+        else  // touchCount = 2  // TODO: WHAT?
+            return Input.GetTouch(0).position - Input.GetTouch(1).position;
     }
 
     // Is reset each frame in ProcessTouch() when processed
@@ -141,11 +142,52 @@ public class TouchController : MonoBehaviour
     {
         if (EventSystem.current.IsPointerOverGameObject()) return;
 
-        if (Input.GetMouseButtonDown(0))
-            _touchState = TouchState.TouchedDown;
+        // #if UNITY_EDITOR
+        //     if (Input.GetMouseButtonDown(0))
+        //         _touchState = TouchState.TouchedDown;
+        //
+        //     if (Input.GetMouseButtonDown(1) && _touchState == TouchState.TouchedDown)
+        //         _touchState = TouchState.DoubleTouch; // Need to press LMB, then RMB
 
-        if (Input.GetMouseButtonDown(1) && _touchState == TouchState.TouchedDown)
-            _touchState = TouchState.DoubleTouch; // Need to press LMB, then RMB
+        // No touch: Ended
+        // Touch:    Began
+        // Hold:     Stationary
+        // Move:     Moved
+        // End:      Ended
+
+        if (Input.touchCount > 2) return;
+
+        if (Input.touchCount == 1)
+        {
+            if (_touchState == TouchState.NoTouch)
+                _lastTouchPosition = GetTouchPosition();
+
+            _touchState = TouchState.TouchedDown;
+        }
+
+        else if (Input.touchCount == 2)
+            _touchState = TouchState.DoubleTouch;
+
+            // string tmp;
+            // if (Input.touchCount > 0 /*&& Input.GetTouch(0).phase == TouchPhase.Began*/)
+            //     tmp = "touch 0";
+            // else if (Input.touchCount > 1 /*&& Input.GetTouch(1).phase == TouchPhase.Began*/)
+            //     tmp = "touch 1";
+            // else
+            //     tmp = "other touch";
+            
+            // if (Input.touchCount == 1)
+            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).position.ToString();
+            // if (Input.touchCount == 2)
+            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).position + ", " + Input.GetTouch(1).position;
+
+            // if (Input.touchCount == 1)
+            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).phase.ToString();
+            // if (Input.touchCount == 2)
+            //     GameObject.Find("debugText").GetComponent<Text>().text = Input.GetTouch(0).phase + ", " + Input.GetTouch(1).phase;
+
+            // GameObject.Find("debugText").GetComponent<Text>().text = _touchState.ToString();
+            // GameObject.Find("debugText").GetComponent<Text>().text = ((int)(_lastTouchDiffVsActualTouchMagnitude - GetTouchDiff().magnitude)).ToString();
     }
 
     // Is reset each frame in ProcessTouch() when processed
@@ -164,12 +206,4 @@ public class TouchController : MonoBehaviour
     {
         _scrollValue = (int)Input.mouseScrollDelta.y;
     }
-
-#if UNITY_EDITOR
-    void DebugShowStates()
-    {
-        debugTouchState = _touchStates[_touchState];
-        debugControllerState = _controllerStates[_controllerState];
-    }
-#endif
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UiController;
 using static UnityEngine.Debug;
 using static UnityEngine.GameObject;
 using static UnityEngine.Mathf;
@@ -24,7 +25,6 @@ public class TrackEditor : MonoBehaviour
 
     public static TrackEditor trackEditor;
     static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
-    public static TouchController touchController;
 
     /*  Editor objects  */
     static readonly List<Transform> PartCategories = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
@@ -65,7 +65,6 @@ public class TrackEditor : MonoBehaviour
         ground = Find("ground");
         ground.SetActive(false);
         track = new GameObject("Track");
-        touchController = GetComponent<TouchController>();
 
         Thumbnails.GenerateSurfaceMaterialsThumbnails();
         Thumbnails.GeneratePartsThumbnails();  // Initialization process continues here
@@ -194,7 +193,10 @@ public class TrackEditor : MonoBehaviour
 
         // Position selection cube only if it's not attached to a part
         if (!selectionCube.transform.parent)
+        {
             Grid3D.PositionToGrid(selectionCube, coords);
+            Update3dUiTransform();
+        }
 
         // _camera.transform.LookAt(Grid3D.PositionToGrid(_selectionCube, coords));  // Will be replaced by free camera
     }

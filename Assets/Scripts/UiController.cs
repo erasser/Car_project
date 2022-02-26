@@ -52,7 +52,12 @@ public class UiController
     /// </summary>
     public static void Update3dUiTransform()
     {
-        if (!orbitCamera.uiRotateHorizontalUiElement) return;
+        if (!orbitCamera.uiRotateHorizontalUiElement /*|| !selectionCube || !cameraEditor*/) return;
+
+        // Increment to rotation to make it relative tu selection cube position. I don't want it, because the arrows move elsewhere under the finger.
+        // Vector3 cameraToSelectionV3 = selectionCube.transform.position - cameraEditorTransform.position;
+        // var cameraForward = cameraEditorTransform.forward;
+        // var angle = Vector2.SignedAngle(new(cameraToSelectionV3.x, cameraToSelectionV3.z), new(cameraForward.x, cameraForward.z));  // add to y rotation
 
         var cameraLocalEulerAngles = cameraTargetTransform.localEulerAngles;
         orbitCamera.uiRotateHorizontalUiElement.transform.localEulerAngles = new(90 - cameraLocalEulerAngles.x, 0, cameraLocalEulerAngles.y);
