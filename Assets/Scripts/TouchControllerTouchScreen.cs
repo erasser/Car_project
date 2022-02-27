@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;  // Leave it here for debug
@@ -6,6 +7,8 @@ using UnityEngine.UI;  // Leave it here for debug
 ///     It's added dynamically from GameStateManager.
 /// </summary>
 
+// TouchPhase.Stationary and TouchPhase.Moved are actually the same, because touch screen is too sensitive and little movement is registered too.
+
 // TODO: Make it relative to screen dimensions, so the pan and orbit speed is always constant
 
 public class TouchControllerTouchScreen : MonoBehaviour
@@ -13,7 +16,7 @@ public class TouchControllerTouchScreen : MonoBehaviour
     [SerializeField]    [Range(.01f, 5)]      [Tooltip("Interval in seconds, in which long touch event is fired (without touch dragging).")]
     float longTouchDuration = 2;
 
-    static Vector2 _lastTouchPosition;  // https://docs.unity3d.com/ScriptReference/Input-mousePosition.html, https://docs.unity3d.com/ScriptReference/Touch-position.html
+    static readonly List<Vector2> LastTouchCoordinates = new(){new(), new()};  // last first & second touch coordinates
     static Vector2 _lastTouchDiff;
     static float _lastTouchDiffVsActualTouchMagnitude;  // Difference between actual and last two simultaneous touches
     static TouchState _touchState = TouchState.NoTouch;
@@ -23,6 +26,14 @@ public class TouchControllerTouchScreen : MonoBehaviour
     static Vector3 _touchUpPosition;
     static bool _wasUpOnUI;
     float _touchDuration;
+    Text _debugText1;
+    Text _debugText2;
+
+    void Start()
+    {
+        _debugText1 = GameObject.Find("debugText1").GetComponent<Text>();
+        _debugText2 = GameObject.Find("debugText2").GetComponent<Text>();
+    }
 
     enum TouchState         // All must be contained in _touchStates
     {
@@ -43,25 +54,47 @@ public class TouchControllerTouchScreen : MonoBehaviour
 
     void Update()
     {
-        ProcessTouch();
-    }
+        /***  touched UI  ***/
+        if (!IsValidTouch()) return;
 
-    void ProcessTouch()
-    {
+        /***  Orbit camera - simple touch move  ***/
+        
+        
+        
+        // if (IsSimpleTouchStationary())
+        //     DebugText("1 stationary");
+        
+        if (IsSimpleTouchMoving())
+        {
+            OrbitCamera.Orbit(GetTouchPosition(0) - LastTouchCoordinates[0]);
+            DebugText1("2 moving");
+            // print("moving");
+        }
+        // else
+            // print("not moving");
+        
+        if (IsSimpleTouchEnded())
+            DebugText1("3 released");
+
+
+
+        SaveLastTouchCoordinates();
+
+        /*
         CheckMouseDown();
         CheckMouseUp();
         CheckScroll();
 
-        /*  Zoom  */  // TODO: Implement for mobile
+        //  Zoom  /  // TODO: Implement for mobile
         var magnitudeDiff = _lastTouchDiffVsActualTouchMagnitude - GetTouchDiff().magnitude;
         if (magnitudeDiff != 0)
-            OrbitCamera.Zoom((int)(magnitudeDiff));
+            OrbitCamera.Zoom((int)magnitudeDiff);
 
         if (_touchState == TouchState.TouchedDown)
         {
             _touchDuration += Time.deltaTime;  // Used to detect held touch
 
-            /*  delete a part  */  // Now holding touch
+            //  delete a part  /  // Now holding touch
             if (_touchDuration > longTouchDuration && _controllerState == ControllerState.NoAction)
             {
                 _touchState = TouchState.HeldTouch;
@@ -75,7 +108,7 @@ public class TouchControllerTouchScreen : MonoBehaviour
 
             Vector2 touchPositionDiff = GetTouchDiff();
 
-            /*  orbit camera */  // Now dragging with touch
+            //  orbit camera /  // Now dragging with touch
             if (touchPositionDiff.sqrMagnitude > 0)  // TODO: Add some value for small difference?
             {
                 _controllerState = ControllerState.Orbiting;
@@ -83,7 +116,7 @@ public class TouchControllerTouchScreen : MonoBehaviour
             }
         }
 
-        /*  pan camera  */  // Now double touching  // TODO: Implement for touch screen
+        //  pan camera  /  // Now double touching  // TODO: Implement for touch screen
         if (_touchState == TouchState.DoubleTouch)
         {
             Vector2 touchPositionDiff = GetTouchDiff();
@@ -95,8 +128,8 @@ public class TouchControllerTouchScreen : MonoBehaviour
             }
         }
 
-        /*  Raycast to select part  */  // Finished touch without camera pan or rotation or use of UI (common or 3D)
-        if (_touchState == TouchState.TouchedUp /*&& _controllerState == ControllerState.NoAction*/)
+        //  Raycast to select part  /  // Finished touch without camera pan or rotation or use of UI (common or 3D)
+        if (_touchState == TouchState.TouchedUp)
         {
             if (!_wasUpOnUI && _controllerState == ControllerState.NoAction)
             {
@@ -104,7 +137,7 @@ public class TouchControllerTouchScreen : MonoBehaviour
             }
             else
             {
-                /*  Reset states after orbit, pan or use of 3D UI  */
+                //  Reset states after orbit, pan or use of 3D UI  /
                 _controllerState = ControllerState.NoAction;
             }
             _touchState = TouchState.NoTouch;
@@ -115,27 +148,83 @@ public class TouchControllerTouchScreen : MonoBehaviour
 
         // TODO: Maybe it's not necessary if the state is no touch
         _lastTouchPosition = GetTouchPosition();
+        */
     }
 
-    Vector2 GetTouchPosition()
+    TouchPhase Phase(byte index)
+    {
+        return Input.GetTouch(index).phase;
+    }
+
+    bool IsInTolerance(float difference)  // Přestože voláno jednou, je na střídačku nula a větší než nula (možná to nevadí)
+    {
+        // print(difference);
+        // DebugText2(difference);
+        return difference < 5;  // TODO: Should be relative to deltaTime
+    }
+
+    bool IsValidTouch()
+    {
+        // if (Input.touchCount is 0 or 1) return true;
+        // return Input.touchCount is 1 or 2 || !EventSystem.current.IsPointerOverGameObject();
+        return !EventSystem.current.IsPointerOverGameObject();
+    }
+    
+    bool IsSimpleTouchStationary()  // TODO: I must add some toleration
+    {
+        return Input.touchCount == 1 && (Phase(0) == TouchPhase.Stationary || Phase(0) == TouchPhase.Moved) &&
+               IsInTolerance((LastTouchCoordinates[0] - GetTouchPosition(0)).sqrMagnitude);
+               // TODO: Redundant code fragment ↑ (Ukládat to do proměnné? A nepoužívat sqrMagnitude)
+    }
+
+    bool IsSimpleTouchMoving()  // Rename to FirstTouch?
+    {
+        return Input.touchCount == 1 && Phase(0) == TouchPhase.Moved &&
+               !IsInTolerance((LastTouchCoordinates[0] - GetTouchPosition(0)).sqrMagnitude);
+    }
+
+    bool IsSimpleTouchEnded()
+    {
+        return Input.touchCount == 1 && Phase(0) == TouchPhase.Ended;
+    }
+
+    bool IsDoubleTouchMoving()  // For both zoom and pan
+    {
+        return Input.touchCount == 2 && (Phase(0) == TouchPhase.Moved || Phase(1) == TouchPhase.Moved);
+    }
+
+    void SaveLastTouchCoordinates()
+    {
+        if (Input.touchCount == 1)
+        {
+            LastTouchCoordinates[0] = GetTouchPosition(0);
+                
+            if (Input.touchCount == 2)
+            {
+                LastTouchCoordinates[1] = GetTouchPosition(1);
+            }
+        }
+    }
+
+    Vector2 GetTouchPosition(byte touchIndex)
     {
         // if (Input.touchCount == 0 || Input.touchCount > 2) return Vector2.zero;  // TODO: Vyřešit tento stav
-        if (Input.touchCount != 1) return Vector2.zero;  // TODO: Vyřešit tento stav
+        // if (Input.touchCount != 1) return Vector2.zero;  // TODO: Vyřešit tento stav
 
-        return Input.GetTouch(0).position;
+        return Input.GetTouch(touchIndex).position;
     }
 
-    Vector2 GetTouchDiff()
+    /*Vector2 GetTouchDiff()
     {
         // UNITY_EDITOR: return GetTouchPosition() - _lastTouchPosition;
 
         if (Input.touchCount == 0 || Input.touchCount > 2) return Vector2.zero;  // TODO: Vyřešit tento stav
 
         if (Input.touchCount == 1)
-            return Input.GetTouch(0).position - _lastTouchPosition;
+            return Input.GetTouch(0).position - LastTouchCoordinates;
         else  // touchCount = 2  // TODO: WHAT?
             return Input.GetTouch(0).position - Input.GetTouch(1).position;
-    }
+    }*/
 
     // Is reset each frame in ProcessTouch() when processed
     void CheckMouseDown()
@@ -153,14 +242,14 @@ public class TouchControllerTouchScreen : MonoBehaviour
         // Touch:    Began
         // Hold:     Stationary
         // Move:     Moved
-        // End:      Ended
+        // End:      -
 
         if (Input.touchCount > 2) return;
 
         if (Input.touchCount == 1)
         {
-            if (_touchState == TouchState.NoTouch)
-                _lastTouchPosition = GetTouchPosition();
+            // if (_touchState == TouchState.NoTouch)
+            //     _lastTouchPosition = GetTouchPosition();
 
             _touchState = TouchState.TouchedDown;
         }
@@ -205,5 +294,22 @@ public class TouchControllerTouchScreen : MonoBehaviour
     void CheckScroll()
     {
         _scrollValue = (int)Input.mouseScrollDelta.y;
+    }
+    
+    void DebugText1(string text)
+    {
+        _debugText1.text = text;
+    }
+    void DebugText1(float text)
+    {
+        _debugText1.text = text.ToString();
+    }
+    void DebugText2(string text)
+    {
+        _debugText2.text = text;
+    }
+    void DebugText2(float text)
+    {
+        _debugText2.text = text.ToString();
     }
 }

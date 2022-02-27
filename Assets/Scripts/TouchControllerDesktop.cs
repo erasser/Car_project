@@ -33,8 +33,7 @@ public class TouchControllerDesktop : MonoBehaviour
         { TouchState.HeldTouch, "held touch" }};
     readonly Dictionary<ControllerState, string> _controllerStates = new() {
         { ControllerState.NoAction, "no action" },
-        { ControllerState.Panning, "panning" },
-        { ControllerState.Orbiting, "orbiting" },
+        { ControllerState.CameraTransform, "panning" },
         { ControllerState.PartDeleted, "part deleted" }};
 
     enum TouchState         // All must be contained in _touchStates
@@ -49,17 +48,11 @@ public class TouchControllerDesktop : MonoBehaviour
     enum ControllerState    // All must be contained in _controllerStates
     {
         NoAction,
-        Panning,     // dragging with LMB &RMB
-        Orbiting,    // dragging with LMB
+        CameraTransform,     // panning or orbiting
         PartDeleted
     }
 
     void Update()
-    {
-        ProcessTouch();
-    }
-
-    void ProcessTouch()
     {
         CheckMouseDown();
         CheckMouseUp();
@@ -95,7 +88,7 @@ public class TouchControllerDesktop : MonoBehaviour
             /*  orbit camera */  // Now dragging with touch
             if (touchPositionDiff.sqrMagnitude > 0)
             {
-                _controllerState = ControllerState.Orbiting;
+                _controllerState = ControllerState.CameraTransform;
                 OrbitCamera.Orbit(touchPositionDiff);
             }
         }
@@ -107,7 +100,7 @@ public class TouchControllerDesktop : MonoBehaviour
             // Now moving with double touch
             if (touchPositionDiff.sqrMagnitude > 0)
             {
-                _controllerState = ControllerState.Panning;
+                _controllerState = ControllerState.CameraTransform;
                 OrbitCamera.Pan(touchPositionDiff);
             }
         }
