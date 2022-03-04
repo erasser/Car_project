@@ -1,4 +1,6 @@
-﻿► Co po potvrzení nové part jí zapamatovat? (tj. vytvořit znovu tutéž)
+﻿Přidat outline k parts schovaným za jinými parts? Na mobilu se po načtení tratě vše outlinuje? (mám pocit)
+
+► Co po potvrzení nové part jí zapamatovat? (tj. vytvořit znovu tutéž)
 
 Přidat možnost focusnout kameru na selection cube - button?
 
@@ -12,6 +14,9 @@ https://forum.unity.com/threads/wheel-collider-on-different-surfaces.812121/
 
 Debug.DrawLine(), Debug.DrawRay()
 
+• Fuck out "EnterAndExitB" (UI_vehicle object). Now the Image is disabled, but it's still used in MSSceneControllerFree.cs
+    Consider doing the same with ChangeCamerasB and EnterAndExitB - will I use free vehicle camera?
+• track autosave
 • Particle crash effect (jiskry při kolizi)
 • Implement camera zoom to car (try CineMachine?)
 • Consider using Button (legacy) - Does it cause less draw calls than Button with Text mesh pro? (which is probably, what's used)

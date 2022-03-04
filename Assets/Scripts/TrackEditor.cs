@@ -24,7 +24,6 @@ public class TrackEditor : MonoBehaviour
     public GameObject vehiclePrefab;
 
     public static TrackEditor trackEditor;
-    static Coord _origin;  // coordinates of the origin in _grid, i.e. lists indexes of the center cube
 
     /*  Editor objects  */
     static readonly List<Transform> PartCategories = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  

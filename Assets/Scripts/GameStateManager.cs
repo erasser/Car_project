@@ -26,9 +26,8 @@ public class GameStateManager : MonoBehaviour
         trackEditor.ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
         trackEditor.ground.SetActive(true);
         selectionCube.SetActive(true);
-        SetSelectionCoords(new Coord(1, 1, 1));
-        OrbitCamera.Set(selectionCube.transform.position, 50, -30, 200);
-        // cameraEditor.SetActive(false);cameraEditor.SetActive(true);  // Something is fucked up, this is a hotfix
+        SetSelectionCoords(Grid3D.origin);
+        OrbitCamera.Set(selectionCube.transform.position, 50, -30, 300);
     }
 
     public static void Play()
@@ -47,6 +46,7 @@ public class GameStateManager : MonoBehaviour
         vehicleController = Instantiate(trackEditor.vehicleControllerPrefab, Find("UI").transform);
         vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
         vehicleController.SetActive(true);
+        vehicleController.transform.Find("Canvas").GetComponent<Canvas>().enabled = true;  // It's the only way to show mobile buttons
         vehicle.transform.eulerAngles = new (startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);
         vehicle.transform.position = new (startPart.transform.position.x, startPart.transform.position.y + .5f, startPart.transform.position.z);
         vehicle.transform.Translate(Vector3.back * 4);

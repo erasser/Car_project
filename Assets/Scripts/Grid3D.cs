@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.Mathf;
+using static TrackEditor;
 
 /// <summary>
 ///     Grid holds GridCubes, which holds parts and their position
@@ -19,6 +20,7 @@ public class Grid3D : MonoBehaviour
     [SerializeField][Tooltip("Depth cube count, must be in [3, 255]")]
     public byte zCount = 8;
     public const byte CubeSize = 20;
+    public static Coord origin;  // coordinates of the origin in the grid, i.e. lists indexes of the center cube
 
     public static Grid3D instance;
     public static GameObject boundingBox;
@@ -34,7 +36,7 @@ public class Grid3D : MonoBehaviour
 
     void Create()
     {
-        // _origin = new Coord(Coord.xCount / 2, Coord.yCount / 2, Coord.zCount / 2);
+        origin = new Coord(xCount / 2, 1, zCount / 2);
 
         gridParent = new GameObject("gridParent");
 
