@@ -8,19 +8,15 @@ using static UnityEngine.Mathf;
 
 public class TrackEditor : MonoBehaviour
 {
-    [SerializeField]
     public GameObject partsPrefab;
-    [SerializeField] [Tooltip("List of materials assignable to track parts.\nUsed to physically affect the vehicle behavior.\n\nThe first material must be the default one, which prefabs have assigned.")]
+    [Tooltip("List of materials assignable to track parts.\nUsed to physically affect the vehicle behavior.\n\nThe first material must be the default one, which prefabs have assigned.")]
     public List<Material> surfaceMaterials;
     [Space]
-    [SerializeField] [Tooltip("Wireframe cube visualizer (to show grid lines)")]
-    GameObject selectionCubePrefab;
-    [SerializeField] [Tooltip("Layer of objects pickable by raycaster (i.e. track parts)")]
-    LayerMask selectableObjectsLayer;
+    [Tooltip("Layer of objects pickable by raycaster (i.e. track parts)")]
+    public LayerMask selectableObjectsLayer;
     [Space]
-    [SerializeField] [Tooltip("This serves to not to be run from the game start, which would cause \"missing MSSceneController\" error.")]
+    [Tooltip("This serves to not to be run from the game start, which would cause \"missing MSSceneController\" error.")]
     public GameObject vehicleControllerPrefab;
-    [SerializeField]
     public GameObject vehiclePrefab;
 
     public static TrackEditor trackEditor;
@@ -29,7 +25,7 @@ public class TrackEditor : MonoBehaviour
     static readonly List<Transform> PartCategories = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     public static readonly List<Transform> Parts = new();  // Transform is iterable. Use GetChild(index) to get n-th child.  
     public static GameObject cameraEditor;
-    public GameObject ground;
+    public static GameObject ground;
     public static GameObject track;
     public static GameObject vehicleController;
     public static GameObject vehicle;
@@ -53,7 +49,7 @@ public class TrackEditor : MonoBehaviour
         trackEditor = this;
 
         new UiController();
-        selectionCube = Instantiate(selectionCubePrefab);
+        selectionCube = Find("SelectionCubeWireframe").gameObject;
         _selectionCubeMaterial = selectionCube.GetComponent<MeshRenderer>().material;
         SelectionCubeColors.Add("unselected", _selectionCubeMaterial.color);
         SelectionCubeColors.Add("selected", new Color(0, 1, 1, .18f));
@@ -80,6 +76,8 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.b,
                 Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
+
+        Performance.ShowFPS();
     }
 
     public static void ApplySurface(byte index)

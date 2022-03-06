@@ -20,20 +20,20 @@ using Vector3 = UnityEngine.Vector3;
 
 public class OrbitCamera : MonoBehaviour
 {
-    [SerializeField]    [Range(0, 90)]      [Tooltip("Minimal pitch in degrees")]
-    int minPitch = 5;  // Beware: Euler angles are clamped to [0, 360]
-    [SerializeField]    [Range(0, 90)]      [Tooltip("Maximal pitch in degrees")]
-    int maxPitch = 85;
-    [SerializeField]    [Range(0, 10000)]   [Tooltip("Minimal camera distance in scene units")]
-    int minZoom = 5;
-    [SerializeField]    [Range(0, 10000)]   [Tooltip("Maximal camera distance in scene units")]
-    int maxZoom = 400;
-    [SerializeField]    [Range(1, 255)]
-    byte orbitSpeed = 20;
-    [SerializeField]    [Range(1, 255)]
-    byte panSpeed = 16;
+    [Range(0, 90)]      [Tooltip("Minimal pitch in degrees")]
+    public int minPitch = 5;  // Beware: Euler angles are clamped to [0, 360]
+    [Range(0, 90)]      [Tooltip("Maximal pitch in degrees")]
+    public int maxPitch = 85;
+    [Range(0, 10000)]   [Tooltip("Minimal camera distance in scene units")]
+    public int minZoom = 5;
+    [Range(0, 10000)]   [Tooltip("Maximal camera distance in scene units")]
+    public int maxZoom = 400;
+    [Range(1, 255)]
+    public byte orbitSpeed = 20;
+    [Range(1, 255)]
+    public byte panSpeed = 16;
     [Space]
-    [SerializeField]                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
+                        [Tooltip("This object will be rotated in Y axis correspondingly to the camera rotation (optional)")]
     public GameObject uiRotateHorizontalUiElement;
 
     public static OrbitCamera orbitCamera;
