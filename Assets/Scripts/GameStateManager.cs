@@ -25,10 +25,12 @@ public class GameStateManager : MonoBehaviour
             Application.targetFrameRate = 666;
         #endif
 
+        Thumbnails.GenerateSurfaceMaterialsThumbnails();
+        Thumbnails.GeneratePartsThumbnails();
+
         Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
         ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
-        ground.SetActive(true);
         Find("selectionHorizontalHelper").transform.position = ground.transform.position;
         selectionCube.SetActive(true);
         SetSelectionCoords(Grid3D.origin);
