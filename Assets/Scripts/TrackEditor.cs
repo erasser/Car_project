@@ -73,7 +73,7 @@ public class TrackEditor : MonoBehaviour
                 Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
 
-        Performance.ShowFPS();
+        // Performance.ShowFPS();
     }
 
     public static void ApplySurface(byte index)

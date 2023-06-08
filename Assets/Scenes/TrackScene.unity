@@ -2543,7 +2543,7 @@ PrefabInstance:
     - target: {fileID: 2855721300171031873, guid: 129bea1e1f1f71f4081fc661969464d3,
         type: 3}
       propertyPath: m_Name
-      value: selectionHorizontalIndicator
+      value: selectionHorizontalHelper
       objectReference: {fileID: 0}
     - target: {fileID: 2855721300171031874, guid: 129bea1e1f1f71f4081fc661969464d3,
         type: 3}
@@ -6548,6 +6548,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d49b7c1bcd2e07499844da127be038d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_ForceModuleActive: 0
 --- !u!114 &114390255093816500
 MonoBehaviour:
@@ -6576,6 +6577,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
