@@ -12,20 +12,26 @@ using static UiController;
 public class GameStateManager : MonoBehaviour
 {
     static GameObject _touchController;
+    static MSSceneControllerFree.ControlTypeFree _vehicleControllerControls;
 
     public static void Init()
     {
         #if UNITY_EDITOR
             _touchController = new GameObject("TouchController", typeof(TouchControllerDesktop));
+            _vehicleControllerControls = MSSceneControllerFree.ControlTypeFree.windows;
         #else
             _touchController = new GameObject("TouchController", typeof(TouchControllerTouchScreen));
+            _vehicleControllerControls = MSSceneControllerFree.ControlTypeFree.mobileButton;
+            Application.targetFrameRate = 666;
         #endif
+
+        Thumbnails.GenerateSurfaceMaterialsThumbnails();
+        Thumbnails.GeneratePartsThumbnails();
 
         Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
         ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
-        ground.SetActive(true);
-        Find("selectionHorizontalIndicator").transform.position = ground.transform.position;
+        Find("selectionHorizontalHelper").transform.position = ground.transform.position;
         selectionCube.SetActive(true);
         SetSelectionCoords(Grid3D.origin);
         OrbitCamera.Set(selectionCube.transform.position, 50, -30, 300);
@@ -45,7 +51,9 @@ public class GameStateManager : MonoBehaviour
         vehicle = Instantiate(trackEditor.vehiclePrefab);
         vehicleRigidBody = vehicle.GetComponent<Rigidbody>();
         vehicleController = Instantiate(trackEditor.vehicleControllerPrefab, Find("UI").transform);
-        vehicleController.GetComponent<MSSceneControllerFree>().vehicles[0] = vehicle;
+        var msSceneControllerFree = vehicleController.GetComponent<MSSceneControllerFree>();
+        msSceneControllerFree.vehicles[0] = vehicle;
+        msSceneControllerFree.selectControls = _vehicleControllerControls;
         vehicleController.SetActive(true);
         vehicleController.transform.Find("Canvas").GetComponent<Canvas>().enabled = true;  // It's the only way to show mobile buttons
         vehicle.transform.eulerAngles = new (startPart.transform.eulerAngles.x, startPart.transform.eulerAngles.y + 90, startPart.transform.eulerAngles.z);

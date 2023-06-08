@@ -58,11 +58,7 @@ public class TrackEditor : MonoBehaviour
 
         cameraEditor = Find("cameraEditor");
         ground = Find("ground");
-        ground.SetActive(false);
         track = new GameObject("Track");
-
-        Thumbnails.GenerateSurfaceMaterialsThumbnails();
-        Thumbnails.GeneratePartsThumbnails();  // Initialization process continues here
 
         GameStateManager.Init();
     }
@@ -76,6 +72,8 @@ public class TrackEditor : MonoBehaviour
                 _selectionCubeMaterial.color.b,
                 Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * _selectionCubeAlphaHalf + _selectionCubeAlphaHalf);
                 // Mathf.Sin((Time.time - _selectionCubeAlphaStartTime) * 5) * (_selectionCubeAlphaHalf / 2 - .05f) + _selectionCubeAlphaHalf / 2 + .1f);
+
+        Performance.ShowFPS();
     }
 
     public static void ApplySurface(byte index)
@@ -94,7 +92,7 @@ public class TrackEditor : MonoBehaviour
     {
         if (Physics.Raycast(OrbitCamera.cameraComponent.ScreenPointToRay(Input.mousePosition), out RaycastHit selectionHit, 1000, selectableObjectsLayer))
         {
-            if (selectedPart && selectionHit.collider.gameObject.GetInstanceID() == selectedPart.gameObject.GetInstanceID())
+            if (selectedPart && selectionHit.collider.gameObject == selectedPart.gameObject)
                 selectedPart.Rotate();
             else
                 SelectPart(selectionHit.collider.GetComponent<Part>());
@@ -200,7 +198,7 @@ public class TrackEditor : MonoBehaviour
     {
         if (selectedPart == part) return;
 
-        UnselectPart();
+        // UnselectPart();  // This seems to be redundant. All UnselectPart's statements are overriden here. 
 
         selectedPart = part;
 
@@ -288,17 +286,12 @@ public class TrackEditor : MonoBehaviour
 
     static void ResetTrack()
     {
-        foreach (Transform partTransform in track.transform)
-            Destroy(partTransform.gameObject);
+        UnselectPart();
+
+        Destroy(track);
+        track = new GameObject("Track");
 
         Grid3D.Clear();
-
-        if (selectedPart)
-        {
-            var toDestroy = selectedPart;
-            UnselectPart();
-            Destroy(toDestroy);
-        }
 
         UpdateCanTransformBeApplied();
         UpdateSelectionCubeColor();

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.Mathf;
-using static TrackEditor;
 
 /// <summary>
 ///     Grid holds GridCubes, which holds parts and their position

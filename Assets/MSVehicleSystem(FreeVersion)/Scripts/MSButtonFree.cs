@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.EventSystems;
+﻿using UnityEngine.EventSystems;
 using UnityEngine;
 
-public class MSButtonFree : MonoBehaviour, IPointerDownHandler, IPointerUpHandler {
+public class MSButtonFree : MonoBehaviour, /*IPointerDownHandler, IPointerUpHandler,*/ IPointerEnterHandler, IPointerExitHandler {
 
 	[HideInInspector]
 	public float buttonInput;
@@ -11,11 +9,21 @@ public class MSButtonFree : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 	public float sensibility = 3;
 	bool pressing;
 
-	public void OnPointerDown(PointerEventData eventData){
+	// public void OnPointerDown(PointerEventData eventData){
+	// 	pressing = true;
+	// }
+
+	// public void OnPointerUp(PointerEventData eventData){
+	// 	pressing = false;
+	// }
+
+	public void OnPointerEnter(PointerEventData eventData)
+	{
 		pressing = true;
 	}
 
-	public void OnPointerUp(PointerEventData eventData){
+	public void OnPointerExit(PointerEventData eventData)
+	{
 		pressing = false;
 	}
 
