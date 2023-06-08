@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - partStart
+  - partCheckpoint
+  - partFinish
+  - partForsage
+  - partRoad0
+  - partRoad1
+  - start
+  - partBox0
+  - partBox1
+  - partUphill0
+  - partUphill1
+  - partUphill2
+  - partUphill3
+  - partUphill4
+  - partUphill5
+  - partTurn0
+  - partTurn1
+  - partToTwisted
+  - partTwisted
+  - partLoopSmall
+  - partLoopBig
+  - partLoopBigUpper
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - selectable (track part)
+  - PostProcessing
+  - UI3D
+  - wheelsParticleEffects
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0

@@ -1,4 +1,5 @@
 ﻿Přidat outline k parts schovaným za jinými parts? Na mobilu se po načtení tratě vše outlinuje? (mám pocit)
+Nahradit GridCube prefab v GamgeControlleru wireframe materialem
 
 ► Co po potvrzení nové part jí zapamatovat? (tj. vytvořit znovu tutéž)
 
@@ -14,6 +15,7 @@ https://forum.unity.com/threads/wheel-collider-on-different-surfaces.812121/
 
 Debug.DrawLine(), Debug.DrawRay()
 
+• Zvážit přemístění některých prefabů do scény (selection cube, ground atd.). Spíš se přiklánim, že to je žádoucí.
 • Fuck out "EnterAndExitB" (UI_vehicle object). Now the Image is disabled, but it's still used in MSSceneControllerFree.cs
     Consider doing the same with ChangeCamerasB and EnterAndExitB - will I use free vehicle camera?
 • track autosave

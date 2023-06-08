@@ -23,8 +23,9 @@ public class GameStateManager : MonoBehaviour
 
         Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
-        trackEditor.ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
-        trackEditor.ground.SetActive(true);
+        ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
+        ground.SetActive(true);
+        Find("selectionHorizontalIndicator").transform.position = ground.transform.position;
         selectionCube.SetActive(true);
         SetSelectionCoords(Grid3D.origin);
         OrbitCamera.Set(selectionCube.transform.position, 50, -30, 300);

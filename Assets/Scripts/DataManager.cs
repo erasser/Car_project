@@ -2,7 +2,7 @@
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+// using Newtonsoft.Json;
 using UnityEngine;
 
 // https://forum.unity.com/threads/vector3-is-not-marked-serializable.435303
@@ -42,18 +42,18 @@ struct DataManager
         }
 
         TrackData trackData = new TrackData();
-        
+
         if (trackData.partsSaveData.Count == 0)
         {
             Debug.Log("track is empty, not saving");
             // TODO: Show message to user
             return;
         }
-        
+
         FileStream file = File.Create(SaveFile);
         MyBinaryFormatter.Serialize(file, trackData);
         file.Close();
-        Debug.Log(JsonConvert.SerializeObject(new TrackData()));
+        // Debug.Log(JsonConvert.SerializeObject(new TrackData()));
         // TODO: Show message to user
     }
 

@@ -8,16 +8,14 @@ using static TrackEditor;
 /// </summary>
 public class Grid3D : MonoBehaviour
 {
-    [SerializeField]
-    GameObject gridCubeHelperPrefab;
-    [SerializeField]
-    GameObject boundingBoxPrefab;    // Helper to show grid bounds
-    [SerializeField][Tooltip("Width cube count, must be in [3, 255]")]  // TODO: Make better serialized field (spinner?)
-    [Space]
+    public GameObject gridCubeHelperPrefab;
+    public GameObject boundingBoxPrefab;    // Helper to show grid bounds
+    [Space]  // TODO: Make better serialized field (spinner?)
+    [Tooltip("Width cube count, must be in [3, 255]")]
     public byte xCount = 10;
-    [SerializeField][Tooltip("Height cube count, must be in [3, 255]")]
+    [Tooltip("Height cube count, must be in [3, 255]")]
     public byte yCount = 7;
-    [SerializeField][Tooltip("Depth cube count, must be in [3, 255]")]
+    [Tooltip("Depth cube count, must be in [3, 255]")]
     public byte zCount = 8;
     public const byte CubeSize = 20;
     public static Coord origin;  // coordinates of the origin in the grid, i.e. lists indexes of the center cube
