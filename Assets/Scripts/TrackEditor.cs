@@ -43,6 +43,14 @@ public class TrackEditor : MonoBehaviour
     static Material _selectionCubeMaterial;
     public static Coord selectionCubeCoords;
     public static Part selectedPart;
+    
+    /*  Global constants  */
+    public static readonly bool IsMobile = 
+        #if ! UNITY_EDITOR
+                true;
+        #else
+                false;
+        #endif
 
     void Start()
     {

@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/MSVehicleSystem(FreeVersion)/Mobile.unity
     guid: ed16e75da3373ed41a590edfdf5918aa
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TrackScene.unity
     guid: c850ee8c3b14cc8459e7e186857cf567
   m_configObjects:

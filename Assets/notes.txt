@@ -1,4 +1,14 @@
-﻿Přidat outline k parts schovaným za jinými parts? Na mobilu se po načtení tratě vše outlinuje? (mám pocit)
+﻿kde jsou buttony na materiály? - mají zřejmě nulovou velikost
+Ten prostřední joystickovej button by mohl choosenout poslední zvolenou part (viz mé notes)
+Na mobilu to ťuknutím nerotuje (part of track)
+Když dám STOP, zobrazí se grid
+Zakomponovat do CarTrigger.OnTriggerEnter() hmotnost? Taky to ovlivňuje klouzavost
+	- Co to bude dělat, když levá půlka auta pojede po jiném terénu?
+Co když na forsáži pojedu míň než 4 kolama? Udělat úměrně k počtu kol?
+Mám tam ten efekt kol na ledu, že jo?
+Co dělá ta zelená outline? Nějak nemizí.
+
+Přidat outline k parts schovaným za jinými parts? Na mobilu se po načtení tratě vše outlinuje? (mám pocit)
 Nahradit GridCube prefab v GamgeControlleru wireframe materialem
 
 ► Co po potvrzení nové part jí zapamatovat? (tj. vytvořit znovu tutéž)
