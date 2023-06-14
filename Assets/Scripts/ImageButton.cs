@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using Unity.VisualScripting.FullSerializer;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -47,6 +48,8 @@ public class ImageButton
         rectTransform = gameObject.GetComponent<RectTransform>();
         rectTransform.transform.position = new (xPos, yPos, 0);
         rectTransform.sizeDelta = new (size, size);
+
+Debug.Log("size: " + size);  // TODO: Dořešit neviditelné buttony
 
         button = gameObject.GetComponent<Button>();
         image = gameObject.GetComponent<Image>();

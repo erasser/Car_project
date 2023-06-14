@@ -16,14 +16,17 @@ public class GameStateManager : MonoBehaviour
 
     public static void Init()
     {
-        #if UNITY_EDITOR
-            _touchController = new GameObject("TouchController", typeof(TouchControllerDesktop));
-            _vehicleControllerControls = MSSceneControllerFree.ControlTypeFree.windows;
-        #else
+        if (IsMobile)
+        {
             _touchController = new GameObject("TouchController", typeof(TouchControllerTouchScreen));
             _vehicleControllerControls = MSSceneControllerFree.ControlTypeFree.mobileButton;
-            Application.targetFrameRate = 666;
-        #endif
+            Application.targetFrameRate = 60;
+        }
+        else
+        {
+            _touchController = new GameObject("TouchController", typeof(TouchControllerDesktop));
+            _vehicleControllerControls = MSSceneControllerFree.ControlTypeFree.windows;
+        }
 
         Thumbnails.GenerateSurfaceMaterialsThumbnails();
         Thumbnails.GeneratePartsThumbnails();
@@ -31,7 +34,7 @@ public class GameStateManager : MonoBehaviour
         Grid3D.ToggleGridHelper();  // Shows grid
         Grid3D.SetBoundingBox();
         ground.transform.position = new (0, Grid3D.Bounds["min"].y + Grid3D.CubeSize - .05f, 0);
-        Find("selectionHorizontalHelper").transform.position = ground.transform.position;
+        Find("selectionVerticalIndicator").transform.position = ground.transform.position;
         selectionCube.SetActive(true);
         SetSelectionCoords(Grid3D.origin);
         OrbitCamera.Set(selectionCube.transform.position, 50, -30, 300);

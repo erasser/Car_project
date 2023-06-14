@@ -19963,7 +19963,7 @@ MonoBehaviour:
         invertRotationJoystick: 1
   _vehicleTorque:
     maxVelocityKMh: 420
-    engineTorque: 9
+    engineTorque: 7
     numberOfGears: 10
     speedOfGear: 1.5
     manualAdjustmentOfTorques:
@@ -20369,7 +20369,7 @@ MonoBehaviour:
     maxVelocityGears: 1e0000002d0000003c0000004b0000005a00000069000000780000008700000096000000a5000000b4000000c3000000
   _vehicleSettings:
     startOn: 1
-    vehicleMass: 1500
+    vehicleMass: 2500
     improveControl:
       tireSlipsFactor: 1.7
       helpToTurn: 0.3
@@ -20412,7 +20412,7 @@ MonoBehaviour:
     rightFrontWheel:
       wheelMesh: {fileID: 3720284444131610822}
       wheelCollider: {fileID: 3720284443422744637}
-      wheelDrive: 1
+      wheelDrive: 0
       wheelHandBrake: 0
       skidMarkShift: 0.04
       wheelTurn: 1
@@ -20425,7 +20425,7 @@ MonoBehaviour:
     leftFrontWheel:
       wheelMesh: {fileID: 3720284444682700017}
       wheelCollider: {fileID: 162523270498768428}
-      wheelDrive: 1
+      wheelDrive: 0
       wheelHandBrake: 0
       skidMarkShift: -0.04
       wheelTurn: 1

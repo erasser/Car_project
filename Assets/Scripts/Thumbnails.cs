@@ -106,7 +106,7 @@ public class Thumbnails : MonoBehaviour
         for (byte i = 0; i < trackEditor.surfaceMaterials.Count; ++i)
         {
             byte index = i;  // https://forum.unity.com/threads/addlistener-and-delegates-i-think-im-doing-it-wrong.413093
-
+            print("_thumbSize: " + _thumbSize);
             var buttonThumb = new ImageButton(
                 $"buttonSurfaceThumb_{i}",
                 uiTrackEditor,
